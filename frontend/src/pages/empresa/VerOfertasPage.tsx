@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState } from "react";
-import '../../pages/css/RegisterPage.css';
+
 import ModalOfer from '../../components/ModalOfer'; // Asegúrate de que la ruta es correcta
 import PublicarOPage from './PublicarOPage';
 

@@ -7,6 +7,7 @@ import { Api } from '../services/api';
 import Swal from 'sweetalert2';
 import  "../assets/css/RegistroP.css"
 import { useState } from 'react';
+import Navbar from '../components/layout/Navbar';
 
 function RegistroE() {
     const [isLoading, setIsLoading] = useState(false);
@@ -57,6 +58,7 @@ function RegistroE() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row space-y-2" >
+        <Navbar />
          {isLoading && (
                 <div className='loader-container'>
                     <div className="loader"></div>
@@ -92,12 +94,13 @@ function RegistroE() {
                       
                        
                     </div>
-
                    
-                
-                <div className="text-center mt-4">
-                    <p>¿Ya tienes una cuenta? <a href="/login" className="text-indigo-600 hover:text-indigo-500">Inicia sesión</a></p>
-                </div>
+                    <div className="text-center mt-4">
+        <p>
+          <a href="/register" className="text-orange-600 hover:text-orange-500">Regístrate como postulante</a>
+        </p>
+        <p>¿Ya tienes una cuenta? <a href="/login" className="text-indigo-600 hover:text-indigo-500">Inicia sesión</a></p>
+      </div>
             </div>
         </div>
         <div className="relative lg:w-5/12 xl:w-1/2 flex items-center justify-center overflow-hidden">

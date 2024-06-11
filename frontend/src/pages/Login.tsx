@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import Swal from 'sweetalert2';
-
+import Navbar from '../components/layout/Navbar';
 
 
 const Login = () => {
@@ -70,9 +70,9 @@ const Login = () => {
                         }
                     } else if (role === 'empresa_oferente') {
                         if (user.first_login_at === null) {
-                            navigate("/completare");
+                            navigate("/bienvenidae");
                         }else{
-                            navigate("/inicio-e");
+                            navigate("/iniciow");
                         }
                     } 
                 
@@ -90,6 +90,7 @@ const Login = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row space-y-2" >
+            <Navbar />
             <div className="lg:w-7/12 xl:w-2/3 flex items-center justify-center">
                 <div className="max-w-md w-full space-y-8">
                     <div>
