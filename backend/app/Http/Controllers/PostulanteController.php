@@ -31,7 +31,8 @@ class PostulanteController extends Controller
         $postulante->informacion_extra = $request->description;
 
         // Ajusta el nombre del campo de la foto según sea necesario
-        $postulante->foto = $request->image->store('images');
+        $postulante->foto = $request->image->store('images', 'public');
+
         $postulante->cv = $request->input('cv');
 
         // Guardar el postulante
