@@ -1,0 +1,70 @@
+<?php
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\Admin\UploadController;
+use App\Http\Controllers\EmpresaController;
+use App\Http\Controllers\PostulanteController;
+use App\Http\Controllers\SectorController;
+use App\Http\Controllers\TituloController;
+use App\Http\Controllers\UbicacionController;
+
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| is assigned the "api" middleware group. Enjoy building your API!
+|
+*/
+
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+
+Route::prefix('auth')->group(function(){
+  Route::post('register',[AuthController::class,'register'])->name('verification.verify');
+  Route::post('registerE',[AuthController::class,'registerEmpresa'])->name('verification.verify');
+  Route::post('login',[AuthController::class,'login'])->name('login');
+  Route::post('loginE',[AuthController::class,'loginEmpresa'])->name('login');
+  // Ruta de verificación de correo electrónico sin autenticación
+  Route::get('/verifyEmail/{id}/{hash}', [AuthController::class, 'verify'])->name('verification.verify');
+
+  // Ruta para reenviar correo de verificación con autenticación
+  Route::middleware('auth:sanctum')->post('email/resend', [AuthController::class, 'resend'])->name('verification.resend');
+});
+
+
+Route::middleware(['jwt.verify'])->get('users',[UserController::class,'index']);
+
+
+Route::post('uploadUbi',[UploadController::class,'uploadUbicacion']);
+Route::post('uploadTit',[UploadController::class,'uploadTitulo']);
+Route::post('uploadSec',[UploadController::class,'uploadSector']);
+
+
+Route::get('/ubicaciones', [UbicacionController::class, 'getProvinciasCantones']);
+Route::get('/ubicaciones/cantones/{province}', [UbicacionController::class, 'getCantonesPorProvincia']);
+Route::get('/ubicaciones/cantonesid/{province}', [UbicacionController::class, 'getCantonesPorProvinciaID']);
+Route::get('/ubicaciones/{provincia}/{canton}', [UbicacionController::class, 'getUbicacionId']);
+
+
+Route::get('/sectores', [SectorController::class, 'getSectores']);
+Route::get('/sectores/{sector}', [SectorController::class, 'getDivisionSector']);
+
+
+Route::get('/titulos', [TituloController::class, 'getTitulosNivelesCampos']);
+Route::get('/titulos/{nivel}', [TituloController::class, 'getCamposNivel']);
+Route::get('/titulos/{nivel}/{campo}', [TituloController::class, 'getTitulosCamposNivel']);
+Route::get('/titulos/{nivel}/{campo}/{titulo}', [TituloController::class, 'getTituloId']);
+
+Route::post('empresaC',[EmpresaController::class,'registerEmp']);
+Route::post('completo',[EmpresaController::class,'completo']);
+
+Route::post('postulanteC',[PostulanteController::class,'registerPos']);
+Route::get('postulanteId/id',[PostulanteController::class,'obtenerIdPostulante']);
+Route::post('postulante/forma',[PostulanteController::class,'registroFormaAca']);
