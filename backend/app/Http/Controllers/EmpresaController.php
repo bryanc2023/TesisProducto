@@ -17,7 +17,7 @@ class EmpresaController extends Controller
         $empresa->nombre_comercial = $request->companyName;
         $empresa->tamanio = "Mediana";
         $empresa->descripcion =  $request->description;
-        $empresa->logo = $request->logo->store('images');
+        $empresa->logo = $request->logo->store('images', 'public');
         $empresa->cantidad_empleados=  $request->numberOfEmployees;
       
         $empresa->save();
