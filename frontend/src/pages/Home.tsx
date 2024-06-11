@@ -13,10 +13,12 @@ const Home: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
+
       <header className="bg-cover bg-center text-white py-40 px-5 text-center" style={{ backgroundImage: "url('/public/images/home.jpg')" }}>
         <div className="bg-black bg-opacity-50 p-6 rounded-lg inline-block">
           <h1 className="text-5xl mb-2">Bienvenido a ProaJob</h1>
           <p className="text-xl">La nueva app de Proasetel S.A para gestionar ofertas de trabajo de manera eficiente</p>
+
         </div>
       </header>
       <section ref={section1Ref} className={`flex flex-col justify-around items-center py-20 px-10 bg-white mx-10 my-10 rounded-lg flex-grow transition-opacity duration-1000 ${section1InView ? 'opacity-100' : 'opacity-0'}`}>
