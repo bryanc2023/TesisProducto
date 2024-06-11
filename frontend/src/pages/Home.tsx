@@ -15,7 +15,7 @@ const Home = () => {
       <header className="App-header">
         <div className="header-content">
           <h1>Bienvenido a ProaJob</h1>
-          <p>La nueva app de Proasetel S.A para gestionar ofertas de trabajo de manera eficiente</p>
+          <p>La nueva app de Proasetel S.A para gestionar ofertas de trabajo de manera eficiente e</p>
         </div>
       </header>
       <section className="offer-section">
