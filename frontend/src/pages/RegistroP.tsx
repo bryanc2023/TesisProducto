@@ -8,6 +8,7 @@ import { Api } from '../services/api';
 import Swal from 'sweetalert2';
 import  "../assets/css/RegistroP.css"
 import ButtonOrange from '../components/input/ButtonOrange';
+import Navbar from '../components/layout/Navbar';
 
 const RegisterP = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -60,6 +61,7 @@ const RegisterP = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row space-y-2" >
+            <Navbar />
               {isLoading && (
                 <div className='loader-container'>
                     <div className="loader"></div>
@@ -101,6 +103,9 @@ const RegisterP = () => {
                        
                     
                     <div className="text-center mt-4">
+                    <p>
+          <a href="/registerE" className="text-indigo-600 hover:text-indigo-500">Regístrate como empresa</a>
+        </p>
                         <p>¿Ya tienes una cuenta? <a href="/login" className="text-orange-600 hover:text-orange-500">Inicia sesión</a></p>
                     </div>
                 </div>

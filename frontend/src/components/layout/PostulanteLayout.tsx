@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuilding, faUser, faEnvelope, faSearch, faChevronDown, faBars, faTimes } from '@fortawesome/free-solid-svg-icons';
-import '../../pages/css/RegisterPage.css';
+
 import { useDispatch } from 'react-redux';
 import { logout } from '../../store/authSlice';
 

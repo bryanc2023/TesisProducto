@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 
 import { useState, useEffect, useRef } from "react";
-import '../css/RegisterPage.css';
+
 
 function InicioP() {
 
