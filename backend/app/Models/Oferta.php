@@ -14,9 +14,9 @@ class Oferta extends Model
 
     protected $fillable = [
         'id_empresa',
+        'id_titulo',
         'cargo',
         'experiencia',
-        'prioridad_exp',
         'educacion_requerida',
         'objetivo_cargo',
         'sueldo',
@@ -25,7 +25,9 @@ class Oferta extends Model
         'fecha_max_pos',
         'detalles_adicionales',
         'correo_contacto',
+        'numero_contacto',
         'estado',
+        'ponderacion',
         'mostrar_sueldo',
         'mostrar_empresa'
     ];
@@ -34,5 +36,10 @@ class Oferta extends Model
     public function empresa()
     {
         return $this->belongsTo(Empresa::class, 'id_empresa');
+    }
+
+    public function titulo()
+    {
+        return $this->belongsTo(Titulo::class, 'id_titulo');
     }
 }

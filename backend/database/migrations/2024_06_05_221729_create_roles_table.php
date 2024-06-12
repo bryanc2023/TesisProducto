@@ -16,6 +16,7 @@ class CreateRolesTable extends Migration
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
+            
         });
 
         // Add the role_id column to the users table
@@ -35,6 +36,8 @@ class CreateRolesTable extends Migration
             $table->dropForeign(['role_id']);
             $table->dropColumn('role_id');
         });
+
+      
 
         Schema::dropIfExists('roles');
     }

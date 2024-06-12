@@ -20,4 +20,9 @@ public function postulantes()
 {
     return $this->belongsToMany(Postulante::class, 'persona_formacion_pro', 'id_titulo', 'id_postulante');
 }
+
+public function ofertas()
+{
+    return $this->hasMany(Oferta::class);
+}
 }

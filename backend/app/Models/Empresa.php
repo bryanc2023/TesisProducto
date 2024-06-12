@@ -13,6 +13,8 @@ class Empresa extends Model
 
     protected $primaryKey = 'id_empresa';
 
+    public $timestamps = false;
+
     protected $fillable = [
         'id_ubicacion',
         'id_usuario',
@@ -48,6 +50,11 @@ class Empresa extends Model
 {
     $empresa = self::where('id_usuario', $idUsuario)->first();
     return $empresa ? $empresa->id_empresa : null;
+}
+
+public function red()
+{
+    return $this->hasMany(EmpresaRed::class);
 }
     
 }

@@ -13,7 +13,7 @@ class CreatePersonaFormacionProTable extends Migration
      */
     public function up()
     {
-        Schema::create('persona_formacion_pro', function (Blueprint $table) {
+        Schema::create('formacion_academica', function (Blueprint $table) {
             $table->unsignedInteger('id_postulante');
             $table->unsignedBigInteger('id_titulo');
             $table->primary(['id_postulante', 'id_titulo']); // Definición de clave primaria compuesta
@@ -35,6 +35,6 @@ class CreatePersonaFormacionProTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('persona_formacion_pro');
+        Schema::dropIfExists('formacion_academica');
     }
 }
