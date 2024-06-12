@@ -214,6 +214,6 @@ function CompletarP2() {
   </form>
 </div>
 )
-};
+}
 
 export default CompletarP2
