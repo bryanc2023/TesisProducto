@@ -3,32 +3,77 @@ import Modal from 'react-modal';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import axios from '../services/axios';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../store';
+import { RootState } from '../store';
 
 interface IFormInput {
   institucion: string;
   estado: string;
   fechaini: string;
   fechafin: string;
+  titulo: string;
+  nivel_educacion: string;
+  campo_amplio: string;
 }
 
 interface Titulo {
   id: number;
   titulo: string;
+  nivel_educacion: string;
+  campo_amplio: string;
+}
+
+interface TituloDetalle {
+  id: number;
+  titulo: string;
+  nivel_educacion: string;
+  campo_amplio: string;
+}
+
+interface Postulante {
+  foto: string;
+  nombres: string;
+  apellidos: string;
+  fecha_nac: string;
+  edad: number;
+  estado_civil: string;
+  cedula: string;
+  genero: string;
+  informacion_extra?: string;
+}
+
+interface Formacion {
+  id: number;
+  institucion: string;
+  estado: string;
+  fechaini: string;
+  fechafin: string;
+  titulo: TituloDetalle;
+  id_postulante: number;
+}
+
+interface Ubicacion {
+  provincia: string;
+  canton: string;
+}
+
+interface ProfileData {
+  postulante: Postulante;
+  ubicacion: Ubicacion;
+  formaciones?: Formacion[];
 }
 
 interface EditFormacionModalProps {
   isOpen: boolean;
   closeModal: () => void;
-  formacion?: any;
+  formacion?: Formacion;
   reloadProfile: () => void;
 }
 
 const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeModal, formacion, reloadProfile }) => {
   const { user } = useSelector((state: RootState) => state.auth);
   const { register, handleSubmit, formState: { errors }, setValue, reset } = useForm<IFormInput>();
-  const [niveles, setNiveles] = useState([]);
-  const [campos, setCampos] = useState([]);
+  const [niveles, setNiveles] = useState<string[]>([]);
+  const [campos, setCampos] = useState<string[]>([]);
   const [titulos, setTitulos] = useState<Titulo[]>([]);
   const [selectedNivel, setSelectedNivel] = useState('');
   const [selectedCampo, setSelectedCampo] = useState('');
@@ -104,22 +149,21 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
     }
   }, [selectedNivel, selectedCampo]);
 
-  const handleNivelChange = (event: any) => {
+  const handleNivelChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedNivel(event.target.value);
     setSelectedTitulo('');
     setSelectedTituloId('');
   };
 
-  const handleCampoChange = (event: any) => {
+  const handleCampoChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedCampo(event.target.value);
     setSelectedTitulo('');
     setSelectedTituloId('');
   };
 
-  const handleTituloChange = (event: any) => {
+  const handleTituloChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedTituloValue = event.target.value;
     setSelectedTitulo(selectedTituloValue);
-
     const selectedTituloObject = titulos.find(titulo => titulo.id.toString() === selectedTituloValue);
     if (selectedTituloObject) {
       setSelectedTituloId(selectedTituloObject.id.toString());
