@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Imports\AreaImport;
 use App\Imports\SectorImport;
 use App\Imports\TituloImport;
 use App\Imports\UbicacionImport;
@@ -60,6 +61,24 @@ class UploadController extends Controller
             $file = $request->file('file');
 
             Excel::import(new SectorImport, $file);
+
+            return response()->json(['message' => 'File uploaded successfully'], 200);
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Error: ' . $e->getMessage()], 500);
+        }
+     
+    }
+
+    public function uploadArea(Request $request)
+    {
+        try {
+            $request->validate([
+                'file' => 'required|mimes:xlsx,xls',
+            ]);
+
+            $file = $request->file('file');
+
+            Excel::import(new AreaImport, $file);
 
             return response()->json(['message' => 'File uploaded successfully'], 200);
         } catch (Exception $e) {

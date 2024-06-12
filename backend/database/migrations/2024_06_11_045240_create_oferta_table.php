@@ -17,6 +17,7 @@ class CreateOfertaTable extends Migration
             $table->id('id_oferta');
             $table->unsignedBigInteger('id_empresa')->nullable();
             $table->unsignedBigInteger('id_titulo')->nullable();
+            $table->unsignedBigInteger('id_area')->nullable();
             $table->string('cargo', 30)->nullable();
             $table->unsignedInteger('experiencia')->nullable();
             $table->string('objetivo_cargo', 50)->nullable();
@@ -34,6 +35,7 @@ class CreateOfertaTable extends Migration
 
             $table->foreign('id_empresa')->references('id_empresa')->on('empresa')->onDelete('cascade');
             $table->foreign('id_titulo')->references('id')->on('titulo')->onDelete('cascade');
+           
         });
     }
 
