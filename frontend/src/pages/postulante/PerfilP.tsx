@@ -49,8 +49,11 @@ const Profile: React.FC = () => {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const response = await axios.get(`/perfil/${user.id}`);
-        setProfileData(response.data);
+        if(user){
+          const response = await axios.get(`/perfil/${user.id}`);
+          setProfileData(response.data);
+        }
+      
       } catch (error) {
         console.error('Error fetching profile data:', error);
       } finally {
