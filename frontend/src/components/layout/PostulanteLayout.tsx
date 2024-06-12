@@ -31,8 +31,11 @@ function PostulanteLayout() {
     useEffect(() => {
         const fetchProfileData = async () => {
             try {
+              if(user){
                 const response = await axios.get(`/perfil/${user.id}`);
                 setProfileData(response.data);
+              }
+                
             } catch (error) {
                 console.error('Error fetching profile data:', error);
             }
@@ -61,7 +64,7 @@ function PostulanteLayout() {
                 <div className="relative" ref={dropdownRef}>
                     <button onClick={toggleDropdown} className="flex items-center focus:outline-none">
                         <FontAwesomeIcon icon={faBuilding} className="mr-2" />
-                        <span className="hidden lg:inline">{profileData ? `${profileData.postulante.nombres} ${profileData.postulante.apellidos}` : 'Postulante'}</span>
+                        <span className="hidden lg:inline">{user ? `${user.name} ` : 'Postulante'}</span>
                         <FontAwesomeIcon icon={faChevronDown} className="ml-2" />
                     </button>
                     {dropdownOpen && (
@@ -95,7 +98,7 @@ function PostulanteLayout() {
                             alt="Foto de Perfil"
                             className="rounded-full profile-image w-24 h-24 object-cover border-4 border-white"
                         />
-                        <span className="mt-2 hidden lg:block">{profileData ? `${profileData.postulante.nombres} ${profileData.postulante.apellidos}` : 'Nombre del Usuario'}</span>
+                        <span className="mt-2 hidden lg:block">{user ? `${user.name} ` : 'Nombre del Usuario'}</span>
                     </div>
                     <ul>
                         <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
