@@ -31,6 +31,7 @@ Route::middleware(['jwt.verify'])->get('users',[UserController::class,'index']);
 Route::post('uploadUbi',[UploadController::class,'uploadUbicacion']);
 Route::post('uploadTit',[UploadController::class,'uploadTitulo']);
 Route::post('uploadSec',[UploadController::class,'uploadSector']);
+Route::post('uploadA',[UploadController::class,'uploadArea']);
 
 Route::get('/ubicaciones', [UbicacionController::class, 'getProvinciasCantones']);
 Route::get('/ubicaciones/cantones/{province}', [UbicacionController::class, 'getCantonesPorProvincia']);
