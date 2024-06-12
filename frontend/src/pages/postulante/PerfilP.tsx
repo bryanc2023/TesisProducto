@@ -2,18 +2,42 @@ import React, { useEffect, useState } from 'react';
 import axios from '../../services/axios';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import Modal from 'react-modal';
+//import Modal from 'react-modal';
 import EditPostulanteModal from '../../components/EditPostulante';
 import EditFormacionModal from '../../components/FormacionPEditar';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
+interface Formacion {
+  id: number;
+  institucion: string;
+  estado: string;
+  fechaini: string;
+  fechafin: string;
+  titulo: {
+    titulo: string;
+    nivel_educacion: string;
+    campo_amplio: string;
+  };
+}
+interface ProfileData {
+  postulante: {
+    foto: string;
+    nombres: string;
+    apellidos: string;
+  };
+  ubicacion: {
+    provincia: string;
+    canton: string;
+  };
+  formaciones: Formacion[];
+}
 const Profile: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
-  const [profileData, setProfileData] = useState<any>(null);
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState('');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedFormacion, setSelectedFormacion] = useState<any>(null);
+  const [selectedFormacion, setSelectedFormacion] = useState<Formacion | null>(null);
 
   useEffect(() => {
     const fetchProfileData = async () => {
