@@ -2,34 +2,12 @@ import React, { useEffect, useState } from 'react';
 import axios from '../../services/axios';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
-//import Modal from 'react-modal';
+
 import EditPostulanteModal from '../../components/EditPostulante';
 import EditFormacionModal from '../../components/FormacionPEditar';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
-interface Formacion {
-  id: number;
-  institucion: string;
-  estado: string;
-  fechaini: string;
-  fechafin: string;
-  titulo: {
-    titulo: string;
-    nivel_educacion: string;
-    campo_amplio: string;
-  };
-}
-interface ProfileData {
-  postulante: {
-    foto: string;
-    nombres: string;
-    apellidos: string;
-  };
-  ubicacion: {
-    provincia: string;
-    canton: string;
-  };
-  formaciones: Formacion[];
-}
+
+
 const Profile: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
@@ -38,6 +16,44 @@ const Profile: React.FC = () => {
   const [modalContent, setModalContent] = useState('');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedFormacion, setSelectedFormacion] = useState<Formacion | null>(null);
+
+
+  interface Postulante {
+    foto: string;
+    nombres: string;
+    apellidos: string;
+    fecha_nac: string;
+    edad: number;
+    estado_civil: string;
+    cedula: string;
+    genero: string;
+    informacion_extra?: string;
+  }
+
+  interface Formacion {
+    id: number;
+    institucion: string;
+    estado: string;
+    fechaini: string;
+    fechafin: string;
+    titulo: {
+      titulo: string;
+      nivel_educacion: string;
+      campo_amplio: string;
+    };
+  }
+
+  interface Ubicacion {
+    provincia: string;
+    canton: string;
+  }
+
+  interface ProfileData {
+    postulante: Postulante;
+    ubicacion: Ubicacion;
+    formaciones?: Formacion[];
+  }
+
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -84,7 +100,7 @@ const Profile: React.FC = () => {
     setIsEditModalOpen(false);
   };
 
-  const openEditFormacionModal = (formacion: any) => {
+  const openEditFormacionModal = (formacion: Formacion) => {
     setSelectedFormacion(formacion);
     setIsModalOpen(true);
   };
@@ -123,6 +139,22 @@ const Profile: React.FC = () => {
         </div>
       </div>
       <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
+        <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Detalles del Perfil</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p><strong>Fecha de Nacimiento:</strong> {profileData.postulante.fecha_nac}</p>
+          <p><strong>Edad:</strong> {profileData.postulante.edad}</p>
+          <p><strong>Estado Civil:</strong> {profileData.postulante.estado_civil}</p>
+          <p><strong>Cédula:</strong> {profileData.postulante.cedula}</p>
+          <p><strong>Género:</strong> {profileData.postulante.genero}</p>
+        </div>
+      </div>
+      <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
+        <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Detalles del Perfil</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p><strong>Información Extra:</strong> {profileData.postulante.informacion_extra}</p>
+        </div>
+      </div>
+      <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Formación Académica</h2>
           <button
@@ -132,13 +164,12 @@ const Profile: React.FC = () => {
             + Agregar educación
           </button>
         </div>
-        {profileData.formaciones.map((formacion, index) => (
+        {profileData.formaciones && profileData.formaciones.map((formacion, index) => (
           <div key={index} className="mb-4 p-4 border rounded-lg bg-gray-700 relative">
             <div className="absolute top-2 right-2 flex space-x-2">
-         
-          <button
-            onClick={() => openEditFormacionModal(formacion)}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 mr-2"
+              <button
+                onClick={() => openEditFormacionModal(formacion)}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 mr-2"
               >
                 <FaPencilAlt className="w-4 h-4" />
               </button>
@@ -147,9 +178,7 @@ const Profile: React.FC = () => {
                 className="px-4 py-2 bg-rose-500 text-white rounded-md hover:bg-rose-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-rose-300 mr-2"
               >
                 <FaTrash className="w-4 h-4" />
-          </button>
-
-
+              </button>
             </div>
             <p><strong>Institución:</strong> {formacion.institucion}</p>
             <p><strong>Estado:</strong> {formacion.estado}</p>
@@ -175,7 +204,6 @@ const Profile: React.FC = () => {
           <span className="text-gray-400">Agrega tus cursos y capacitaciones</span>
         </div>
       </div>
-
       <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
         <div className="flex justify-between items-center">
           <h3 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Experiencia Laboral</h3>
