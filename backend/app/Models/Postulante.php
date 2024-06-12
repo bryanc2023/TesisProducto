@@ -14,6 +14,8 @@ class Postulante extends Model
 
     protected $primaryKey = 'id_postulante';
 
+    public $timestamps = false;
+
     protected $fillable = [
         'id_ubicacion',
         'id_usuario',
@@ -50,12 +52,17 @@ class Postulante extends Model
 }
 public function titulos()
 {
-    return $this->belongsToMany(Titulo::class, 'persona_formacion_pro', 'id_postulante', 'id_titulo');
+    return $this->belongsToMany(Titulo::class, 'formacion_academica', 'id_postulante', 'id_titulo');
 }
 
 public static function getIdPostulantePorIdUsuario($idUsuario)
 {
     $postulante = self::where('id_usuario', $idUsuario)->first();
     return $postulante ? $postulante->id_postulante : null;
+}
+
+public function red()
+{
+    return $this->hasMany(PostulanteRed::class);
 }
 }

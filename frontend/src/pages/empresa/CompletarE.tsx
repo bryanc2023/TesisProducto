@@ -4,6 +4,7 @@ import axios from "../../services/axios";
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 interface IFormInput {
   logo: FileList;
@@ -25,12 +26,13 @@ interface Division {
 const CompletarE: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
-  const { register, handleSubmit, formState: { errors }, setValue } = useForm<IFormInput>();
+  const { register, handleSubmit, formState: { errors }, setValue , getValues} = useForm<IFormInput>();
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [provinces, setProvinces] = useState([]);
   const [cantons, setCantons] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState('');
   const [selectedCanton, setSelectedCanton] = useState('');
+  const [hasSocialLinks, setHasSocialLinks] = useState(false);
 
   useEffect(() => {
     // Obtener provincias y cantones al montar el componente
@@ -123,10 +125,22 @@ const CompletarE: React.FC = () => {
   const handleSocialLinkChange = (index: number, field: keyof typeof socialLinks[0], value: string) => {
     const newLinks = [...socialLinks];
     newLinks[index][field] = value;
+  
     setSocialLinks(newLinks);
     setValue('socialLinks', newLinks);
   };
+  const handleRemoveSocialLink = (indexToRemove:number) => {
+    // Copia el array de socialLinks y elimina el elemento en el índice especificado
+    const updatedSocialLinks = [...socialLinks];
+    updatedSocialLinks.splice(indexToRemove, 1);
+    // Actualiza el estado con el nuevo array sin el elemento eliminado
+    setSocialLinks(updatedSocialLinks);
+  };
   
+  const getPlatformLogo = (platform: string) => {
+    const platformData = socialPlatforms.find((p) => p.value === platform);
+    return platformData ? platformData.logo : '';
+  };
 
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
     if (user && selectedDivision && selectedProvince && selectedCanton) {
@@ -146,22 +160,30 @@ const CompletarE: React.FC = () => {
         formData.append('description', data.description);
         formData.append('usuario_id', user.id.toString());
 
-       // socialLinks.forEach((link, index) => {
-       //   formData.append(`socialLinks[${index}][platform]`, link.platform);
-      //    formData.append(`socialLinks[${index}][url]`, link.url);
-      //  });
+       socialLinks.forEach((link, index) => {
+          formData.append(`socialLinks[${index}][platform]`, link.platform);
+          formData.append(`socialLinks[${index}][url]`, link.url);
+        });
 
+       
         for (const entry of formData.entries()) {
           console.log(entry);
         }
-        await axios.post('empresaC', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
+       await axios.post('empresaC', formData, {
+       headers: {
+           'Content-Type': 'multipart/form-data',
           },
         });
 
         console.log("Registro exitoso");
-        navigate("/inicio-e");
+        Swal.fire({
+          icon: 'success',
+          title: '¡Registro completo!',
+          text: 'Bienvenido a ProaJob.',
+      }).then(() => {
+          navigate("/inicio-e");
+      });
+        
       } catch (error) {
         console.error('Error al enviar el formulario:', error);
       }
@@ -295,35 +317,43 @@ const CompletarE: React.FC = () => {
         </div>
 
         <div className="form-group mb-8">
-          <label className="block text-gray-700 font-semibold mb-2">Enlaces de redes sociales:</label>
-          {socialLinks.map((link, index) => (
-            <div key={index} className="flex items-center mb-4">
-              <select
-                value={link.platform}
-                onChange={(e) => handleSocialLinkChange(index, 'platform', e.target.value)}
-                className="w-1/4 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600 mr-2"
-              >
-                <option value="">Seleccione</option>
-                {socialPlatforms.map((platform) => (
-                  <option key={platform.value} value={platform.value}>
-                    {platform.label}
-                  </option>
-                ))}
-              </select>
-              <span className="mr-2">
-                {link.platform && <img src={socialPlatforms.find(platform => platform.value === link.platform)?.logo} alt={link.platform} className="w-6 h-6 inline-block" />}
-              </span>
-              <input
-                type="text"
-                value={link.url}
-                onChange={(e) => handleSocialLinkChange(index, 'url', e.target.value)}
-                className="w-3/4 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
-                placeholder="URL de la red social"
-              />
-            </div>
-          ))}
-          <button type="button" onClick={handleAddSocialLink} className="px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-slate-600">Añadir otra red social</button>
+          <label className="block text-gray-700 font-semibold mb-2">¿La empresa tiene redes sociales?</label>
+          <div className="flex items-center">
+            <input type="checkbox" id="hasSocialLinks" onChange={() => setHasSocialLinks(!hasSocialLinks)} className="mr-2" />
+            <label htmlFor="hasSocialLinks" className="text-gray-700">Sí</label>
+          </div>
         </div>
+
+        {hasSocialLinks && (
+          
+  <div className="form-group mb-8">
+    
+    <label className="block text-gray-700 font-semibold mb-2">Redes Sociales:</label>
+    {socialLinks.map((link, index) => (
+      
+      <div key={index} className="flex items-center mb-4">
+           <button type="button" onClick={() => handleRemoveSocialLink(index)} className="bg-red-500 text-white py-2 px-4 rounded">x</button>
+        <img src={getPlatformLogo(link.platform)} alt={link.platform} className="w-6 h-6 mr-2" />
+        <select value={link.platform} onChange={(e) => handleSocialLinkChange(index, 'platform', e.target.value)} className="form-select mr-2">
+          <option value="">Seleccione una plataforma</option>
+          {socialPlatforms.map((platform) => (
+            <option key={platform.value} value={platform.value}>{platform.label}</option>
+          ))}
+        </select>
+        <input
+          type="url"
+          value={link.url}
+          onChange={(e) => handleSocialLinkChange(index, 'url', e.target.value)}
+          placeholder="URL"
+          className="form-input mr-2"
+        />
+     
+       
+      </div>
+    ))}
+    <button type="button" onClick={handleAddSocialLink} className="bg-green-500 text-white py-2 px-4 rounded">Agregar otra red social</button>
+  </div>
+)}
 
         <div className="form-group mb-8">
           <label htmlFor="description" className="block text-gray-700 font-semibold mb-2">Descripción:</label>

@@ -23,7 +23,7 @@ class CreateEmpresasTable extends Migration
             $table->string('descripcion', 50);
             $table->string('logo', 100);
             $table->integer('cantidad_empleados');
-            $table->timestamps();
+           
 
             // Agregar claves foráneas
             $table->foreign('id_ubicacion')->references('id')->on('ubicacion')->onDelete('cascade');

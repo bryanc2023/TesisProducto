@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class PersonaFormacionPro extends Model
 {
     use HasFactory;
-    protected $table = 'persona_formacion_pro';
+    protected $table = 'formacion_academica';
     protected $primaryKey = ['id_postulante', 'id_titulo'];
     public $incrementing = false;
     public $timestamps = false; // Desactivar las marcas de tiempo

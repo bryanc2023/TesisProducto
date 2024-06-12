@@ -70,9 +70,9 @@ const Login = () => {
                         }
                     } else if (role === 'empresa_oferente') {
                         if (user.first_login_at === null) {
-                            navigate("/bienvenidae");
+                            navigate("/completare");
                         }else{
-                            navigate("/iniciow");
+                            navigate("/inicio-e");
                         }
                     } 
                 
