@@ -42,4 +42,14 @@ class Oferta extends Model
     {
         return $this->belongsTo(Titulo::class, 'id_titulo');
     }
+
+    public function criterios()
+{
+    return $this->belongsToMany(Criterio::class, 'criterio_oferta', 'id_oferta', 'id_criterio');
+}
+
+public function areas()
+{
+    return $this->belongsTo(AreaTrabajo::class, 'id_area');
+}
 }
