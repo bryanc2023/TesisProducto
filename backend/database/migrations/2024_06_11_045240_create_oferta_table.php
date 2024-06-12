@@ -15,8 +15,7 @@ class CreateOfertaTable extends Migration
     {
         Schema::create('oferta', function (Blueprint $table) {
             $table->id('id_oferta');
-            $table->unsignedBigInteger('id_empresa')->nullable();
-            $table->foreign('id_empresa')->references('id_empresa')->on('empresa')->onDelete('restrict')->onUpdate('restrict');
+            $table->unsignedBigInteger('id_empresa');
             $table->string('cargo', 30)->nullable();
             $table->unsignedInteger('experiencia')->nullable();
             $table->unsignedInteger('prioridad_exp')->nullable();
@@ -31,6 +30,8 @@ class CreateOfertaTable extends Migration
             $table->char('estado', 1)->nullable();
             $table->boolean('mostrar_sueldo')->nullable();
             $table->boolean('mostrar_empresa')->nullable();
+
+            $table->foreign('id_empresa')->references('id_empresa')->on('empresa')->onDelete('cascade');
         });
     }
 

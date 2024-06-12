@@ -7,6 +7,7 @@ import EditPostulanteModal from '../../components/EditPostulante';
 import EditFormacionModal from '../../components/FormacionPEditar';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 
+
 const Profile: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
@@ -15,6 +16,7 @@ const Profile: React.FC = () => {
   const [modalContent, setModalContent] = useState('');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedFormacion, setSelectedFormacion] = useState<Formacion | null>(null);
+
 
   interface Postulante {
     foto: string;
@@ -51,6 +53,7 @@ const Profile: React.FC = () => {
     ubicacion: Ubicacion;
     formaciones?: Formacion[];
   }
+
 
   useEffect(() => {
     const fetchProfileData = async () => {
