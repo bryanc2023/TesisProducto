@@ -1,85 +1,82 @@
 import { Link } from 'react-router-dom';
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "../../services/axios";
+import { RootState } from '../../store';
+import { useSelector } from 'react-redux';
 
-import ModalOfer from '../../components/ModalOfer'; // Asegúrate de que la ruta es correcta
 
+interface Oferta {
+    id_oferta: number;
+    estado: string;
+    cargo:string;
+    areas: {
+        nombre_area: string;
+    };
+    fecha_publi:string;
+    modalidad:string;
+    carga_horaria:string;
+    experiencia:string;
+    mostrar_empresa:number;
+    // Define otros campos de la oferta según sea necesario
+}
 
 function VerOfertasPPage() {
-    const [showModal, setShowModal] = useState(false);
+    const [ofertas, setOfertas] = useState<Oferta[]>([]);
+    const { user } = useSelector((state: RootState) => state.auth);
 
-    const handleShowModal = () => {
-        setShowModal(true);
-    };
+    useEffect(() => {
+        fetchOfertas();
+    }, []);
 
-    const handleCloseModal = () => {
-        setShowModal(false);
+    const fetchOfertas = async () => {
+        if(user){
+        try {
+            const response = await axios.get(`empresa/${user.id}/ofertas`); // Reemplaza con tu URL y ID de empresa
+            setOfertas(response.data.ofertas);
+        } catch (error) {
+            console.error('Error fetching ofertas:', error);
+        }
+    }
     };
 
     return (
         <div className="w-full p-4">
             <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-                <h1 className="text-2xl font-semibold mb-4">OFERTAS DISPONIBLES:</h1>
+                <h1 className="text-2xl font-semibold mb-4">OFERTAS PUBLICADAS:</h1>
                 <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
-                            <th scope="col" className="py-3 px-6">ID</th>
+                            <th scope="col" className="py-3 px-6">Cargo</th>
                             <th scope="col" className="py-3 px-6">Estado</th>
+                            <th scope="col" className="py-3 px-6">Fecha Publicacion</th>
                             <th scope="col" className="py-3 px-6">Área</th>
-                            <th scope="col" className="py-3 px-6">Discapacidad</th>
-                            <th scope="col" className="py-3 px-6">Modalidad</th>
                             <th scope="col" className="py-3 px-6">Carga Horaria</th>
-                            <th scope="col" className="py-3 px-6">Salario</th>
-                            <th scope="col" className="py-3 px-6">Título Requerido</th>
                             <th scope="col" className="py-3 px-6">Experiencia Mínima</th>
-                            <th scope="col" className="py-3 px-6">Detalle</th>
-                            <th scope="col" className="py-3 px-6">Empresa</th>
                             <th scope="col" className="py-3 px-6">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {/* Campos de prueba para los títulos de la tabla */}
-                        <tr className="bg-gray-100">
-                            <td className="py-4 px-6">1</td>
-                            <td className="py-4 px-6">Activo</td>
-                            <td className="py-4 px-6">Tecnología</td>
-                            <td className="py-4 px-6">No</td>
-                            <td className="py-4 px-6">Remoto</td>
-                            <td className="py-4 px-6">40 horas/semana</td>
-                            <td className="py-4 px-6">$3000</td>
-                            <td className="py-4 px-6">Ingeniero en Sistemas</td>
-                            <td className="py-4 px-6">2 años</td>
-                            <td className="py-4 px-6">Desarrollar aplicaciones web</td>
-                            <td className="py-4 px-6">TechCorp</td>
-                            <td className="py-4 px-6">
-                                <Link to={`/postulantes/1`} className="text-blue-600 hover:underline">Ver Postulantes</Link>
-                            </td>
-                        </tr>
-                        {/* Nueva fila con datos adicionales */}
-                        <tr className="bg-gray-200">
-                            <td className="py-4 px-6">2</td>
-                            <td className="py-4 px-6">Cerrado</td>
-                            <td className="py-4 px-6">Marketing</td>
-                            <td className="py-4 px-6">Sí</td>
-                            <td className="py-4 px-6">Presencial</td>
-                            <td className="py-4 px-6">30 horas/semana</td>
-                            <td className="py-4 px-6">$2500</td>
-                            <td className="py-4 px-6">Licenciado en Marketing</td>
-                            <td className="py-4 px-6">3 años</td>
-                            <td className="py-4 px-6">Gestionar campañas publicitarias</td>
-                            <td className="py-4 px-6">MarketCorp</td>
-                            <td className="py-4 px-6">
-                                <Link to={`/postulantes/2`} className="text-blue-600 hover:underline">Ver Postulantes</Link>
-                            </td>
-                        </tr>
+                        {ofertas.map((oferta) => (
+                            <tr key={oferta.id_oferta}>
+                                <td className="py-4 px-6">{oferta.cargo}</td>
+                                <td className="py-4 px-6">{oferta.estado}</td>
+                                <td className="py-4 px-6">{oferta.fecha_publi}</td>
+                                <td className="py-4 px-6">{oferta.areas.nombre_area}</td>
+                                <td className="py-4 px-6">{oferta.carga_horaria}</td>
+                                <td className="py-4 px-6">{oferta.experiencia}</td>
+                                {/* Agrega los demás campos según tus necesidades */}
+                          
+                                <td className="py-4 px-6">
+                                    <Link to={`/postulantes/${oferta.id_oferta}`} className="text-blue-600 hover:underline">Ver Oferta</Link>
+                                </td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             </div>
             <div className="mt-4 flex justify-between items-center">
                 <Link to="/add-oferta" className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Agregar Nueva Oferta</Link>
-               
             </div>
-
-          
         </div>
     );
 }

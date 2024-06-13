@@ -3,37 +3,108 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef } from "react";
 
 
-function InicioP() {
+import axios from "../../services/axios";
 
+
+
+interface Oferta {
+    id_oferta: number;
+    estado: string;
+    cargo:string;
+    areas: {
+        nombre_area: string;
+    };
+    empresa: {
+        id_empresa: string,
+        nombre_comercial: string;
+        logo:string;
+    };
+    fecha_publi:string;
+    mostrar_empresa: number;
+    modalidad:string;
+    carga_horaria:string;
+    experiencia:string;
+    // Define otros campos de la oferta según sea necesario
+}
+
+function InicioP() {
+    const [ofertas, setOfertas] = useState<Oferta[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+
+
+    useEffect(() => {
+        fetchOfertas();
+    }, []);
+
+    const fetchOfertas = async () => {
+        
+        try {
+            const response = await axios.get(`ofertas`); // Reemplaza con tu URL y ID de empresa
+            setOfertas(response.data.ofertas);
+        } catch (error) {
+            console.error('Error fetching ofertas:', error);
+        }
+    
+    };
+    const filteredOfertas = ofertas.filter((oferta) =>
+        oferta.cargo.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
   return (
     <div className="w-full p-4">
-        <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-            <h1 className="text-2xl font-semibold mb-4">OFERTAS DISPONIBLES:</h1>
-            <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                    <tr>
-                        <th className="py-3 px-6">ID</th>
-                        <th className="py-3 px-6">Estado</th>
-                        <th className="py-3 px-6">Área</th>
-                        <th className="py-3 px-6">Discapacidad</th>
-                        <th className="py-3 px-6">Modalidad</th>
-                        <th className="py-3 px-6">Carga Horaria</th>
-                        <th className="py-3 px-6">Salario</th>
-                        <th className="py-3 px-6">Título Requerido</th>
-                        <th className="py-3 px-6">Experiencia Mínima</th>
-                        <th className="py-3 px-6">Detalle</th>
-                        <th className="py-3 px-6">Empresa</th>
-                    </tr>
-                </thead>
-                <tbody>
-                   
-                </tbody>
-            </table>
+         <div className="flex mb-4">
+                <input
+                    type="text"
+                    className="border border-gray-300 p-2 rounded mr-2"
+                    placeholder="Buscar por cargo"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <button
+                    className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+                    onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
+                >
+                    {showAdvancedSearch ? 'Ocultar Búsqueda Avanzada' : 'Búsqueda Avanzada'}
+                </button>
+            </div>
+
+            {showAdvancedSearch && (
+                <div className="mb-4 p-4 border border-gray-300 rounded">
+                    <h2 className="text-xl font-semibold mb-4">Búsqueda Avanzada</h2>
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* Agrega aquí más inputs para la búsqueda avanzada */}
+                        <input type="text" className="border border-gray-300 p-2 rounded" placeholder="Buscar por empresa" />
+                        <input type="text" className="border border-gray-300 p-2 rounded" placeholder="Buscar por área" />
+                        {/* Agrega más inputs según sea necesario */}
+                    </div>
+                </div>
+            )}
+            <h1 className="text-2xl font-semibold mb-4">OFERTAS PUBLICADAS:</h1>
+            <div className="relative overflow-x-auto">
+                <div className="flex flex-wrap gap-4">
+                    {filteredOfertas.map((oferta) => (
+                        <div key={oferta.id_oferta} className="bg-white p-4 rounded shadow-md flex-shrink-0 w-full md:w-1/2 lg:w-1/3">
+                            <div className="flex items-center mb-2">
+                                <img
+                                    src={oferta.mostrar_empresa === 1 ? 'https://guiadelempresario.com/wp-content/uploads/2021/04/Copy-of-Untitled-500x500.png' : `http://localhost:8000/storage/${oferta.empresa.logo}`}
+                                    alt="Logo"
+                                    className="w-20 h-16 rounded-full shadow-lg mr-4"
+                                />
+                                <h2 className="text-xl font-semibold">{oferta.cargo}</h2>
+                            </div>
+                            <p className="text-gray-700 mb-1"><strong>Empresa:</strong> {oferta.mostrar_empresa === 1 ? 'Anónima' : oferta.empresa.nombre_comercial}</p>
+                            <p className="text-gray-700 mb-1"><strong>Fecha Publicación:</strong> {oferta.fecha_publi}</p>
+                            <p className="text-gray-700 mb-1"><strong>Área:</strong> {oferta.areas.nombre_area}</p>
+                            <p className="text-gray-700 mb-1"><strong>Carga Horaria:</strong> {oferta.carga_horaria}</p>
+                            <p className="text-gray-700 mb-1"><strong>Experiencia Mínima:</strong> {oferta.experiencia}</p>
+                            <Link to={`/postulantes/${oferta.id_oferta}`} className="text-blue-600 hover:underline">Ver Oferta</Link>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
-        <Link to="/iniciop" className="inline-block mt-4 text-blue-600 hover:underline">Inicio</Link>
-    </div>
-);
+    );
 }
 
 export default InicioP

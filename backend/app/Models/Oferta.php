@@ -43,7 +43,8 @@ class Oferta extends Model
 
     public function criterios()
 {
-    return $this->belongsToMany(Criterio::class, 'criterio_oferta', 'id_oferta', 'id_criterio');
+    return $this->belongsToMany(Criterio::class, 'criterio_oferta', 'id_oferta', 'id_criterio')
+    ->withPivot('valor', 'prioridad');
 }
 
 public function areas()
@@ -53,6 +54,8 @@ public function areas()
 
 public function expe()
     {
-        return $this->hasMany(EducacionRequerida::class, 'id_oferta');
+        return $this->belongsToMany(Titulo::class, 'educacion_requerida', 'id_oferta', 'id_titulo')
+        ->withPivot('prioridad');
+        
     }
 }
