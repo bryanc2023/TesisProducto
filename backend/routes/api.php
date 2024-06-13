@@ -4,7 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\UploadController;
+use App\Http\Controllers\AreaController;
+use App\Http\Controllers\CriterioController;
 use App\Http\Controllers\EmpresaController;
+use App\Http\Controllers\OfertaController;
 use App\Http\Controllers\PostulanteController;
 use App\Http\Controllers\SectorController;
 use App\Http\Controllers\TituloController;
@@ -32,6 +35,7 @@ Route::post('uploadUbi',[UploadController::class,'uploadUbicacion']);
 Route::post('uploadTit',[UploadController::class,'uploadTitulo']);
 Route::post('uploadSec',[UploadController::class,'uploadSector']);
 Route::post('uploadA',[UploadController::class,'uploadArea']);
+Route::post('uploadC',[UploadController::class,'uploadCriterio']);
 
 Route::get('/ubicaciones', [UbicacionController::class, 'getProvinciasCantones']);
 Route::get('/ubicaciones/cantones/{province}', [UbicacionController::class, 'getCantonesPorProvincia']);
@@ -53,3 +57,10 @@ Route::post('postulanteC',[PostulanteController::class,'registerPos']);
 Route::get('postulanteId/id',[PostulanteController::class,'obtenerIdPostulante']);
 Route::post('postulante/forma',[PostulanteController::class,'registroFormaAca']);
 Route::get('/perfil/{id}', [PostulanteController::class, 'getPerfil']);
+
+
+Route::get('/areas', [AreaController::class, 'getAreas']);
+
+Route::get('/criterios', [CriterioController::class, 'getCriterios']);
+
+Route::post('add-oferta',[OfertaController::class,'registerOferta']);

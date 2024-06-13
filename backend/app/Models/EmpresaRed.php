@@ -12,7 +12,6 @@ class EmpresaRed extends Model
 
     protected $primaryKey = 'id_empresa_red';
 
-    public $timestamps = false;
 
     protected $fillable = [
         'id_empresa',

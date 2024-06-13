@@ -14,15 +14,16 @@ class Oferta extends Model
 
     protected $fillable = [
         'id_empresa',
-        'id_titulo',
+        'id_area',
         'cargo',
         'experiencia',
-        'educacion_requerida',
         'objetivo_cargo',
         'sueldo',
         'funciones',
         'fecha_publi',
         'fecha_max_pos',
+        'carga_horaria',
+        'modalidad',
         'detalles_adicionales',
         'correo_contacto',
         'numero_contacto',
@@ -38,10 +39,7 @@ class Oferta extends Model
         return $this->belongsTo(Empresa::class, 'id_empresa');
     }
 
-    public function titulo()
-    {
-        return $this->belongsTo(Titulo::class, 'id_titulo');
-    }
+ 
 
     public function criterios()
 {
@@ -52,4 +50,9 @@ public function areas()
 {
     return $this->belongsTo(AreaTrabajo::class, 'id_area');
 }
+
+public function expe()
+    {
+        return $this->hasMany(EducacionRequerida::class, 'id_oferta');
+    }
 }
