@@ -215,7 +215,7 @@ const Profile: React.FC = () => {
             {cedulaError && <span className="text-red-500 ml-2">{cedulaError}</span>}
           </p>
           <p><strong>Género:</strong> {profileData.postulante.genero}</p>
-          <p><strong>Información Extra:</strong> {profileData.postulante.informacion_extra}</p>
+   
         </div>
       </div>
       <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">

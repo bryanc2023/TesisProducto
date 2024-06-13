@@ -53,6 +53,68 @@ class PostulanteController extends Controller
         }
     }
 
+    public function registroFormaAcaPlus(Request $request)
+    {
+        $request->validate([
+            'id_postulante' => 'required|integer',
+            'id_titulo' => 'required|integer|exists:titulo,id',
+            'institucion' => 'required|string|max:220',
+            'estado' => 'required|string|max:30',
+            'fechaini' => 'nullable|date',
+            'fechafin' => 'nullable|date'
+        ]);
+
+       
+        
+        $postulante = Postulante::where('id_usuario', $request->id_postulante)->first();
+    if (!$postulante) {
+        return response()->json(['error' => 'Postulante no encontrado'], 404);
+    }
+
+        $idp=  $postulante->id_postulante;
+        $postulantefor = new PersonaFormacionPro();
+        $postulantefor->id_postulante = $idp;
+        $postulantefor->id_titulo = $request->id_titulo;
+        $postulantefor->institucion = $request->institucion;
+        $postulantefor->estado = $request->estado;
+        $postulantefor->fecha_ini = $request->fechaini;
+        $postulantefor->fecha_fin = $request->fechafin;
+
+        $postulantefor->save();
+
+    
+
+        return response()->json(['message' => 'Formación académica registrada exitosamente', 'postulante_formacion' => $postulantefor], 201);
+    }
+
+    public function getPerfil($id)
+    {
+        try {
+            $postulante = Postulante::with(['ubicacion', 'formaciones.titulo'])->where('id_usuario', $id)->first();
+            if (!$postulante) {
+                return response()->json(['message' => 'User not found'], 404);
+            }
+
+            $response = [
+                'postulante' => $postulante,
+                'ubicacion' => $postulante->ubicacion,
+                'formaciones' => $postulante->formaciones->map(function ($formacion) {
+                    return [
+                        'institucion' => $formacion->institucion,
+                        'estado' => $formacion->estado,
+                        'fechaini' => $formacion->fecha_ini,
+                        'fechafin' => $formacion->fecha_fin,
+                        'titulo' => $formacion->titulo,
+                    ];
+                }),
+            ];
+
+            return response()->json($response);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error retrieving user profile'], 500);
+        }
+    }
+
     public function registroFormaAca(Request $request)
     {
         $request->validate([
@@ -86,31 +148,13 @@ class PostulanteController extends Controller
         return response()->json(['message' => 'Formación académica registrada exitosamente', 'postulante_formacion' => $postulantefor], 201);
     }
 
-    public function getPerfil($id)
+    public function prueba(Request $request)
     {
-        try {
-            $postulante = Postulante::with(['ubicacion', 'formaciones.titulo'])->where('id_usuario', $id)->first();
-            if (!$postulante) {
-                return response()->json(['message' => 'User not found'], 404);
-            }
-
-            $response = [
-                'postulante' => $postulante,
-                'ubicacion' => $postulante->ubicacion,
-                'formaciones' => $postulante->formaciones->map(function ($formacion) {
-                    return [
-                        'institucion' => $formacion->institucion,
-                        'estado' => $formacion->estado,
-                        'fechaini' => $formacion->fecha_ini,
-                        'fechafin' => $formacion->fecha_fin,
-                        'titulo' => $formacion->titulo,
-                    ];
-                }),
-            ];
-
-            return response()->json($response);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Error retrieving user profile'], 500);
-        }
+        $postulante = Postulante::where('id_usuario', $request->id_postulante)->first();
+    if (!$postulante) {
+        return response()->json(['error' => 'Postulante no encontrado'], 404);
     }
+    $idp=  $postulante->id_postulante;
+    return response()->json(['id_postulante' => $idp], 200);
+}
 }

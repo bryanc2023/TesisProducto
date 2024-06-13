@@ -193,10 +193,11 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
           fechafin: data.fechafin,
         };
 
+        console.log(formData);
         if (formacion) {
           await axios.put(`formacion/${formacion.id}`, formData);
         } else {
-          await axios.post('postulante/forma', formData);
+          await axios.post('postulante/forma2', formData);
         }
         closeModal();
         reloadProfile();
