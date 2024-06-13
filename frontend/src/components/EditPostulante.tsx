@@ -17,15 +17,41 @@ interface EditPostulanteModalProps {
   };
 }
 
+const validarCedulaEcuatoriana = (cedula: string): boolean => {
+  if (cedula.length !== 10) return false;
+
+  const digitoRegion = parseInt(cedula.substring(0, 2), 10);
+  if (digitoRegion < 1 || digitoRegion > 24) return false;
+
+  const coeficientes = [2, 1, 2, 1, 2, 1, 2, 1, 2];
+  let suma = 0;
+
+  for (let i = 0; i < 9; i++) {
+    const digito = parseInt(cedula[i], 10) * coeficientes[i];
+    suma += digito > 9 ? digito - 9 : digito;
+  }
+
+  const ultimoDigito = parseInt(cedula[9], 10);
+  const digitoVerificador = 10 - (suma % 10);
+
+  return digitoVerificador === ultimoDigito || (digitoVerificador === 10 && ultimoDigito === 0);
+};
+
 const EditPostulanteModal: React.FC<EditPostulanteModalProps> = ({ isOpen, closeModal, postulante }) => {
   const [nombres, setNombres] = useState(postulante.nombres);
   const [apellidos, setApellidos] = useState(postulante.apellidos);
   const [fecha_nac, setFechaNac] = useState(postulante.fecha_nac);
   const [estado_civil, setEstadoCivil] = useState(postulante.estado_civil);
   const [genero, setGenero] = useState(postulante.genero);
+  const [cedula, setCedula] = useState(postulante.cedula);
   const [informacion_extra, setInformacionExtra] = useState(postulante.informacion_extra);
+  const [errorCedula, setErrorCedula] = useState<string | null>(null);
 
   const handleSave = () => {
+    if (!validarCedulaEcuatoriana(cedula)) {
+      setErrorCedula('Cédula no válida. Por favor, ingrese una cédula ecuatoriana correcta.');
+      return;
+    }
     // Lógica para guardar los cambios
     closeModal();
   };
@@ -35,7 +61,7 @@ const EditPostulanteModal: React.FC<EditPostulanteModalProps> = ({ isOpen, close
       isOpen={isOpen}
       onRequestClose={closeModal}
       contentLabel="Editar Datos del Postulante"
-      className="bg-white p-6 rounded-lg shadow-md w-full max-w-lg mx-auto my-20 relative"
+      className="bg-white p-6 rounded-lg shadow-md w-full max-w-lg mx-auto my-4 relative"
       overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
     >
       <button onClick={closeModal} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl font-bold">
@@ -43,57 +69,73 @@ const EditPostulanteModal: React.FC<EditPostulanteModalProps> = ({ isOpen, close
       </button>
       <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Editar Datos</h2>
       <div className="space-y-4">
-        <div>
-          <label className="block text-gray-700">Nombres</label>
-          <input
-            type="text"
-            className="w-full px-4 py-2 border rounded-md"
-            value={nombres}
-            onChange={(e) => setNombres(e.target.value)}
-          />
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <label className="block text-gray-700">Nombres</label>
+            <input
+              type="text"
+              className="w-full px-4 py-2 border rounded-md"
+              value={nombres}
+              onChange={(e) => setNombres(e.target.value)}
+            />
+          </div>
+          <div className="flex-1">
+            <label className="block text-gray-700">Apellidos</label>
+            <input
+              type="text"
+              className="w-full px-4 py-2 border rounded-md"
+              value={apellidos}
+              onChange={(e) => setApellidos(e.target.value)}
+            />
+          </div>
         </div>
-        <div>
-          <label className="block text-gray-700">Apellidos</label>
-          <input
-            type="text"
-            className="w-full px-4 py-2 border rounded-md"
-            value={apellidos}
-            onChange={(e) => setApellidos(e.target.value)}
-          />
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <label className="block text-gray-700">Fecha de Nacimiento</label>
+            <input
+              type="date"
+              className="w-full px-4 py-2 border rounded-md"
+              value={fecha_nac}
+              onChange={(e) => setFechaNac(e.target.value)}
+            />
+          </div>
+          <div className="flex-1">
+            <label className="block text-gray-700">Estado Civil</label>
+            <select
+              className="w-full px-4 py-2 border rounded-md"
+              value={estado_civil}
+              onChange={(e) => setEstadoCivil(e.target.value)}
+            >
+              <option value="soltero">Soltero</option>
+              <option value="casado">Casado</option>
+              <option value="divorciado">Divorciado</option>
+              <option value="viudo">Viudo</option>
+            </select>
+          </div>
         </div>
-        <div>
-          <label className="block text-gray-700">Fecha de Nacimiento</label>
-          <input
-            type="date"
-            className="w-full px-4 py-2 border rounded-md"
-            value={fecha_nac}
-            onChange={(e) => setFechaNac(e.target.value)}
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700">Estado Civil</label>
-          <select
-            className="w-full px-4 py-2 border rounded-md"
-            value={estado_civil}
-            onChange={(e) => setEstadoCivil(e.target.value)}
-          >
-            <option value="soltero">Soltero</option>
-            <option value="casado">Casado</option>
-            <option value="divorciado">Divorciado</option>
-            <option value="viudo">Viudo</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-gray-700">Género</label>
-          <select
-            className="w-full px-4 py-2 border rounded-md"
-            value={genero}
-            onChange={(e) => setGenero(e.target.value)}
-          >
-            <option value="masculino">Masculino</option>
-            <option value="femenino">Femenino</option>
-            <option value="otro">Otro</option>
-          </select>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <label className="block text-gray-700">Género</label>
+            <select
+              className="w-full px-4 py-2 border rounded-md"
+              value={genero}
+              onChange={(e) => setGenero(e.target.value)}
+            >
+              <option value="masculino">Masculino</option>
+              <option value="femenino">Femenino</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div className="flex-1">
+            <label className="block text-gray-700">Cédula</label>
+            <input
+              type="text"
+              className="w-full px-4 py-2 border rounded-md"
+              value={cedula}
+              onChange={(e) => setCedula(e.target.value)}
+            />
+            {errorCedula && <p className="text-red-500 text-sm mt-1">{errorCedula}</p>}
+          </div>
         </div>
         <div>
           <label className="block text-gray-700">Información Extra</label>

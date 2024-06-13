@@ -6,7 +6,7 @@ import Modal from 'react-modal';
 import FormacionPEditar from '../../components/FormacionPEditar';
 import EditPostulanteModal from '../../components/EditPostulante';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
-
+import { useForm, SubmitHandler } from 'react-hook-form';
 
 Modal.setAppElement('#root');
 
@@ -108,12 +108,11 @@ const Profile: React.FC = () => {
     setIsEditModalOpen(false);
   };
 
-  const openEditFormacionModal = (formacion: string) => {
+  const openEditFormacionModal = (formacion: Formacion) => {
     setSelectedFormacion(formacion);
     setModalContent('formacion');
     setIsModalOpen(true);
   };
-
 
   interface ProfileData {
     postulante: {
@@ -146,6 +145,32 @@ const Profile: React.FC = () => {
       campo_amplio: string;
     };
   }
+
+  interface ExperienciaInput {
+    empresa: string;
+    puesto: string;
+    fechaini: string;
+    fechafin: string;
+    descripcion: string;
+    referencia: string;
+    contacto: string;
+    numero: string;
+  }
+
+  const { register, handleSubmit, formState: { errors }, watch, setError } = useForm<ExperienciaInput>();
+  const fechaini = watch('fechaini');
+  const fechafin = watch('fechafin');
+
+  const onSubmit: SubmitHandler<ExperienciaInput> = (data) => {
+    if (new Date(fechaini) > new Date(fechafin)) {
+      setError('fechafin', { type: 'manual', message: 'La fecha de inicio no puede ser mayor que la fecha de finalización.' });
+      return;
+    }
+
+    // Lógica para guardar los datos
+    closeModal();
+  };
+
   const handleDeleteFormacion = async (id: number) => {
     try {
       await axios.delete(`formacion/${id}`);
@@ -212,18 +237,18 @@ const Profile: React.FC = () => {
         {profileData.formaciones.map((formacion, index) => (
           <div key={index} className="mb-4 p-4 border rounded-lg bg-gray-700 relative">
             <div className="absolute top-2 right-2 flex space-x-2">
-            <button
-  onClick={() => openEditFormacionModal(formacion)}
-  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 mr-2"
->
-  <FaPencilAlt className="w-4 h-4" />
-</button>
-<button
-  onClick={() => handleDeleteFormacion(formacion.id)}
-  className="px-4 py-2 bg-rose-500 text-white rounded-md hover:bg-rose-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-rose-300 mr-2"
->
-  <FaTrash className="w-4 h-4" />
-</button>
+              <button
+                onClick={() => openEditFormacionModal(formacion)}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 mr-2"
+              >
+                <FaPencilAlt className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => handleDeleteFormacion(formacion.id)}
+                className="px-4 py-2 bg-rose-500 text-white rounded-md hover:bg-rose-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-rose-300 mr-2"
+              >
+                <FaTrash className="w-4 h-4" />
+              </button>
             </div>
             <p><strong>Institución:</strong> {formacion.institucion}</p>
             <p><strong>Estado:</strong> {formacion.estado}</p>
@@ -317,41 +342,59 @@ const Profile: React.FC = () => {
           </>
         )}
 
-{modalContent === 'experiencia' && (
+        {modalContent === 'experiencia' && (
           <>
             <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Agregar Experiencia</h2>
-            <form className="space-y-4 overflow-auto max-h-96 p-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 overflow-auto max-h-96 p-4">
               <div className="grid grid-cols-1 gap-4">
                 <div className="mb-4">
                   <label className="block text-gray-700">Empresa</label>
-                  <input type="text" className="w-full px-4 py-2 border rounded-md" placeholder="Ingresa el nombre" />
+                  <input type="text" className="w-full px-4 py-2 border rounded-md" placeholder="Ingresa el nombre" {...register('empresa', { required: 'Este campo es obligatorio' })} />
+                  {errors.empresa && <span className="text-red-500">{errors.empresa.message}</span>}
                 </div>
                 <div className="mb-4">
                   <label className="block text-gray-700">Puesto</label>
-                  <input type="text" className="w-full px-4 py-2 border rounded-md" placeholder="Ingresa el nombre" />
+                  <input type="text" className="w-full px-4 py-2 border rounded-md" placeholder="Ingresa el nombre" {...register('puesto', { required: 'Este campo es obligatorio' })} />
+                  {errors.puesto && <span className="text-red-500">{errors.puesto.message}</span>}
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="mb-4">
                   <label className="block text-gray-700">Fecha de inicio</label>
-                  <input type="date" className="w-full px-4 py-2 border rounded-md" />
+                  <input type="date" className="w-full px-4 py-2 border rounded-md" {...register('fechaini', { required: 'Este campo es obligatorio' })} />
+                  {errors.fechaini && <span className="text-red-500">{errors.fechaini.message}</span>}
                 </div>
                 <div className="mb-4">
                   <label className="block text-gray-700">Fecha de finalización</label>
-                  <input type="date" className="w-full px-4 py-2 border rounded-md" />
+                  <input type="date" className="w-full px-4 py-2 border rounded-md" {...register('fechafin', { required: 'Este campo es obligatorio' })} />
+                  {errors.fechafin && <span className="text-red-500">{errors.fechafin.message}</span>}
                 </div>
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700">Descripción de responsabilidades</label>
-                <textarea className="w-full px-4 py-2 border rounded-md" rows={3} placeholder="Escribe cuáles son tus tareas"></textarea>
+                <textarea className="w-full px-4 py-2 border rounded-md" rows={3} placeholder="Escribe cuáles son tus tareas" {...register('descripcion', { required: 'Este campo es obligatorio' })}></textarea>
+                {errors.descripcion && <span className="text-red-500">{errors.descripcion.message}</span>}
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700">Persona de referencia</label>
-                <input type="text" className="w-full px-4 py-2 border rounded-md" placeholder="Nombre de la persona de referencia" />
+                <input type="text" className="w-full px-4 py-2 border rounded-md" placeholder="Nombre de la persona de referencia" {...register('referencia', { required: 'Este campo es obligatorio' })} />
+                {errors.referencia && <span className="text-red-500">{errors.referencia.message}</span>}
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700">Contacto de referencia</label>
-                <input type="text" className="w-full px-4 py-2 border rounded-md" placeholder="Correo electrónico o teléfono" />
+                <label className="block text-gray-700">Correo de referencia</label>
+                <input type="email" className="w-full px-4 py-2 border rounded-md" placeholder="Correo electrónico" {...register('contacto', {
+                  required: 'Este campo es obligatorio',
+                  pattern: {
+                    value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                    message: 'Debe ser un correo válido'
+                  }
+                })} />
+                {errors.contacto && <span className="text-red-500">{errors.contacto.message}</span>}
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700">Número de contacto</label>
+                <input type="text" className="w-full px-4 py-2 border rounded-md" placeholder="Número de contacto" {...register('numero', { required: 'Este campo es obligatorio' })} />
+                {errors.numero && <span className="text-red-500">{errors.numero.message}</span>}
               </div>
               <div className="flex justify-between">
                 <button type="button" onClick={closeModal} className="px-4 py-2 text-red-500 border border-red-500 rounded-md hover:bg-red-500 hover:text-white">Cancelar</button>
@@ -383,6 +426,7 @@ const Profile: React.FC = () => {
                     <option value="Nativo">Quechua</option>
                   </select>
                 </div>
+                
                 <div className="mb-4">
                   <label className="block text-gray-700">Nivel escrito <span className="text-red-500">*</span></label>
                   <select className="w-full px-4 py-2 border rounded-md" required>
