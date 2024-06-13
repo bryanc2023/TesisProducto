@@ -56,7 +56,7 @@ function EmpresaLayout() {
 
       <div className="flex pt-16">
         {/* Lateral Nav */}
-        <nav style={{ backgroundColor: '#d1552a' }} className={`w-1/6 text-white p-4 fixed top-16 bottom-0 transition-transform transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+        <nav style={{ backgroundColor: '#d1552a' }} className={`w-1/6 text-white p-4 fixed top-14 bottom-0 transition-transform transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
           <div className="flex flex-col items-center mb-4">
             <img
               src="https://via.placeholder.com/100"
