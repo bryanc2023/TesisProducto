@@ -17,7 +17,7 @@ class CriterioOferta extends Model
     protected $fillable = [
         'id_oferta',
         'id_criterio',
-        'puntuacion',
+        'valor',
         'prioridad'
     ];
     public function oferta()

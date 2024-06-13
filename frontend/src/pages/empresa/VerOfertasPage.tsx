@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState } from "react";
 
 import ModalOfer from '../../components/ModalOfer'; // Asegúrate de que la ruta es correcta
-import PublicarOPage from './PublicarOPage';
+
 
 function VerOfertasPPage() {
     const [showModal, setShowModal] = useState(false);
@@ -75,19 +75,11 @@ function VerOfertasPPage() {
                 </table>
             </div>
             <div className="mt-4 flex justify-between items-center">
-                <Link to="/iniciop" className="text-blue-600 hover:underline">Inicio</Link>
-                <button
-                    className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-                    onClick={handleShowModal}
-                >
-                    Agregar oferta
-                </button>
+                <Link to="/add-oferta" className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Agregar Nueva Oferta</Link>
+               
             </div>
 
-            {/* Modal */}
-            <ModalOfer show={showModal} onClose={handleCloseModal}>
-                <PublicarOPage />
-            </ModalOfer>
+          
         </div>
     );
 }

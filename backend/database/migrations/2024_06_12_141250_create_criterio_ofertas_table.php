@@ -19,7 +19,7 @@ class CreateCriterioOfertasTable extends Migration
             $table->primary(['id_oferta', 'id_criterio']); // Definición de clave primaria compuesta
             $table->foreign('id_oferta')->references('id_oferta')->on('oferta')->onDelete('cascade');
             $table->foreign('id_criterio')->references('id_criterio')->on('criterio')->onDelete('cascade');
-            $table->unsignedInteger('puntuacion')->nullable();
+            $table->string('valor')->nullable();
             $table->unsignedInteger('prioridad')->nullable();
         });
     }

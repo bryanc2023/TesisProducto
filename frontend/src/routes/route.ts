@@ -23,6 +23,7 @@ import ConsultoPostu from "../pages/empresa/ConsultoPostu"
 import MoniR from "../pages/empresa/MoniR"
 import ResultadosP from "../pages/postulante/ResultadosP"
 import PerfilP from "../pages/postulante/PerfilP"
+import AgregarO from "../pages/empresa/AgregarO"
 
 
 
@@ -101,6 +102,21 @@ export const routes: TypeRoute[] = [
             {
                 path: '',
                 element: InicioE,
+                allowedRoles: ['empresa_oferente'],
+            },
+            
+        ],
+    }
+    ,
+    {
+        path: '/add-oferta',
+        element: EmpresaLayout,
+        isProtected: true,
+        allowedRoles: ['empresa_oferente'],
+        children: [
+            {
+                path: '',
+                element: AgregarO,
                 allowedRoles: ['empresa_oferente'],
             },
             
