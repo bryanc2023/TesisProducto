@@ -57,6 +57,8 @@ Route::post('postulanteC',[PostulanteController::class,'registerPos']);
 Route::get('postulanteId/id',[PostulanteController::class,'obtenerIdPostulante']);
 Route::post('postulante/forma',[PostulanteController::class,'registroFormaAca']);
 Route::get('/perfil/{id}', [PostulanteController::class, 'getPerfil']);
+Route::post('/prueba', [PostulanteController::class, 'prueba']);
+Route::post('postulante/forma2',[PostulanteController::class,'registroFormaAcaPlus']);
 
 
 Route::get('/areas', [AreaController::class, 'getAreas']);
