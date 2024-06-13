@@ -60,9 +60,13 @@ Route::get('/perfil/{id}', [PostulanteController::class, 'getPerfil']);
 Route::post('/prueba', [PostulanteController::class, 'prueba']);
 Route::post('postulante/forma2',[PostulanteController::class,'registroFormaAcaPlus']);
 
+Route::middleware('auth:api')->group(function () {
+  // Aquí van las rutas protegidas por JWT
+  Route::get('/areas', [AreaController::class, 'getAreas']);
+  Route::get('/criterios', [CriterioController::class, 'getCriterios']);
+  Route::post('add-oferta', [OfertaController::class, 'registerOferta']);
+  
+});
 
-Route::get('/areas', [AreaController::class, 'getAreas']);
-
-Route::get('/criterios', [CriterioController::class, 'getCriterios']);
-
-Route::post('add-oferta',[OfertaController::class,'registerOferta']);
+Route::get('empresa/{idEmpresa}/ofertas', [OfertaController::class, 'getOfertasByEmpresa']);
+Route::get('/ofertas', [OfertaController::class, 'getAllOfertas']);

@@ -77,7 +77,7 @@ class OfertaController extends Controller
             foreach ($validatedData['titulos'] as $titulo) {
                 EducacionRequerida::create([
                     'id_oferta' => $oferta->id_oferta,
-                    'titulo' => $titulo['id'],
+                    'id_titulo' => $titulo['id'],
                 ]);
             }
         }
@@ -96,4 +96,24 @@ class OfertaController extends Controller
          
         return response()->json(['message' => 'Oferta creado exitosamente', 'oferta' => $oferta], 201);
     }
+
+    public function getOfertasByEmpresa($idEmpresa)
+{
+    $user = Empresa::getIdEmpresaPorIdUsuario($idEmpresa);
+    if (!$user) {
+        return response()->json(['error' => 'Usuario no encontrado'], 404);
+    }
+    $ofertas = Oferta::where('id_empresa', $user)
+                     ->with(['areas', 'criterios','expe'])
+                     ->get();
+    return response()->json(['ofertas' => $ofertas]);
+}
+
+public function getAllOfertas()
+{
+    $ofertas = Oferta::with(['areas', 'criterios', 'empresa','expe'])
+                     ->get();
+
+    return response()->json(['ofertas' => $ofertas]);
+}
 }

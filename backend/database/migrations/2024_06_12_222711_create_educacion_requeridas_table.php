@@ -14,11 +14,13 @@ class CreateEducacionRequeridasTable extends Migration
     public function up()
     {
         Schema::create('educacion_requerida', function (Blueprint $table) {
-            $table->id();
             $table->unsignedBigInteger('id_oferta');
-            $table->unsignedBigInteger('titulo');
+            $table->unsignedBigInteger('id_titulo');
+            $table->primary(['id_oferta', 'id_titulo']); 
             $table->foreign('id_oferta')->references('id_oferta')->on('oferta')->onDelete('cascade');
-            $table->timestamps();
+            $table->foreign('id_titulo')->references('id')->on('titulo')->onDelete('cascade');
+            $table->unsignedInteger('prioridad')->nullable();
+            
         });
     }
 

@@ -27,7 +27,7 @@ interface Oferta {
     // Define otros campos de la oferta según sea necesario
 }
 
-function InicioP() {
+function VerOfertasAll() {
     const [ofertas, setOfertas] = useState<Oferta[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
@@ -53,13 +53,38 @@ function InicioP() {
 
   return (
     <div className="w-full p-4">
-         
-            <h1 className="text-2xl font-semibold mb-4">OFERTAS QUE PUEDEN SER PARA TI:</h1>
-            <h2>En base a tu perfil estas ofertas podrian interesarte:</h2>
+         <div className="flex mb-4">
+                <input
+                    type="text"
+                    className="border border-gray-300 p-2 rounded mr-2"
+                    placeholder="Buscar por cargo"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <button
+                    className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+                    onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
+                >
+                    {showAdvancedSearch ? 'Ocultar Búsqueda Avanzada' : 'Búsqueda Avanzada'}
+                </button>
+            </div>
+
+            {showAdvancedSearch && (
+                <div className="mb-4 p-4 border border-gray-300 rounded">
+                    <h2 className="text-xl font-semibold mb-4">Búsqueda Avanzada</h2>
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* Agrega aquí más inputs para la búsqueda avanzada */}
+                        <input type="text" className="border border-gray-300 p-2 rounded" placeholder="Buscar por empresa" />
+                        <input type="text" className="border border-gray-300 p-2 rounded" placeholder="Buscar por área" />
+                        {/* Agrega más inputs según sea necesario */}
+                    </div>
+                </div>
+            )}
+            <h1 className="text-2xl font-semibold mb-4">OFERTAS PUBLICADAS:</h1>
             <div className="relative overflow-x-auto">
                 <div className="flex flex-wrap gap-4">
                     {filteredOfertas.map((oferta) => (
-                        <div key={oferta.id_oferta} className="p-4 rounded shadow-md flex-shrink-0 w-full md:w-1/2 lg:w-1/3 bg-gray-100"> 
+                        <div key={oferta.id_oferta} className="bg-gray-100 p-4 rounded shadow-md flex-shrink-0 w-full md:w-1/2 lg:w-3/4">
                             <div className="flex items-center mb-2">
                                 <img
                                     src={oferta.mostrar_empresa === 1 ? 'https://guiadelempresario.com/wp-content/uploads/2021/04/Copy-of-Untitled-500x500.png' : `http://localhost:8000/storage/${oferta.empresa.logo}`}
@@ -82,4 +107,4 @@ function InicioP() {
     );
 }
 
-export default InicioP
+export default VerOfertasAll
