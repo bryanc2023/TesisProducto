@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import axios from "../../services/axios";
 import { useSelector } from 'react-redux';
-import { RootState} from '../../store';
+import { RootState } from '../../store';
 import { useNavigate } from 'react-router-dom';
 
 interface IFormInput {
@@ -18,11 +18,11 @@ interface IFormInput {
 
 const CompletarP: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useSelector((state:RootState) => state.auth);
-  const { register, handleSubmit , formState: { errors }} = useForm<IFormInput>();
+  const { user } = useSelector((state: RootState) => state.auth);
+  const { register, handleSubmit, formState: { errors } } = useForm<IFormInput>();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [provinces, setProvinces] = useState([]);
-  const [cantons, setCantons] = useState([]);
+  const [provinces, setProvinces] = useState<string[]>([]);
+  const [cantons, setCantons] = useState<string[]>([]);
   const [selectedProvince, setSelectedProvince] = useState('');
   const [selectedCanton, setSelectedCanton] = useState('');
 
@@ -55,20 +55,19 @@ const CompletarP: React.FC = () => {
     fetchCantons();
   }, [selectedProvince]);
 
-  const handleProvinceChange = (event:any) => {
+  const handleProvinceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedProvince(event.target.value);
     setSelectedCanton('');
   };
 
-  const handleCantonChange = (event:any) => {
+  const handleCantonChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedCanton(event.target.value);
   };
 
   const getMaxBirthDate = () => {
     const currentDate = new Date();
-    const maxYear = currentDate.getFullYear() - 17;
-    const maxDate = new Date(maxYear, 11, 31);
-    return maxDate.toISOString().split('T')[0];
+    currentDate.setDate(currentDate.getDate() - 1); // Make sure the max date is not today or future
+    return currentDate.toISOString().split('T')[0];
   };
 
   const getMinBirthDate = () => {
@@ -113,7 +112,7 @@ const CompletarP: React.FC = () => {
         formData.append('description', data.description);
         formData.append('usuario_id', user.id.toString());
 
-        axios.post('postulanteC', formData, {
+        await axios.post('postulanteC', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -155,8 +154,8 @@ const CompletarP: React.FC = () => {
                 Seleccionar imagen
               </div>
             )}
-            <input type="file" id="image" {...register('image', { required: true })} onChange={handleImageChange} className={`block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 ${errors.image ? 'border-red-500' : ''}`} />
-            {errors.image && <p className="text-red-500 text-xs mt-1">La imagen es requerida.</p>}
+            <input type="file" id="image" {...register('image', { required: 'La imagen es requerida' })} onChange={handleImageChange} className={`block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 ${errors.image ? 'border-red-500' : ''}`} />
+            {errors.image && <p className="text-red-500 text-xs mt-1">{errors.image.message}</p>}
           </div>
         </div>
 
@@ -177,7 +176,7 @@ const CompletarP: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           <div className="form-group">
             <label htmlFor="province" className="block text-gray-700 font-semibold mb-2">Provincia:</label>
-            <select id="province" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600" onChange={handleProvinceChange}>
+            <select id="province" {...register('province', { required: 'Provincia es requerida' })} className={getInputClassName(errors.province)} onChange={handleProvinceChange}>
               <option value="">Seleccione</option>
               {provinces.map((province, index) => (
                 <option key={index} value={province}>
@@ -185,11 +184,12 @@ const CompletarP: React.FC = () => {
                 </option>
               ))}
             </select>
+            {errors.province && <p className="text-red-500 text-xs mt-1">{errors.province.message}</p>}
           </div>
 
           <div className="form-group">
             <label htmlFor="canton" className="block text-gray-700 font-semibold mb-2">Cantón:</label>
-            <select id="canton" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600" disabled={!selectedProvince} onChange={handleCantonChange}>
+            <select id="canton" {...register('canton', { required: 'Cantón es requerido' })} className={getInputClassName(errors.canton)} disabled={!selectedProvince} onChange={handleCantonChange}>
               <option value="">Seleccione</option>
               {cantons.map((canton, index) => (
                 <option key={index} value={canton}>
@@ -197,6 +197,7 @@ const CompletarP: React.FC = () => {
                 </option>
               ))}
             </select>
+            {errors.canton && <p className="text-red-500 text-xs mt-1">{errors.canton.message}</p>}
           </div>
         </div>
 
