@@ -24,6 +24,7 @@ import MoniR from "../pages/empresa/MoniR"
 import ResultadosP from "../pages/postulante/ResultadosP"
 import PerfilP from "../pages/postulante/PerfilP"
 import AgregarO from "../pages/empresa/AgregarO"
+import VerOfertasAll from "../pages/postulante/VerOfertasAll"
 
 
 
@@ -65,6 +66,20 @@ export const routes: TypeRoute[] = [
             {
                 path: '',
                 element: InicioP,
+                allowedRoles: ['postulante'],
+            },
+            
+        ],
+    },
+    {
+        path: '/verOfertasAll',
+        element: PostulanteLayout,
+        isProtected: true,
+        allowedRoles: ['postulante'],
+        children: [
+            {
+                path: '',
+                element: VerOfertasAll,
                 allowedRoles: ['postulante'],
             },
             
