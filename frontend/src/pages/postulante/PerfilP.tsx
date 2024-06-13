@@ -5,7 +5,7 @@ import { RootState } from '../../store';
 import Modal from 'react-modal';
 import FormacionPEditar from '../../components/FormacionPEditar';
 import EditPostulanteModal from '../../components/EditPostulante';
-
+import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 
 
 Modal.setAppElement('#root');
@@ -212,18 +212,18 @@ const Profile: React.FC = () => {
         {profileData.formaciones.map((formacion, index) => (
           <div key={index} className="mb-4 p-4 border rounded-lg bg-gray-700 relative">
             <div className="absolute top-2 right-2 flex space-x-2">
-              <button
-                onClick={() => openEditFormacionModal(formacion)}
-                className="text-yellow-400 hover:underline"
-              >
-                Editar
-              </button>
-              <button
-                onClick={() => handleDeleteFormacion(formacion.id)}
-                className="text-red-400 hover:underline"
-              >
-                Eliminar
-              </button>
+            <button
+  onClick={() => openEditFormacionModal(formacion)}
+  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 mr-2"
+>
+  <FaPencilAlt className="w-4 h-4" />
+</button>
+<button
+  onClick={() => handleDeleteFormacion(formacion.id)}
+  className="px-4 py-2 bg-rose-500 text-white rounded-md hover:bg-rose-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-rose-300 mr-2"
+>
+  <FaTrash className="w-4 h-4" />
+</button>
             </div>
             <p><strong>Institución:</strong> {formacion.institucion}</p>
             <p><strong>Estado:</strong> {formacion.estado}</p>
