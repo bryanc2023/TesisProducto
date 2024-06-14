@@ -1,5 +1,3 @@
-
-
 import EmpresaLayout from "../components/layout/EmpresaLayout"
 import Navbar from "../components/layout/Navbar"
 import PostulanteLayout from "../components/layout/PostulanteLayout"

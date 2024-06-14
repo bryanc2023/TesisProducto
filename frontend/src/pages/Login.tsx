@@ -1,5 +1,5 @@
 import { Formik } from 'formik';
-
+import React, { useEffect, useState } from 'react';
 import InputLabel from '../components/input/InputLabel';
 import Button from '../components/input/Button';
 import * as Yup from 'yup';
@@ -7,14 +7,14 @@ import { useAppDispatch ,RootState} from '../store';
 import { loginUser } from '../store/authSlice';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+
 import Swal from 'sweetalert2';
 import Navbar from '../components/layout/Navbar';
 
 
 const Login = () => {
 
-
+    const [idEmpresa, setIdEmpresa] = useState(null); 
     const dispatch = useAppDispatch();
     const initialValues={
         email: '',
@@ -69,6 +69,10 @@ const Login = () => {
                             navigate("/inicio");
                         }
                     } else if (role === 'empresa_oferente') {
+                        console.log(JSON.stringify(user, null, 2));
+                        setIdEmpresa(user.id); // Guardar en el estado
+                        localStorage.setItem("idEmpresa", user.id); 
+                        
                         if (user.first_login_at === null) {
                             navigate("/completare");
                         }else{

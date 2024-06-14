@@ -31,6 +31,9 @@ Route::prefix('auth')->group(function(){
 
 Route::middleware(['jwt.verify'])->get('users',[UserController::class,'index']);
 
+//Rutas para usuario
+Route::get('userById/{id}', [UserController::class, 'getUserById']);
+
 Route::post('uploadUbi',[UploadController::class,'uploadUbicacion']);
 Route::post('uploadTit',[UploadController::class,'uploadTitulo']);
 Route::post('uploadSec',[UploadController::class,'uploadSector']);
@@ -53,7 +56,7 @@ Route::get('/titulos/{nivel}/{campo}/{titulo}', [TituloController::class, 'getTi
 //Rutas para Empresa
 Route::post('empresaC',[EmpresaController::class,'registerEmp']);
 Route::post('completo',[EmpresaController::class,'completo']);
-Route::get('empresaById/{id}', [EmpresaController::class, 'getEmpresaById']);
+Route::get('empresaById/{id}', [EmpresaController::class, 'getEmpresaByIdUser']);
 
 //Rutas para Postulante
 Route::post('postulanteC',[PostulanteController::class,'registerPos']);

@@ -1,25 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../../services/axios';
+import { useNavigate } from 'react-router-dom';
 
 const EmpresaDetails: React.FC = () => {
     const [empresa, setEmpresa] = useState<Empresa | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        const fetchData = async () => {
+    const idEmpresa = localStorage.getItem("idEmpresa");
+    useEffect(()=>{
+        const getEmpresa = async() => {
             try {
-                const response = await axios.get<Empresa>('http://localhost:8000/api/empresaById/1');
+                
+                const response = await axios.get(`http://localhost:8000/api/empresaById/${idEmpresa}`);
                 setEmpresa(response.data);
-            } catch (err) {
-                setError(err.message);
+            } catch (error) {
+                setError('An error occurred while fetching company data');
             } finally {
                 setLoading(false);
             }
         };
-
-        fetchData();
-    }, []);
+        getEmpresa();
+    }
+      
+    )
+    
+  
 
     if (loading) {
         return <div className="flex justify-center items-center h-screen">Loading...</div>;
