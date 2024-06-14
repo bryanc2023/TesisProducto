@@ -96,7 +96,7 @@ function VerOfertasAll() {
                     </div>
                 </div>
             )}
-            <h1 className="text-2xl font-semibold mb-4">OFERTAS PUBLICADAS POR:</h1>
+            <h1 className="text-2xl font-semibold mb-4">OFERTAS PUBLICADAS:</h1>
             <div className="relative overflow-x-auto">
                 <div className="flex flex-wrap gap-4">
                     {filteredOfertas.map((oferta) => (

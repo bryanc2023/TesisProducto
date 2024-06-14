@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBuilding, faChevronDown, faBars, faTimes, faClipboardList, faUsers, faChartLine } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown, faBars, faTimes, faClipboardList, faUsers, faChartLine } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import { faUser } from '@fortawesome/free-solid-svg-icons/faUser';
 import axios from '../../services/axios';
-
+import { useNavigate } from 'react-router-dom';
 interface Empresa {
     id_empresa: number;
     nombre_comercial: string;
@@ -14,24 +14,34 @@ interface Empresa {
 }
 
 function EmpresaLayout() {
+    const [empresa, setEmpresa] = useState<Empresa | null>(null);
+    const [loading, setLoading] = useState(true);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [empresa, setEmpresa] = useState<Empresa | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    
     const dropdownRef = useRef(null);
     const dispatch = useDispatch();
-
+    const idEmpresa = localStorage.getItem("idEmpresa");
+  
     useEffect(() => {
-        const fetchEmpresa = async () => {
-            try {
-                const response = await axios.get<Empresa>('http://localhost:8000/api/empresaById/1');
-                setEmpresa(response.data);
-            } catch (err) {
-                console.error('Error fetching empresa data:', err);
-            }
-        };
-
-        fetchEmpresa();
-    }, []);
+      const getEmpresa = async () => {
+        try {
+          const response = await axios.get(`http://localhost:8000/api/empresaById/${idEmpresa}`);
+          setEmpresa(response.data);
+        } catch (error) {
+          setError('An error occurred while fetching company data');
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      getEmpresa();
+    }, [idEmpresa]);
+  
+      
+    
+    
 
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen);
