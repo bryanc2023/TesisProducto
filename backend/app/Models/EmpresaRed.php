@@ -12,7 +12,6 @@ class EmpresaRed extends Model
 
     protected $primaryKey = 'id_empresa_red';
 
-
     protected $fillable = [
         'id_empresa',
         'nombre_red',
@@ -21,7 +20,7 @@ class EmpresaRed extends Model
 
     public function empresa()
     {
-        return $this->belongsTo(Empresa::class);
+        return $this->belongsTo(Empresa::class, 'id_empresa');
     }
 
     

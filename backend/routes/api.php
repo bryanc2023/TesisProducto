@@ -50,9 +50,12 @@ Route::get('/titulos/{nivel}', [TituloController::class, 'getCamposNivel']);
 Route::get('/titulos/{nivel}/{campo}', [TituloController::class, 'getTitulosCamposNivel']);
 Route::get('/titulos/{nivel}/{campo}/{titulo}', [TituloController::class, 'getTituloId']);
 
+//Rutas para Empresa
 Route::post('empresaC',[EmpresaController::class,'registerEmp']);
 Route::post('completo',[EmpresaController::class,'completo']);
+Route::get('empresaById/{id}', [EmpresaController::class, 'getEmpresaById']);
 
+//Rutas para Postulante
 Route::post('postulanteC',[PostulanteController::class,'registerPos']);
 Route::get('postulanteId/id',[PostulanteController::class,'obtenerIdPostulante']);
 Route::post('postulante/forma',[PostulanteController::class,'registroFormaAca']);
