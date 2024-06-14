@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuilding, faChevronDown, faBars, faTimes, faClipboardList, faUsers, faChartLine } from '@fortawesome/free-solid-svg-icons';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import { faUser } from '@fortawesome/free-solid-svg-icons/faUser';
 import axios from '../../services/axios';
+import { RootState } from '../../store';
 
 interface Empresa {
     id_empresa: number;
@@ -17,17 +18,22 @@ function EmpresaLayout() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [empresa, setEmpresa] = useState<Empresa | null>(null);
+    const { user } = useSelector((state: RootState) => state.auth);
     const dropdownRef = useRef(null);
     const dispatch = useDispatch();
 
     useEffect(() => {
         const fetchEmpresa = async () => {
+            if(user){
+
+            
             try {
-                const response = await axios.get<Empresa>('http://localhost:8000/api/empresaById/1');
+                const response = await axios.get<Empresa>(`http://localhost:8000/api/empresaById/${user.id}`);
                 setEmpresa(response.data);
             } catch (err) {
                 console.error('Error fetching empresa data:', err);
             }
+        }
         };
 
         fetchEmpresa();
@@ -50,7 +56,7 @@ function EmpresaLayout() {
                 </div>
                 <div className="relative" ref={dropdownRef}>
                     <button onClick={toggleDropdown} className="flex items-center focus:outline-none">
-                        {empresa && <img src={`http://localhost:8000/${empresa.logo}`} alt="Logo" className="w-8 h-8 object-cover border-2 border-white rounded-full mr-2" />}
+                        {empresa && <img src={`http://localhost:8000/storage/${empresa.logo}`} alt="Logo" className="w-8 h-8 object-cover border-2 border-white rounded-full mr-2" />}
                         <span className="hidden lg:inline">{empresa ? empresa.nombre_comercial : 'Empresa oferente'}</span>
                         <FontAwesomeIcon icon={faChevronDown} className="ml-2" />
                     </button>
@@ -80,7 +86,7 @@ function EmpresaLayout() {
                 {/* Lateral Nav */}
                 <nav style={{ backgroundColor: '#d1552a' }} className={`w-1/6 text-white p-4 fixed top-14 bottom-0 transition-transform transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
                     <div className="flex flex-col items-center mb-4">
-                        {empresa && <img src={`http://localhost:8000/${empresa.logo}`} alt="Foto de Perfil" className="rounded-full profile-image w-24 h-24 object-cover mb-2" />}
+                        {empresa && <img src={`http://localhost:8000/storage/${empresa.logo}`} alt="Foto de Perfil" className="rounded-full profile-image w-24 h-24 object-cover mb-2" />}
                         <span className="mt-2 hidden lg:block">{empresa ? empresa.nombre_comercial : 'Nombre del Usuario'}</span>
                     </div>
                     <ul>

@@ -38,8 +38,7 @@ const PostulantesList: React.FC = () => {
     useEffect(() => {
         // Aquí iría la lógica para obtener la lista de postulantes desde el backend
         setPostulantes([
-            { id: 1, nombre: 'Juan Pérez', puesto: 'Desarrollador Web', empresa: 'Empresa #1', fechaPublicacion: '01/01/2023', ubicacion: 'Remoto', experienciaMinima: '2 años', cargaHoraria: '40 horas/semana', fechaMaxPostulacion: '31/12/2023', modalidad: 'Remoto', nivelInstruccion: 'Universitario', objetivo: 'Desarrollar aplicaciones web.', funciones: 'Desarrollar y mantener aplicaciones web.', habilidades: 'React, Node.js', conocimientos: 'JavaScript, CSS', descripcion: 'Ninguna', contacto: 'juan@example.com', telefono: '1234567890', direccion: 'Calle Falsa 123', fechaNacimiento: '1990-01-01', educacion: 'Universitario', experiencia: '2 años', referencias: 'Referencia 1' },
-            { id: 2, nombre: 'María Gómez', puesto: 'Diseñadora UX', empresa: 'Empresa #2', fechaPublicacion: '01/01/2023', ubicacion: 'Presencial', experienciaMinima: '3 años', cargaHoraria: '40 horas/semana', fechaMaxPostulacion: '31/12/2023', modalidad: 'Presencial', nivelInstruccion: 'Universitario', objetivo: 'Diseñar interfaces de usuario.', funciones: 'Crear prototipos y diseños.', habilidades: 'Figma, Sketch', conocimientos: 'Diseño UX/UI', descripcion: 'Ninguna', contacto: 'maria@example.com', telefono: '0987654321', direccion: 'Avenida Siempre Viva 742', fechaNacimiento: '1992-02-02', educacion: 'Universitario', experiencia: '3 años', referencias: 'Referencia 2' },
+           
             // Más postulantes...
         ]);
     }, []);

@@ -43,7 +43,7 @@ const EmpresaDetails: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-center sm:items-start">
                 <div className="flex flex-col items-center sm:items-start text-center sm:text-left mr-0 sm:mr-8">
                     <h1 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 inline-block pb-2 w-40 text-center text-black">{empresa.nombre_comercial}</h1>
-                    <img src={`http://localhost:8000/${empresa.logo}`} alt="Logo" className="w-32 h-32 object-cover border-2 border-black rounded-full mb-4 sm:mb-0 mx-auto" />
+                    <img src={`http://localhost:8000/storage/${empresa.logo}`} alt="Logo" className="w-32 h-32 object-cover border-2 border-black rounded-full mb-4 sm:mb-0 mx-auto" />
                 </div>
                 <div className="w-full">
                     <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 inline-block pb-2 w-40 text-black">Detalles del Perfil</h2>
