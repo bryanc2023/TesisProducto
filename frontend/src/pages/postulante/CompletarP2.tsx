@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useForm, SubmitHandler, ErrorMessage } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import axios from "../../services/axios";
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
@@ -206,7 +206,7 @@ function CompletarP2() {
           <div className="form-group">
             <label htmlFor="institucion" className="block text-gray-700 font-semibold mb-2">Institución:</label>
             <input type="text" id="institucion" {...register('institucion', { required: 'Este campo es requerido' })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600" />
-            <ErrorMessage errors={errors} name="institucion" as="p" className="text-red-500 text-sm mt-2" />
+            {errors.institucion && <p className="text-red-500 text-sm mt-2">{errors.institucion.message}</p>}
           </div>
           <div className="form-group">
             <label htmlFor="estado" className="block text-gray-700 font-semibold mb-2">Estado:</label>
@@ -215,7 +215,7 @@ function CompletarP2() {
               <option value="En curso">En curso</option>
               <option value="Culminado">Culminado</option>
             </select>
-            <ErrorMessage errors={errors} name="estado" as="p" className="text-red-500 text-sm mt-2" />
+            {errors.estado && <p className="text-red-500 text-sm mt-2">{errors.estado.message}</p>}
           </div>
         </div>
         
@@ -226,7 +226,7 @@ function CompletarP2() {
               const today = new Date().toISOString().split('T')[0];
               return value <= today || 'La fecha no puede ser mayor a hoy';
             } })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600" />
-            <ErrorMessage errors={errors} name="fechaini" as="p" className="text-red-500 text-sm mt-2" />
+            {errors.fechaini && <p className="text-red-500 text-sm mt-2">{errors.fechaini.message}</p>}
           </div>
           <div className="form-group">
             <label htmlFor="fechafin" className="block text-gray-700 font-semibold mb-2">Fecha de Fin:</label>
@@ -234,7 +234,7 @@ function CompletarP2() {
               const today = new Date().toISOString().split('T')[0];
               return value <= today || 'La fecha no puede ser mayor a hoy';
             } })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600" />
-            <ErrorMessage errors={errors} name="fechafin" as="p" className="text-red-500 text-sm mt-2" />
+            {errors.fechafin && <p className="text-red-500 text-sm mt-2">{errors.fechafin.message}</p>}
           </div>
         </div>
 

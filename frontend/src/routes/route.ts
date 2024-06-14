@@ -25,6 +25,7 @@ import ResultadosP from "../pages/postulante/ResultadosP"
 import PerfilP from "../pages/postulante/PerfilP"
 import AgregarO from "../pages/empresa/AgregarO"
 import VerOfertasAll from "../pages/postulante/VerOfertasAll"
+import PerfilE from "../pages/empresa/PerfilE"
 
 
 
@@ -176,6 +177,20 @@ export const routes: TypeRoute[] = [
             {
                 path: 'verOfertasE',
                 element: VerOfertasPPage,
+                allowedRoles: ['empresa_oferente'],
+            },
+            
+        ],
+    },
+    {
+        path: '/',
+        element: EmpresaLayout,
+        isProtected: true,
+        allowedRoles: ['empresa_oferente'],
+        children: [
+            {
+                path: 'PerfilE',
+                element: PerfilE,
                 allowedRoles: ['empresa_oferente'],
             },
             

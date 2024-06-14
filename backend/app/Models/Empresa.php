@@ -54,7 +54,7 @@ class Empresa extends Model
 
 public function red()
 {
-    return $this->hasMany(EmpresaRed::class);
+    return $this->hasMany(EmpresaRed::class, 'id_empresa_red');
 }
     
 }

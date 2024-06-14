@@ -79,4 +79,33 @@ class EmpresaController extends Controller
         }
         return response()->json(['message' => 'Empresa creado exitosamente', 'empresa' => $empresa], 201);
     }
+    
+    public function getEmpresaById($idEmpresa)
+{
+    try {
+        $empresa = Empresa::with([
+            'red' => function ($query) {
+                $query->select('id_empresa_red', 'nombre_red', 'enlace');
+            },
+            'sector' => function ($query) {
+                $query->select('id', 'sector', 'division'); // Seleccionar solo los campos necesarios
+            },
+            'ubicacion' => function ($query) {
+                $query->select('id', 'provincia', 'canton'); // Seleccionar solo los campos necesarios
+            }
+        ])->findOrFail($idEmpresa);
+
+        return response()->json($empresa);
+
+    } catch (\Throwable $th) {
+        return response()->json([
+            'message' => 'Empresa no encontrada',
+            'error' => $th->getMessage()
+        ], 500);
+    }
 }
+
+
+}
+
+
