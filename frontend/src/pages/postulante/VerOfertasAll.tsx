@@ -1,29 +1,24 @@
 import { Link } from 'react-router-dom';
-
-import { useState, useEffect, useRef } from "react";
-
-
+import { useState, useEffect } from "react";
 import axios from "../../services/axios";
-
-
 
 interface Oferta {
     id_oferta: number;
     estado: string;
-    cargo:string;
+    cargo: string;
     areas: {
         nombre_area: string;
     };
     empresa: {
         id_empresa: string,
         nombre_comercial: string;
-        logo:string;
+        logo: string;
     };
-    fecha_publi:string;
+    fecha_publi: string;
     mostrar_empresa: number;
-    modalidad:string;
-    carga_horaria:string;
-    experiencia:string;
+    modalidad: string;
+    carga_horaria: string;
+    experiencia: string;
     // Define otros campos de la oferta según sea necesario
 }
 
@@ -31,29 +26,40 @@ function VerOfertasAll() {
     const [ofertas, setOfertas] = useState<Oferta[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
-
+    const [areas, setAreas] = useState([]);
+    const [selectedArea, setSelectedArea] = useState('');
 
     useEffect(() => {
         fetchOfertas();
+        fetchAreas();
     }, []);
 
+    const fetchAreas = async () => {
+        try {
+            const response = await axios.get(`areas`); // Reemplaza con tu URL para obtener las áreas
+            setAreas(response.data.areas);
+        } catch (error) {
+            console.error('Error fetching areas:', error);
+        }
+    };
+
     const fetchOfertas = async () => {
-        
         try {
             const response = await axios.get(`ofertas`); // Reemplaza con tu URL y ID de empresa
             setOfertas(response.data.ofertas);
         } catch (error) {
             console.error('Error fetching ofertas:', error);
         }
-    
     };
+
     const filteredOfertas = ofertas.filter((oferta) =>
-        oferta.cargo.toLowerCase().includes(searchTerm.toLowerCase())
+        oferta.cargo.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (selectedArea === '' || oferta.areas.nombre_area === selectedArea)
     );
 
-  return (
-    <div className="w-full p-4">
-         <div className="flex mb-4">
+    return (
+        <div className="w-full p-4">
+            <div className="flex mb-4">
                 <input
                     type="text"
                     className="border border-gray-300 p-2 rounded mr-2"
@@ -73,9 +79,19 @@ function VerOfertasAll() {
                 <div className="mb-4 p-4 border border-gray-300 rounded">
                     <h2 className="text-xl font-semibold mb-4">Búsqueda Avanzada</h2>
                     <div className="grid grid-cols-2 gap-4">
-                        {/* Agrega aquí más inputs para la búsqueda avanzada */}
                         <input type="text" className="border border-gray-300 p-2 rounded" placeholder="Buscar por empresa" />
-                        <input type="text" className="border border-gray-300 p-2 rounded" placeholder="Buscar por área" />
+                        <select
+                            className="border border-gray-300 p-2 rounded"
+                            value={selectedArea}
+                            onChange={(e) => setSelectedArea(e.target.value)}
+                        >
+                            <option value="">Seleccione un área</option>
+                            {areas.map(area => (
+                                <option key={area.id} value={area.nombre_area}>
+                                    {area.nombre_area}
+                                </option>
+                            ))}
+                        </select>
                         {/* Agrega más inputs según sea necesario */}
                     </div>
                 </div>
@@ -107,4 +123,4 @@ function VerOfertasAll() {
     );
 }
 
-export default VerOfertasAll
+export default VerOfertasAll;
