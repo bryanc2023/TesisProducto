@@ -80,7 +80,7 @@ class EmpresaController extends Controller
         return response()->json(['message' => 'Empresa creado exitosamente', 'empresa' => $empresa], 201);
     }
     
-    public function getEmpresaById($idEmpresa)
+    public function getEmpresaByIdUser($idUser)
 {
     try {
         $empresa = Empresa::with([
@@ -93,7 +93,7 @@ class EmpresaController extends Controller
             'ubicacion' => function ($query) {
                 $query->select('id', 'provincia', 'canton'); // Seleccionar solo los campos necesarios
             }
-        ])->findOrFail($idEmpresa);
+        ])->where('id_usuario', $idUser)->first();
 
         return response()->json($empresa);
 
@@ -105,7 +105,7 @@ class EmpresaController extends Controller
     }
 }
 
+    
+
 
 }
-
-
