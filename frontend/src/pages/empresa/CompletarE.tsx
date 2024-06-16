@@ -312,7 +312,7 @@ const CompletarE: React.FC = () => {
               </select>
             </div>
           </div>
-  
+  {/*}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div className="form-group">
               <label htmlFor="email" className="block text-gray-700 font-semibold mb-2">Correo de contacto:</label>
@@ -342,7 +342,7 @@ const CompletarE: React.FC = () => {
               {errors.contactNumber && <p className="text-red-500 text-xs mt-1">{errors.contactNumber.message}</p>}
             </div>
           </div>
-  
+ */ }
           <div className="form-group mb-8">
             <label className="block text-gray-700 font-semibold mb-2">¿La empresa tiene redes sociales?</label>
             <div className="flex items-center">
