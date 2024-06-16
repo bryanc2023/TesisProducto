@@ -28,7 +28,6 @@ class Oferta extends Model
         'correo_contacto',
         'numero_contacto',
         'estado',
-        'ponderacion',
         'mostrar_sueldo',
         'mostrar_empresa'
     ];

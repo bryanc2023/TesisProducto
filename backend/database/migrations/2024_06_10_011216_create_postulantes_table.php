@@ -19,7 +19,6 @@ class CreatePostulantesTable extends Migration
             $table->unsignedBigInteger('id_usuario');
             $table->string('nombres', 50);
             $table->string('apellidos', 50);
-            $table->string('nacionalidad', 50)->nullable();
             $table->date('fecha_nac')->nullable();
             $table->integer('edad')->nullable();
             $table->string('estado_civil', 30)->nullable();

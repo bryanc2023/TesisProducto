@@ -20,10 +20,18 @@ function RegistroE() {
 
     const onSubmit = (values:typeof initialValues)=>{
         console.log(values);
-        setIsLoading(true);
+        Swal.fire({
+            title: 'Cargando...',
+            text: 'Por favor, espera mientras se procede al registro',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading(Swal.getConfirmButton());
+            }
+        });
         Api.post('/auth/registerE', values)
             .then((response) => {
-                setIsLoading(false);
+                Swal.close(); // Cerrar el mensaje de "cargando"
                 console.log(response);
                 // Si la respuesta indica un registro exitoso, muestra la alerta de SweetAlert
                
@@ -51,7 +59,7 @@ function RegistroE() {
     const validationSchema = Yup.object({
        name:Yup.string().required('El nombre de usuario es requerido'),
        email:Yup.string().email('El correo no es válido')
-       .matches(/^[a-zA-Z0-9._%+-]+@(gmail\.com|outlook\.com|outlook\.es|hotmail\.com|hotmail\.es)$/, 'El correo debe ser de dominio gmail.com, outlook.com o hotmail.com').required('El correo es requerido'),
+              .matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(es|ec|com)$/, 'El correo debe ser de un dominio que termine en .es , ec o .com').required('El correo es requerido'),
        password:Yup.string().min(6,'La contraseña debe ser minímo de 6 letras y números').required('La contraseña es requerida'),
        password_confirmation:Yup.string().oneOf([Yup.ref('password')],'Las contraseñas no coinciden').min(6,'La contraseña debe ser minímo de 6 letras y números').required('La comprobación de contraseña es requerida'),
     });

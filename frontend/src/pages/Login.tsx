@@ -38,57 +38,67 @@ const Login = () => {
     }, [isLogged, role, navigate]);
     
     const onSubmit = (values:typeof initialValues)=>{
+       // Mostrar el mensaje de "cargando"
+    Swal.fire({
+        title: 'Cargando...',
+        text: 'Por favor, espera mientras se procesa tu login.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            Swal.showLoading(Swal.getConfirmButton());
+        }
+    });
+    
 
-        dispatch(loginUser(values)).then((response)=>{
+    dispatch(loginUser(values)).then((response) => {
+        Swal.close(); // Cerrar el mensaje de "cargando"
+        
+        if(response.payload === "403"){
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de verificación',
+                text: 'Este usuario no ha sido verificado todavía, por favor verifica el enlace en tu correo para continuar con el login',
+            });
+        } else if(response.payload === "401"){
+            Swal.fire({
+                icon: 'error',
+                title: 'Credenciales inválidas',
+                text: 'El usuario o contraseña ingresado no es correcto',
+            });
+        } else if(response.type === 'auth/loginUser/fulfilled'){
+            console.log(response.payload);
+            
+            const { user, token, role } = response.payload;
+
+          
+                // Redirigir a la página correspondiente después de que el usuario haga clic en OK
+                if (role === 'admin') {
+                    navigate("/administrador");
+                } else if (role === 'postulante') {
+                    if (user.first_login_at === null) {
+                        navigate("/completar");
+                    } else {
+                        navigate("/inicio");
+                    }
+                } else if (role === 'empresa_oferente') {
+                    console.log(JSON.stringify(user, null, 2));
+                    setIdEmpresa(user.id); // Guardar en el estado
+                    localStorage.setItem("idEmpresa", user.id); 
+                    
+                    if (user.first_login_at === null) {
+                        navigate("/completare");
+                    } else {
+                        navigate("/inicio-e");
+                    }
+                }
            
-           if(response.payload ===  "403"){
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error de verificación',
-                    text: 'Este usuario no ha sido verificado todavia, porfavor verifica el enlace en tu correo para continuar con el login',
-                })
-            }else if(response.payload ===  "401"){
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Credenciales inválidas',
-                    text: 'El usuario o contraseña ingresado no es el correcto',
-                })
-            } 
-            console.log(response.payload.user.first_login_at);
-            if(response.type === 'auth/loginUser/fulfilled'){
-                console.log(response.payload);
-                
-                const { user, token, role } = response.payload;
-                
-                    if (role === 'admin') {
-                        navigate("/administrador");
-                    } else if (role === 'postulante') {
-                        if (user.first_login_at === null) {
-                            navigate("/completar");
-                        }else{
-                            navigate("/inicio");
-                        }
-                    } else if (role === 'empresa_oferente') {
-                        console.log(JSON.stringify(user, null, 2));
-                        setIdEmpresa(user.id); // Guardar en el estado
-                        localStorage.setItem("idEmpresa", user.id); 
-                        
-                        if (user.first_login_at === null) {
-                            navigate("/completare");
-                        }else{
-                            navigate("/inicio-e");
-                        }
-                    } 
-                
-                
-               
-            }
-        })
-    }
+        }
+    });
+};
 
     const validationSchema = Yup.object({
        email:Yup.string().email('El correo no es válido')
-       .matches(/^[a-zA-Z0-9._%+-]+@(gmail\.com|outlook\.com|outlook\.es|hotmail\.com|hotmail\.es)$/, 'El correo debe ser de dominio gmail.com, outlook.com o hotmail.com').required('El correo es requerido'),
+       .matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(es|ec|com)$/, 'El correo debe ser de un dominio que termine en .es , ec o .com').required('El correo es requerido'),
        password:Yup.string().min(6,'La contraseña debe ser minímo de 6 letras y números').required('La contraseña es requerida'),
     });
 
