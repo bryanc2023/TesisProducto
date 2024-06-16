@@ -58,6 +58,7 @@ Route::get('/titulos/{nivel}/{campo}/{titulo}', [TituloController::class, 'getTi
 Route::post('empresaC',[EmpresaController::class,'registerEmp']);
 Route::post('completo',[EmpresaController::class,'completo']);
 Route::get('empresaById/{id}', [EmpresaController::class, 'getEmpresaByIdUser']);
+Route::put('updateEmpresaById/{id}', [EmpresaController::class, 'updateEmpresaByIdUser']);
 
 //Rutas para Postulante
 Route::post('postulanteC',[PostulanteController::class,'registerPos']);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBuilding, faChevronDown, faBars, faTimes, faClipboardList, faUsers, faChartLine } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown, faBars, faTimes, faClipboardList, faUsers, faChartLine } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import { faUser } from '@fortawesome/free-solid-svg-icons/faUser';
@@ -37,7 +37,7 @@ function EmpresaLayout() {
         };
 
         fetchEmpresa();
-    }, []);
+    }, [user]);
 
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen);
