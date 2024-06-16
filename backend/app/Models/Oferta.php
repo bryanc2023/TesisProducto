@@ -58,4 +58,9 @@ public function expe()
         ->withPivot('prioridad');
         
     }
+
+    public function postulantes()
+{
+    return $this->belongsToMany(Postulante::class, 'postulacion', 'id_oferta', 'id_postulante');
+}
 }

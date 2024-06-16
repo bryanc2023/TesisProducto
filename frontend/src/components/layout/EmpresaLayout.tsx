@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown, faBars, faTimes, faClipboardList, faUsers, faChartLine } from '@fortawesome/free-solid-svg-icons';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import { faUser } from '@fortawesome/free-solid-svg-icons/faUser';
 import axios from '../../services/axios';
-import { useNavigate } from 'react-router-dom';
+import { RootState } from '../../store';
+
 interface Empresa {
     id_empresa: number;
     nombre_comercial: string;
@@ -14,34 +15,29 @@ interface Empresa {
 }
 
 function EmpresaLayout() {
-    const [empresa, setEmpresa] = useState<Empresa | null>(null);
-    const [loading, setLoading] = useState(true);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    
+    const [empresa, setEmpresa] = useState<Empresa | null>(null);
+    const { user } = useSelector((state: RootState) => state.auth);
     const dropdownRef = useRef(null);
     const dispatch = useDispatch();
-    const idEmpresa = localStorage.getItem("idEmpresa");
-  
+
     useEffect(() => {
-      const getEmpresa = async () => {
-        try {
-          const response = await axios.get(`http://localhost:8000/api/empresaById/${idEmpresa}`);
-          setEmpresa(response.data);
-        } catch (error) {
-          setError('An error occurred while fetching company data');
-        } finally {
-          setLoading(false);
+        const fetchEmpresa = async () => {
+            if(user){
+
+            
+            try {
+                const response = await axios.get<Empresa>(`http://localhost:8000/api/empresaById/${user.id}`);
+                setEmpresa(response.data);
+            } catch (err) {
+                console.error('Error fetching empresa data:', err);
+            }
         }
-      };
-  
-      getEmpresa();
-    }, [idEmpresa]);
-  
-      
-    
-    
+        };
+
+        fetchEmpresa();
+    }, [user]);
 
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen);
@@ -60,7 +56,7 @@ function EmpresaLayout() {
                 </div>
                 <div className="relative" ref={dropdownRef}>
                     <button onClick={toggleDropdown} className="flex items-center focus:outline-none">
-                        {empresa && <img src={`http://localhost:8000/${empresa.logo}`} alt="Logo" className="w-8 h-8 object-cover border-2 border-white rounded-full mr-2" />}
+                        {empresa && <img src={`http://localhost:8000/storage/${empresa.logo}`} alt="Logo" className="w-8 h-8 object-cover border-2 border-white rounded-full mr-2" />}
                         <span className="hidden lg:inline">{empresa ? empresa.nombre_comercial : 'Empresa oferente'}</span>
                         <FontAwesomeIcon icon={faChevronDown} className="ml-2" />
                     </button>
@@ -90,7 +86,7 @@ function EmpresaLayout() {
                 {/* Lateral Nav */}
                 <nav style={{ backgroundColor: '#d1552a' }} className={`w-1/6 text-white p-4 fixed top-14 bottom-0 transition-transform transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
                     <div className="flex flex-col items-center mb-4">
-                        {empresa && <img src={`http://localhost:8000/${empresa.logo}`} alt="Foto de Perfil" className="rounded-full profile-image w-24 h-24 object-cover mb-2" />}
+                        {empresa && <img src={`http://localhost:8000/storage/${empresa.logo}`} alt="Foto de Perfil" className="rounded-full profile-image w-24 h-24 object-cover mb-2" />}
                         <span className="mt-2 hidden lg:block">{empresa ? empresa.nombre_comercial : 'Nombre del Usuario'}</span>
                     </div>
                     <ul>

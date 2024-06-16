@@ -1,6 +1,9 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from "react";
 import axios from "../../services/axios";
+import Swal from 'sweetalert2';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 
 interface Oferta {
     id_oferta: number;
@@ -22,12 +25,69 @@ interface Oferta {
     // Define otros campos de la oferta según sea necesario
 }
 
+interface ModalProps {
+    oferta: Oferta | null;
+    onClose: () => void;
+    userId: number| undefined;
+}
+
+function Modal({ oferta, onClose, userId }: ModalProps) {
+    const navigate = useNavigate();
+    if (!oferta) return null;
+    const handlePostular = async () => {
+        console.log(`id_usuario: ${userId}, id_oferta: ${oferta.id_oferta}`);
+        try {
+            await axios.post('postular', {
+                id_postulante: userId,
+                id_oferta: oferta.id_oferta,
+            });
+            Swal.fire({
+                title: '¡Hecho!',
+                text: 'Te has postulado a la oferta seleccionado, verifica el estado de tu postulación en los resultados',
+                icon: 'success',
+                confirmButtonText: 'Ok'
+              }).then(() => {
+                navigate("/inicio");
+              });
+        } catch (error) {
+            console.error('Error postulando:', error);
+            alert('Hubo un error al postular. Intenta nuevamente.');
+        }
+    };
+
+
+    return (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+            <div className="bg-white p-4 rounded shadow-lg w-11/12 md:w-1/2">
+                <button onClick={onClose} className="text-red-500 float-right">X</button>
+                <h2 className="text-xl font-semibold">{oferta.cargo}</h2>
+                <img
+                    src={oferta.mostrar_empresa === 1 ? 'https://guiadelempresario.com/wp-content/uploads/2021/04/Copy-of-Untitled-500x500.png' : `http://localhost:8000/storage/${oferta.empresa.logo}`}
+                    alt="Logo"
+                    className="w-20 h-16 rounded-full shadow-lg mr-4"
+                />
+                <p className="text-gray-700 mb-1"><strong>Empresa:</strong> {oferta.mostrar_empresa === 1 ? 'Anónima' : oferta.empresa.nombre_comercial}</p>
+                <p className="text-gray-700 mb-1"><strong>Fecha Publicación:</strong> {oferta.fecha_publi}</p>
+                <p className="text-gray-700 mb-1"><strong>Área:</strong> {oferta.areas.nombre_area}</p>
+                <p className="text-gray-700 mb-1"><strong>Carga Horaria:</strong> {oferta.carga_horaria}</p>
+                <p className="text-gray-700 mb-1"><strong>Experiencia Mínima:</strong> {oferta.experiencia}</p>
+                <p className="text-gray-700 mb-1"><strong>Objetivo del cargo:</strong> {oferta.objetivo_cargo}</p>
+                <p className="text-gray-700 mb-1"><strong>Funciones:</strong> {oferta.funciones}</p>
+                <p className="text-gray-700 mb-1"><strong>Detalles adicionales:</strong> {oferta.detalles_adicionales}</p>
+                <button onClick={handlePostular} className="mt-4 bg-blue-500 text-white p-2 rounded">Postular</button>
+            </div>
+        </div>
+    );
+}
 function VerOfertasAll() {
+    const { user } = useSelector((state: RootState) => state.auth);
     const [ofertas, setOfertas] = useState<Oferta[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
     const [areas, setAreas] = useState([]);
     const [selectedArea, setSelectedArea] = useState('');
+    const [selectedOferta, setSelectedOferta] = useState<Oferta | null>(null);
+
 
     useEffect(() => {
         fetchOfertas();
@@ -114,11 +174,12 @@ function VerOfertasAll() {
                             <p className="text-gray-700 mb-1"><strong>Área:</strong> {oferta.areas.nombre_area}</p>
                             <p className="text-gray-700 mb-1"><strong>Carga Horaria:</strong> {oferta.carga_horaria}</p>
                             <p className="text-gray-700 mb-1"><strong>Experiencia Mínima:</strong> {oferta.experiencia}</p>
-                            <Link to={`/postulantes/${oferta.id_oferta}`} className="text-blue-600 hover:underline">Ver Oferta</Link>
+                            <button onClick={() => setSelectedOferta(oferta)} className="text-blue-600 hover:underline">Ver Oferta</button>
                         </div>
                     ))}
                 </div>
             </div>
+            {selectedOferta && <Modal oferta={selectedOferta} onClose={() => setSelectedOferta(null)} userId={user?.id} />}
         </div>
     );
 }

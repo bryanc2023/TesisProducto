@@ -24,6 +24,8 @@ import PerfilP from "../pages/postulante/PerfilP"
 import AgregarO from "../pages/empresa/AgregarO"
 import VerOfertasAll from "../pages/postulante/VerOfertasAll"
 import PerfilE from "../pages/empresa/PerfilE"
+import EmpresaGLayout from "../components/layout/EmpresaGLayout"
+
 
 
 
@@ -234,5 +236,12 @@ export const routes: TypeRoute[] = [
         allowedRoles: ['admin'],
     },
     
+    {
+        path: '/EmpresaGlayout',
+        element: EmpresaGLayout,
+        isProtected: true,
+        allowedRoles: ['empresa_gestora'],
+       
+    },
     
 ];

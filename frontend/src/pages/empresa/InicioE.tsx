@@ -9,9 +9,9 @@ function InicioE() {
   };
 
   return (
-    <button onClick={handleLogout}>
-      Logout
-    </button>
+   <>
+   <div></div>
+   </>
   );
 }
 

@@ -65,4 +65,9 @@ public function red()
 {
     return $this->hasMany(PostulanteRed::class);
 }
+
+public function postulacion()
+{
+    return $this->belongsToMany(Postulacion::class, 'postulacion', 'id_oferta', 'id_postulante');
+}
 }

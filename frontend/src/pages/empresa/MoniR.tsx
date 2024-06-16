@@ -2,17 +2,15 @@ import React from 'react';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const data = [
-    { name: 'Oferta 1', postulantes: 30 },
-    { name: 'Oferta 2', postulantes: 20 },
-    { name: 'Oferta 3', postulantes: 50 },
-    { name: 'Oferta 4', postulantes: 80 },
-    { name: 'Oferta 5', postulantes: 45 },
+    { name: 'Oferta 1', postulantes: 1 },
+    { name: 'Oferta 2', postulantes: 0 },
+    { name: 'Oferta 3', postulantes: 0 },
 ];
 
 const pieData = [
-    { name: 'Contratados', value: 10 },
-    { name: 'Rechazados', value: 40 },
-    { name: 'Pendientes', value: 50 },
+    { name: 'Contratados', value: 0 },
+    { name: 'Rechazados', value: 0 },
+    { name: 'Pendientes', value: 3 },
 ];
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
@@ -37,7 +35,7 @@ const RecruitmentDashboard = () => {
                 </div>
                 
                 <div className="bg-white p-4 rounded shadow">
-                    <h2 className="text-xl font-semibold mb-4">Estado de las Aplicaciones</h2>
+                    <h2 className="text-xl font-semibold mb-4">Estado de ofertas publicadas</h2>
                     <ResponsiveContainer width="100%" height={300}>
                         <PieChart>
                             <Pie
