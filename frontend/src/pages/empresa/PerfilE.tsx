@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../../services/axios';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 
 interface Empresa {
+    id?: number;
     nombre_comercial: string;
     logo: string;
     ubicacion: {
@@ -24,8 +27,8 @@ const EmpresaDetails: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [editedEmpresa, setEditedEmpresa] = useState<Empresa | null>(null);
-
-    const idEmpresa = localStorage.getItem("idEmpresa");
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const { user } = useSelector((state: RootState) => state.auth);
 
     const [provinces, setProvinces] = useState<string[]>([]);
     const [cantons, setCantons] = useState<string[]>([]);
@@ -38,37 +41,33 @@ const EmpresaDetails: React.FC = () => {
     const [isDivisionEnabled, setIsDivisionEnabled] = useState<boolean>(false);
 
     useEffect(() => {
-        const getEmpresa = async () => {
+        const fetchProfileData = async () => {
             try {
-                if (!idEmpresa) {
-                    throw new Error("No company ID found in localStorage");
+                if (user) {
+                    console.log(user.id)
+                    const response = await axios.get(`/empresaById/${user.id}`);
+                    setEmpresa(response.data);
+                    if (response.data.ubicacion) {
+                        setSelectedProvince(response.data.ubicacion.provincia || '');
+                        setSelectedCanton(response.data.ubicacion.canton || '');
+                    }
+                    if (response.data.sector) {
+                        setSelectedSector(response.data.sector.sector || '');
+                        setSelectedDivision(response.data.sector.division || '');
+                    }
                 }
-
-                setLoading(true);
-                const response = await axios.get(`http://localhost:8000/api/empresaById/${idEmpresa}`);
-                setEmpresa(response.data);
-                if (response.data.ubicacion) {
-                    setSelectedProvince(response.data.ubicacion.provincia || '');
-                    setSelectedCanton(response.data.ubicacion.canton || '');
-                }
-                if (response.data.sector) {
-                    setSelectedSector(response.data.sector.sector || '');
-                    setSelectedDivision(response.data.sector.division || '');
-                }
-                setError(null);
-            } catch (err) {
-                if (axios.isAxiosError(err)) {
-                    setError(`Axios error: ${err.response?.data?.message || err.message}`);
-                } else {
-                    setError(`General error: ${(err as Error).message}`);
-                }
+            } catch (error) {
+                console.error('Error fetching profile data:', error);
+                setError('Error fetching profile data');
             } finally {
                 setLoading(false);
             }
         };
 
-        getEmpresa();
-    }, [idEmpresa]);
+        if (user) {
+            fetchProfileData();
+        }
+    }, [user]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -149,14 +148,30 @@ const EmpresaDetails: React.FC = () => {
         }
     };
 
+    const reloadProfile = async () => {
+        try {
+            const response = await axios.get(`/empresaById/${user.id}`);
+            setEmpresa(response.data);
+        } catch (error) {
+            console.error('Error fetching profile data:', error);
+            setError('Error fetching profile data');
+        }
+    };
+
     const handleSave = async () => {
         if (editedEmpresa) {
             try {
-                const response = await axios.put(`http://localhost:8000/api/updateEmpresaById/${idEmpresa}`, editedEmpresa);
-                setEmpresa(response.data);
+                const response = await axios.put(`/updateEmpresaById/${user.id}`, editedEmpresa);
+                setSuccessMessage("Datos guardados con éxito!");
+                setTimeout(() => {
+                    setSuccessMessage(null);
+                }, 3000);
+                
+                // Recargar los datos del perfil después de guardar
+                await reloadProfile();
+    
                 setModalIsOpen(false);
                 setError(null);
-                window.location.reload(); // Recarga la página después de guardar los datos
             } catch (err) {
                 if (axios.isAxiosError(err)) {
                     setError(`Axios error: ${err.response?.data?.message || err.message}`);
@@ -181,14 +196,19 @@ const EmpresaDetails: React.FC = () => {
 
     return (
         <div className="max-w-4xl mx-auto mt-10 p-6 bg-white text-black rounded-lg shadow-md" style={{ borderColor: '#d1552a', borderWidth: '4px' }}>
+            {successMessage && (
+                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mt-4" role="alert">
+                    <strong className="font-bold">Éxito! </strong>
+                    <span className="block sm:inline">{successMessage}</span>
+                </div>
+            )}
             <div className="flex flex-col sm:flex-row items-center sm:items-start">
                 <div className="flex flex-col items-center sm:items-start text-center sm:text-left mr-0 sm:mr-8">
                     <h1 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 inline-block pb-2 w-40 text-center text-black">{empresa?.nombre_comercial}</h1>
                     <img 
-                        src={`http://localhost:8000/storage/${empresa?.logo}`} 
+                        src={empresa?.logo ? `http://localhost:8000/storage/${empresa.logo}` : '/path/to/default/image.jpg'} 
                         alt="Logo" 
                         className="w-32 h-32 object-cover border-2 border-black rounded-full mb-4 sm:mb-0 mx-auto" 
-                        onError={(e) => { e.currentTarget.src = '/path/to/default/image.jpg'; }} 
                     />
                     <button onClick={openModal} className="bg-blue-500 text-white px-4 py-2 rounded mb-4 mt-4">Editar Datos</button>
                 </div>
@@ -364,10 +384,13 @@ const EmpresaDetails: React.FC = () => {
                                             </select>
                                         </div>
                                     </div>
+                                     
                                     <div className="flex items-center justify-between mt-4">
                                         <button onClick={handleSave} className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-700">
                                             Guardar
+                                           
                                         </button>
+                                       
                                         <button onClick={closeModal} className="px-4 py-2 text-red-500 border border-red-500 rounded-md hover:bg-red-500 hover:text-white">
                                             Cancelar
                                         </button>
