@@ -250,13 +250,28 @@ const Profile: React.FC = () => {
                 <FaTrash className="w-4 h-4" />
               </button>
             </div>
-            <p><strong>Institución:</strong> {formacion.institucion}</p>
-            <p><strong>Estado:</strong> {formacion.estado}</p>
-            <p><strong>Fecha de Inicio:</strong> {formacion.fechaini}</p>
-            <p><strong>Fecha de Fin:</strong> {formacion.fechafin}</p>
-            <p><strong>Título:</strong> {formacion.titulo.titulo}</p>
-            <p><strong>Nivel de Educación:</strong> {formacion.titulo.nivel_educacion}</p>
-            <p><strong>Campo Amplio:</strong> {formacion.titulo.campo_amplio}</p>
+         
+            {formacion.fechafin !== null ? (
+               <>
+    <p><strong>Institución:</strong> {formacion.institucion}</p>
+    <p><strong>Estado:</strong> {formacion.estado}</p>
+    <p><strong>Fecha de Inicio:</strong> {formacion.fechaini}</p>
+    <p><strong>Fecha de Fin:</strong> {formacion.fechafin}</p>
+    <p><strong>Título:</strong> {formacion.titulo.titulo}</p>
+    <p><strong>Nivel de Educación:</strong> {formacion.titulo.nivel_educacion}</p>
+    <p><strong>Campo Amplio:</strong> {formacion.titulo.campo_amplio}</p>
+    </>
+) : (
+  <>
+  <p><strong>Institución:</strong> {formacion.institucion}</p>
+  <p><strong>Estado:</strong> {formacion.estado}</p>
+  <p><strong>Fecha de Inicio:</strong> {formacion.fechaini}</p>
+  <p><strong>Título:</strong> {formacion.titulo.titulo}</p>
+  <p><strong>Nivel de Educación:</strong> {formacion.titulo.nivel_educacion}</p>
+  <p><strong>Campo Amplio:</strong> {formacion.titulo.campo_amplio}</p>
+  </>
+)}
+           
           </div>
         ))}
       </div>

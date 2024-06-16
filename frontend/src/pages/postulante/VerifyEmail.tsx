@@ -1,21 +1,20 @@
-
-import { useEffect } from 'react';
-import {  useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Api } from '../../services/api'; // Asegúrate de que Api esté configurado correctamente
-import Swal from 'sweetalert2';
 
-
-
-const VerifyEmail= () => {
+const VerifyEmail = () => {
     const { id, token } = useParams();
     const navigate = useNavigate();
-  
-    
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState(false);
+    const [bgColor, setBgColor] = useState('#FFA500');
+
     useEffect(() => {
         console.log('id:', id);
         console.log('token:', token);
         
-
         const verifyEmail = async () => {
             try {
                 console.log('Verifying email with id:', id, 'and token:', token);
@@ -23,50 +22,56 @@ const VerifyEmail= () => {
                 console.log('Response:', response);
 
                 if (response.statusCode === 200) {
-                    await Swal.fire({
-                        icon: 'success',
-                        title: '¡Correo verificado!',
-                        text: 'Tu correo ha sido verificado exitosamente. Ya puedes logearte correctamente.',
-                    });
-                    navigate('/login');
+                    setMessage('¡Correo verificado! Tu correo ha sido verificado exitosamente. Ya puedes logearte correctamente.');
+                    setBgColor('#30b33b'); // Verde para éxito
                 } else if (response.statusCode === 401) {
-                    await Swal.fire({
-                        icon: 'error',
-                        title: 'Error de verificación',
-                        text: 'Este enlace ya ha sido verificado.',
-                    });
-                    navigate('/');
+                    setMessage('Error de verificación. Este enlace ya ha sido verificado.');
+                    setBgColor('#FF0000'); // Rojo para error
                 } else if (response.statusCode === 400) {
-                    await Swal.fire({
-                        icon: 'error',
-                        title: 'Error de verificación',
-                        text: 'Este enlace es inválido.',
-                    });
-                    navigate('/');
-                } 
-                else {
-                    await Swal.fire({
-                        icon: 'error',
-                        title: 'Error de verificación',
-                        text: 'No se pudo verificar tu correo. Inténtalo de nuevo.',
-                    });
-                    navigate('/');
+                    setMessage('Error de verificación. Este enlace es inválido.');
+                    setBgColor('#FF0000'); // Rojo para error
+                } else {
+                    setMessage('Error de verificación. No se pudo verificar tu correo. Inténtalo de nuevo.');
+                    setBgColor('#FF0000'); // Rojo para error
                 }
             } catch (error) {
                 console.error('Error al verificar el correo:', error);
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'Error de verificación',
-                    text: 'Ocurrió un error al verificar tu correo. Inténtalo de nuevo.',
-                });
-                navigate('/');
+                setMessage('Error de verificación. Ocurrió un error al verificar tu correo. Inténtalo de nuevo.');
+                setBgColor('#FF0000'); // Rojo para error
             }
         };
 
         verifyEmail();
     }, [id, token, navigate]);
 
-    return <div>Verificando tu correo...</div>;
+    const handleBackToHome = () => {
+        navigate('/');
+    };
+
+    return (
+        <>
+        <header className="bg-gray-800 p-4 flex justify-between items-center fixed w-full z-10">
+        <h1 className="text-white text-2xl font-bold">
+          ProaJob
+        </h1>
+       
+      </header>
+      
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: 'url(/public/images/verifi.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', filter: 'brightness(50%)' }}></div>
+                <div style={{ position: 'relative', textAlign: 'center', backgroundColor: bgColor, padding: '20px', borderRadius: '10px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)' }}>
+                    <h1 style={{ color: '#ffffff', marginBottom: '20px', fontWeight: 'bold' }}>
+                        <FontAwesomeIcon icon={faEnvelope} size="lg" style={{ marginRight: '10px' }} />
+                        VERIFICACIÓN DE CORREO
+                    </h1>
+                    <p style={{ color: '#ffffff' }}>{message}</p>
+                    <button onClick={handleBackToHome} style={{ marginTop: '20px', padding: '10px 20px', fontSize: '16px', cursor: 'pointer', borderRadius: '5px', backgroundColor: '#ffffff', color: '#000000', border: 'none', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)', fontWeight: 'bold' }}>
+                        Regresar a la página principal
+                    </button>
+                </div>
+            </div>
+    </>
+    );
 };
 
 export default VerifyEmail;

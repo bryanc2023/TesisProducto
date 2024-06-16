@@ -14,6 +14,8 @@ interface IFormInput {
   gender: string;
   maritalStatus: string;
   description: string;
+  province:string;
+  canton:string;
 }
 
 const CompletarP: React.FC = () => {
@@ -66,7 +68,7 @@ const CompletarP: React.FC = () => {
 
   const getMaxBirthDate = () => {
     const currentDate = new Date();
-    currentDate.setDate(currentDate.getDate() - 1); // Make sure the max date is not today or future
+    currentDate.setFullYear(currentDate.getFullYear() - 18); // Restar 18 años
     return currentDate.toISOString().split('T')[0];
   };
 
