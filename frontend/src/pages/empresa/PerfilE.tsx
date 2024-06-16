@@ -365,10 +365,10 @@ const EmpresaDetails: React.FC = () => {
                                         </div>
                                     </div>
                                     <div className="flex items-center justify-between mt-4">
-                                        <button onClick={handleSave} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                                        <button onClick={handleSave} className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-700">
                                             Guardar
                                         </button>
-                                        <button onClick={closeModal} className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                                        <button onClick={closeModal} className="px-4 py-2 text-red-500 border border-red-500 rounded-md hover:bg-red-500 hover:text-white">
                                             Cancelar
                                         </button>
                                     </div>
