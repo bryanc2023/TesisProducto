@@ -157,4 +157,75 @@ class PostulanteController extends Controller
     $idp=  $postulante->id_postulante;
     return response()->json(['id_postulante' => $idp], 200);
 }
+
+public function updatePostulanteByIdUser(Request $request, $idUser)
+{
+    try {
+        // Buscar el postulante por ID de usuario
+        $postulante = Postulante::where('id_usuario', $idUser)->first();
+        
+        if (!$postulante) {
+            return response()->json([
+                'message' => 'Postulante no encontrado'
+            ], 404);
+        }
+
+        // Actualizar los campos del postulante
+        $postulante->nombres = $request->input('nombres', $postulante->nombres);
+        $postulante->apellidos = $request->input('apellidos', $postulante->apellidos);
+        $postulante->fecha_nac = $request->input('fecha_nac', $postulante->fecha_nac);
+
+        // Calcular y actualizar la edad a partir de la fecha de nacimiento
+        if ($request->has('fecha_nac')) {
+            $birthDate = new DateTime($request->input('fecha_nac'));
+            $currentDate = new DateTime();
+            $age = $currentDate->diff($birthDate)->y;
+            $postulante->edad = $age;
+        }
+
+        $postulante->estado_civil = $request->input('estado_civil', $postulante->estado_civil);
+        $postulante->cedula = $request->input('cedula', $postulante->cedula);
+        $postulante->genero = $request->input('genero', $postulante->genero);
+        $postulante->informacion_extra = $request->input('informacion_extra', $postulante->informacion_extra);
+
+        // Si se sube una nueva foto, actualizarla
+        if ($request->hasFile('image')) {
+            $postulante->foto = $request->image->store('images', 'public');
+        }
+
+        $postulante->cv = $request->input('cv', $postulante->cv);
+
+        // Actualizar la ubicación si está presente en el request
+        if ($request->has('provincia') && $request->has('canton')) {
+            $ubicacion = $postulante->ubicacion;
+            if ($ubicacion) {
+                $ubicacion->provincia = $request->input('provincia', $ubicacion->provincia);
+                $ubicacion->canton = $request->input('canton', $ubicacion->canton);
+                $ubicacion->save();
+            } else {
+                // Crear una nueva ubicación si no existe
+                $ubicacion = Ubicacion::create([
+                    'provincia' => $request->input('provincia'),
+                    'canton' => $request->input('canton')
+                ]);
+                $postulante->id_ubicacion = $ubicacion->id;
+            }
+        }
+
+        $postulante->save();
+
+        return response()->json([
+            'message' => 'Postulante actualizado correctamente',
+            'postulante' => $postulante->load('ubicacion')
+        ]);
+
+    } catch (\Throwable $th) {
+        Log::error('Error al actualizar el postulante: ' . $th->getMessage());
+        return response()->json([
+            'message' => 'Error al actualizar el postulante',
+            'error' => $th->getMessage()
+        ], 500);
+    }
+}
+
 }
