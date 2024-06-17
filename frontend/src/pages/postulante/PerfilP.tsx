@@ -19,6 +19,8 @@ const Profile: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [selectedFormacion, setSelectedFormacion] = useState<Formacion | null>(null);
   const [cedulaError, setCedulaError] = useState<string | null>(null);
+  const [languages, setLanguages] = useState<idioma[]>([]);
+
   
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -43,8 +45,22 @@ const Profile: React.FC = () => {
     if (user) {
       const response = await axios.get(`/perfil/${user.id}`);
       setProfileData(response.data);
+      const response2 = await axios.get('idiomas');
+      setLanguages(response2.data);
     }
   };
+
+  useEffect(() => {
+    // Hacer la solicitud a la API para obtener los idiomas
+    axios.get('idioma')
+      .then(response => {
+        setLanguages(response.data.idiomas);
+      })
+      .catch(error => {
+        console.error('Error fetching languages:', error);
+      });
+  }, []);
+
 
   const isCedulaValid = (cedula: string): boolean => {
     if (cedula.length !== 10) return false;
@@ -113,6 +129,7 @@ const Profile: React.FC = () => {
     setModalContent('formacion');
     setIsModalOpen(true);
   };
+  
 
   const handleProfileUpdate = (updatedProfile: any) => {
     setProfileData(updatedProfile);
@@ -129,12 +146,14 @@ const Profile: React.FC = () => {
       cedula: string;
       genero: string;
       informacion_extra: string;
+      idiomas: Idioma[];
     };
     ubicacion: {
       provincia: string;
       canton: string;
     };
     formaciones: Formacion[];
+    
   }
   
   interface Formacion {
@@ -148,6 +167,22 @@ const Profile: React.FC = () => {
       nivel_educacion: string;
       campo_amplio: string;
     };
+  }
+
+  interface Idioma {
+   
+    nivel_oral: string;
+    nivel_escrito: string;
+    idioma:{
+       nombre:string;
+    }| null;
+   
+  }
+
+  interface idioma {
+    id: number;
+    nombre: string;
+    
   }
 
   interface ExperienciaInput {
@@ -173,6 +208,30 @@ const Profile: React.FC = () => {
 
     // Lógica para guardar los datos
     closeModal();
+  };
+
+  const handleLanguageSubmit: React.FormEventHandler<HTMLFormElement> = async (event) => {
+    if(user){
+
+   
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const newLanguage = {
+      userId:user.id,
+      idiomaId: formData.get('idiomaId'),
+      nivelEscrito: formData.get('nivelEscrito'),
+      nivelOral: formData.get('nivelOral'),
+    };
+    console.log(newLanguage);
+  
+    try {
+      await axios.post('nuevoidioma', newLanguage);
+      reloadProfile();
+      closeModal();
+    } catch (error) {
+      console.error('Error adding language:', error);
+    }
+  }
   };
 
   const handleDeleteFormacion = async (id: number) => {
@@ -320,11 +379,39 @@ const Profile: React.FC = () => {
           >
             + Agregar idioma
           </button>
-        </div>
+      
+      </div>
+      {profileData.postulante.idiomas.map((idioma, index) => (
+          <div key={index} className="mb-4 p-4 border rounded-lg bg-gray-700 relative">
+            <div className="absolute top-2 right-2 flex space-x-2">
+              <button
+               
+                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 mr-2"
+              >
+                <FaPencilAlt className="w-4 h-4" />
+              </button>
+              <button
+               
+                className="px-4 py-2 bg-rose-500 text-white rounded-md hover:bg-rose-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-rose-300 mr-2"
+              >
+                <FaTrash className="w-4 h-4" />
+              </button>
+            </div>
+            
+         
+           
+            <p><strong>Idioma:</strong> {idioma.idioma?.nombre}</p>
+    <p><strong>Nivel Oral:</strong> {idioma.nivel_escrito}</p>
+    <p><strong>Nivel Escrito:</strong> {idioma.nivel_oral}</p>
+    
+           
+          </div>
+        ))}
         <div className="border border-dashed border-gray-600 rounded-lg p-4 text-center cursor-pointer" onClick={() => openModal('idioma')}>
           <span className="text-gray-400">Agrega tu idioma</span>
         </div>
       </div>
+      
 
       <Modal
         isOpen={isModalOpen}
@@ -427,31 +514,26 @@ const Profile: React.FC = () => {
         {modalContent === 'idioma' && (
           <>
             <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Agregar Idioma</h2>
-            <form className="space-y-4 p-4">
+            <form onSubmit={handleLanguageSubmit} className="space-y-4 p-4">
               <p className="text-right text-gray-500 text-sm">*Campos obligatorios</p>
               <div className="grid grid-cols-1 gap-4">
                 <div className="mb-4">
                   <label className="block text-gray-700">Idioma <span className="text-red-500">*</span></label>
-                  <select className="w-full px-4 py-2 border rounded-md" required>
-                    <option value="">Elige una opción</option>
-                    <option value="">Francés</option>
-                    <option value="Básico">Portugués</option>
-                    <option value="Intermedio">Alemán</option>
-                    <option value="Avanzado">Japonés</option>
-                    <option value="Nativo">Italiano</option>
-                    <option value="Intermedio">Español</option>
-                    <option value="Avanzado">Chino Mandarín</option>
-                    <option value="Nativo">Coreano</option>
-                    <option value="Avanzado">Holandés</option>
-                    <option value="Nativo">Quechua</option>
-                  </select>
+                  <select name="idiomaId" className="w-full px-4 py-2 border rounded-md" required>
+                  <option value="">Elige una opción</option>
+                  {languages.map((language: idioma) => (
+        <option key={language.id} value={language.id}>
+          {language.nombre}
+        </option>
+      ))}
+    </select>
                 </div>
                 
                 <div className="mb-4">
                   <label className="block text-gray-700">Nivel escrito <span className="text-red-500">*</span></label>
-                  <select className="w-full px-4 py-2 border rounded-md" required>
+                  <select name="nivelEscrito"  className="w-full px-4 py-2 border rounded-md" required>
                     <option value="">Elige una opción</option>
-                    <option value="Básico">Básico</option>
+                    <option value="Basico">Básico</option>
                     <option value="Intermedio">Intermedio</option>
                     <option value="Avanzado">Avanzado</option>
                     <option value="Nativo">Nativo</option>
@@ -459,9 +541,9 @@ const Profile: React.FC = () => {
                 </div>
                 <div className="mb-4">
                   <label className="block text-gray-700">Nivel oral <span className="text-red-500">*</span></label>
-                  <select className="w-full px-4 py-2 border rounded-md" required>
+                  <select name="nivelOral" className="w-full px-4 py-2 border rounded-md" required>
                     <option value="">Elige una opción</option>
-                    <option value="Básico">Básico</option>
+                    <option value="Basico">Básico</option>
                     <option value="Intermedio">Intermedio</option>
                     <option value="Avanzado">Avanzado</option>
                     <option value="Nativo">Nativo</option>

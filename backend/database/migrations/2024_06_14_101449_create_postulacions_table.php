@@ -23,7 +23,7 @@ class CreatePostulacionsTable extends Migration
             $table->date('fecha_revision')->nullable();
             $table->char('estado_postulacion',1)->nullable();
             $table->string('comentario',100)->nullable();
-            $table->integer('total_evaluación')->nullable();
+            $table->integer('total_evaluacion')->nullable();
         });
     }
 
