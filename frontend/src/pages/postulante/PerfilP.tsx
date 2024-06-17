@@ -114,6 +114,10 @@ const Profile: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  const handleProfileUpdate = (updatedProfile: any) => {
+    setProfileData(updatedProfile);
+  };
+
   interface ProfileData {
     postulante: {
       foto: string;
@@ -204,6 +208,7 @@ const Profile: React.FC = () => {
           <button onClick={openEditModal} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700">Editar Datos</button>
         </div>
       </div>
+      
       <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
         <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Detalles del Perfil</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -475,6 +480,7 @@ const Profile: React.FC = () => {
         isOpen={isEditModalOpen}
         closeModal={closeEditModal}
         postulante={profileData.postulante}
+        onProfileUpdate={handleProfileUpdate} // Asegúrate de pasar la función aquí
       />
     </div>
   );
