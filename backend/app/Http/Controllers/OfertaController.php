@@ -6,6 +6,7 @@ use App\Models\CriterioOferta;
 use App\Models\EducacionRequerida;
 use App\Models\Empresa;
 use App\Models\Oferta;
+use App\Models\Ubicacion;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -116,4 +117,6 @@ public function getAllOfertas()
 
     return response()->json(['ofertas' => $ofertas]);
 }
+
+
 }

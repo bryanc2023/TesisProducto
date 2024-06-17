@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Empresa;
 use App\Models\Oferta;
 use App\Models\Postulacion;
 use App\Models\Postulante;
+use App\Models\Ubicacion;
 use Illuminate\Http\Request;
 
 class PostulacionController extends Controller
@@ -105,4 +107,179 @@ foreach ($oferta->criterios as $criterio) {
 
         return response()->json(['message' => 'Postulante:', 'Postulante' => $postulante], 201);
     }
+
+
+    public function getPostulacionPostulante($id)
+    {
+        try {
+            // Buscar el postulante por ID de usuario
+            $postulante = Postulante::where('id_usuario', $id)->first();
+            if (!$postulante) {
+                return response()->json(['error' => 'Postulante no encontrado'], 404);
+            }
+
+            // Obtener las postulaciones del postulante con las relaciones 'oferta' y 'empresa' cargadas
+            $postulaciones = Postulacion::where('id_postulante', $postulante->id_postulante)
+                                        ->with(['oferta', 'oferta.empresa'])
+                                        ->get();
+                                        $ubicaciones = [];
+
+                                        $data = [];
+
+                                        // Recorrer cada postulación para obtener la ubicación asociada
+                                        foreach ($postulaciones as $postulacion) {
+                                            $idUbicacion = $postulacion->oferta->empresa->id_ubicacion;
+                                
+                                            // Obtener la ubicación usando el where
+                                            $ubicacion = Ubicacion::find($idUbicacion);
+                                
+                                            // Verificar si la ubicación existe y no está repetida en la respuesta
+                                            if ($ubicacion) {
+                                                // Agrupar la postulación con su ubicación correspondiente
+                                                $postulacionConUbicacion = [
+                                                    'postulacion' => $postulacion,
+                                                    'ubicacion' => $ubicacion,
+                                                ];
+                                
+                                                // Agregar esta información al arreglo de datos
+                                                $data[] = $postulacionConUbicacion;
+                                            }
+                                        }
+                                
+                                        // Retornar la respuesta JSON con las postulaciones y ubicaciones alineadas
+                                        return response()->json(['postulaciones' => $data]);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Error al obtener las postulaciones del postulante',
+                'error' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getPostulacionEmpresa($id)
+    {
+        try {
+            // Buscar la empresa por ID de usuario
+            $empresa = Empresa::where('id_usuario', $id)->first();
+            if (!$empresa) {
+                return response()->json(['error' => 'Empresa no encontrada'], 404);
+            }
+     // Obtener las postulaciones de la empresa con las relaciones 'oferta' y 'postulantes' cargadas
+     $postulaciones = Postulacion::whereHas('oferta', function ($query) use ($empresa) {
+        $query->where('id_empresa', $empresa->id_empresa);
+    })
+    ->with(['oferta', 'postulante'])
+    ->get();
+
+// Agrupar las postulaciones por oferta y ordenar postulantes por total_evaluacion descendente
+$groupedPostulaciones = $postulaciones->groupBy('id_oferta')->map(function ($item) {
+    return [
+        'id_oferta' => $item->first()->oferta->id_oferta,
+        'id_empresa' => $item->first()->oferta->id_empresa,
+        'cargo' => $item->first()->oferta->cargo,
+        'postulantes' => $item->map(function ($postulacion) {
+            return [
+                'id_postulante' => $postulacion->postulante->id_postulante,
+                'nombres' => $postulacion->postulante->nombres,
+                'apellidos' => $postulacion->postulante->apellidos,
+                'fecha_nac' => $postulacion->postulante->fecha_nac,
+                'edad' => $postulacion->postulante->edad,
+                'estado_civil' => $postulacion->postulante->estado_civil,
+                'cedula' => $postulacion->postulante->cedula,
+                'genero' => $postulacion->postulante->genero,
+                'informacion_extra' => $postulacion->postulante->informacion_extra,
+                'foto' => $postulacion->postulante->foto,
+                'cv' => $postulacion->postulante->cv,
+                'total_evaluacion' => $postulacion->total_evaluacion,
+            ];
+        })->sortByDesc('total_evaluacion')->values()->all(),
+    ];
+});
+
+// Retornar la respuesta JSON con las postulaciones agrupadas y ordenadas
+return response()->json(['postulaciones' => $groupedPostulaciones]);
+
+    } catch (\Throwable $th) {
+        return response()->json([
+            'message' => 'Error al obtener las postulaciones de la empresa',
+            'error' => $th->getMessage()
+        ], 500);
+    }
+    }
+
+    public function getPostulacionEsta($id)
+    {
+        try {
+            $empresa = Empresa::where('id_usuario', $id)->first();
+        if (!$empresa) {
+            return response()->json(['error' => 'Empresa no encontrada'], 404);
+        }
+
+        // Obtener todas las ofertas de la empresa
+        $ofertas = Oferta::where('id_empresa', $empresa->id_empresa)->get();
+
+        // Inicializar arrays para contar postulantes por estado
+        $estadoCounts = [
+            'P' => 0,
+            'A' => 0,
+            'R' => 0,
+        ];
+
+        // Preparar estructura para almacenar resultados
+        $result = [];
+
+        foreach ($ofertas as $oferta) {
+            // Obtener las postulaciones de la oferta con las relaciones 'postulantes'
+            $postulaciones = Postulacion::where('id_oferta', $oferta->id_oferta)
+                ->with('postulante')
+                ->get();
+
+            // Reiniciar los conteos por estado para esta oferta
+            $estadoCounts['P'] = 0;
+            $estadoCounts['A'] = 0;
+            $estadoCounts['R'] = 0;
+
+            // Contar la cantidad de personas por estado ('P', 'A', 'R')
+            foreach ($postulaciones as $postulacion) {
+                switch ($postulacion->estado_postulacion) {
+                    case 'P':
+                        $estadoCounts['P']++;
+                        break;
+                    case 'A':
+                        $estadoCounts['A']++;
+                        break;
+                    case 'R':
+                        $estadoCounts['R']++;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            // Agregar la oferta con el conteo de postulantes y estado al resultado
+            $result[] = [
+                'id_oferta' => $oferta->id_oferta,
+                'cargo' => $oferta->cargo,
+                'num_postulantes' => $postulaciones->count(),
+                'estado_count' => [
+                    'P' => $estadoCounts['P'],
+                    'A' => $estadoCounts['A'],
+                    'R' => $estadoCounts['R'],
+                ],
+            ];
+        }
+
+        // Retornar la respuesta JSON con las ofertas y el estado de las postulaciones
+        return response()->json(['postulaciones' => $result]);
+    
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Error al obtener las postulaciones de la empresa',
+                'error' => $th->getMessage()
+            ], 500);
+        }
+    }
+    
+
 }

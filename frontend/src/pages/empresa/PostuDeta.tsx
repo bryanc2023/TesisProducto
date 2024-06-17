@@ -1,63 +1,52 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-interface Postulante {
-    nombre: string;
-    contacto: string;
-    telefono: string;
-    direccion: string;
-    fechaNacimiento: string;
-    educacion: string;
-    experiencia: string;
-    habilidades: string;
-    referencias: string;
-}
-
 interface PostulanteDetailProps {
-    postulante: Postulante;
-    onAccept: () => void;
-    onReject: () => void;
+    postulante: {
+        nombres: string;
+        apellidos: string;
+        fecha_nac: string;
+        edad: number;
+        estado_civil: string;
+        cedula: string;
+        genero: string;
+        informacion_extra: string;
+        foto: string;
+        cv: string | null;
+        total_evaluacion: number;
+    };
+    onClose: () => void;
 }
 
-const PostulanteDetail: React.FC<PostulanteDetailProps> = ({ postulante, onAccept, onReject }) => {
+const PostulanteDetail: React.FC<PostulanteDetailProps> = ({ postulante, onClose }) => {
     return (
         <div className="p-4 bg-white text-gray-900 rounded-lg">
-            <h1 className="text-2xl font-bold mb-4 text-gray-900">POSTULANTE: {postulante.nombre}</h1>
+            <h1 className="text-2xl font-bold mb-4 text-gray-900">Detalles del Postulante</h1>
+            <div className="flex items-center justify-center mb-4">
+                    <img src={`http://localhost:8000/storage/${postulante.foto}`} alt="Foto del postulante" className="w-32 h-32 object-cover rounded-full" />
+                </div>
             <div className="mb-4">
-                <p className="text-gray-900 mb-2"><span className="font-bold">Nombre:</span> {postulante.nombre}</p>
-                <p className="text-gray-900 mb-2"><span className="font-bold">Correo de contacto:</span> {postulante.contacto}</p>
-                <p className="text-gray-900 mb-2"><span className="font-bold">Teléfono:</span> {postulante.telefono}</p>
-                <p className="text-gray-900 mb-2"><span className="font-bold">Dirección:</span> {postulante.direccion}</p>
-                <p className="text-gray-900 mb-2"><span className="font-bold">Fecha de Nacimiento:</span> {postulante.fechaNacimiento}</p>
+                <p className="text-gray-900 mb-2"><span className="font-bold">Nombre:</span> {postulante.nombres} {postulante.apellidos}</p>
+                <p className="text-gray-900 mb-2"><span className="font-bold">Edad:</span> {postulante.edad}</p>
+                <p className="text-gray-900 mb-2"><span className="font-bold">Estado civil:</span> {postulante.estado_civil}</p>
+                <p className="text-gray-900 mb-2"><span className="font-bold">Género:</span> {postulante.genero}</p>
+                <p className="text-gray-900 mb-2"><span className="font-bold">Información extra:</span> {postulante.informacion_extra}</p>
+              
             </div>
-            <div className="mb-4">
-                <p className="text-gray-900 mb-2"><span className="font-bold">Educación:</span></p>
-                <p className="text-gray-900 mb-2">{postulante.educacion}</p>
-            </div>
-            <div className="mb-4">
-                <p className="text-gray-900 mb-2"><span className="font-bold">Experiencia:</span></p>
-                <p className="text-gray-900 mb-2">{postulante.experiencia}</p>
-            </div>
-            <div className="mb-4">
-                <p className="text-gray-900 mb-2"><span className="font-bold">Habilidades:</span></p>
-                <p className="text-gray-900 mb-2">{postulante.habilidades}</p>
-            </div>
-            <div className="mb-4">
-                <p className="text-gray-900 mb-2"><span className="font-bold">Referencias:</span></p>
-                <p className="text-gray-900 mb-2">{postulante.referencias}</p>
-            </div>
+            {postulante.cv && (
+                <div className="mb-4">
+                    <p className="text-gray-900 mb-2">
+                        <span className="font-bold">CV:</span>
+                        <a href={`http://localhost:8000/storage/${postulante.cv}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline ml-2">Descargar CV</a>
+                    </p>
+                </div>
+            )}
             <div className="flex justify-end mt-4">
                 <button
-                    onClick={onReject}
-                    className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 mr-2"
+                    onClick={onClose}
+                    className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
                 >
-                    Rechazar
-                </button>
-                <button
-                    onClick={onAccept}
-                    className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
-                >
-                    Aceptar
+                    Cerrar
                 </button>
             </div>
         </div>
@@ -66,18 +55,19 @@ const PostulanteDetail: React.FC<PostulanteDetailProps> = ({ postulante, onAccep
 
 PostulanteDetail.propTypes = {
     postulante: PropTypes.shape({
-        nombre: PropTypes.string.isRequired,
-        contacto: PropTypes.string.isRequired,
-        telefono: PropTypes.string.isRequired,
-        direccion: PropTypes.string.isRequired,
-        fechaNacimiento: PropTypes.string.isRequired,
-        educacion: PropTypes.string.isRequired,
-        experiencia: PropTypes.string.isRequired,
-        habilidades: PropTypes.string.isRequired,
-        referencias: PropTypes.string.isRequired
+        nombres: PropTypes.string.isRequired,
+        apellidos: PropTypes.string.isRequired,
+        fecha_nac: PropTypes.string.isRequired,
+        edad: PropTypes.number.isRequired,
+        estado_civil: PropTypes.string.isRequired,
+        cedula: PropTypes.string.isRequired,
+        genero: PropTypes.string.isRequired,
+        informacion_extra: PropTypes.string.isRequired,
+        foto: PropTypes.string.isRequired,
+        cv: PropTypes.string,
+        total_evaluacion: PropTypes.number.isRequired,
     }).isRequired,
-    onAccept: PropTypes.func.isRequired,
-    onReject: PropTypes.func.isRequired
+    onClose: PropTypes.func.isRequired,
 };
 
 export default PostulanteDetail;

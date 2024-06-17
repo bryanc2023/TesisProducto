@@ -13,6 +13,7 @@ interface IFormInput {
   id_idioma:number;
   niveloral:string;
   nivelescrito:string;
+  cv:FileList;
 }
 
 interface Titulo {
@@ -166,12 +167,22 @@ function CompletarP2() {
         formData.append('id_idioma', data.id_idioma.toString());
         formData.append('niveloral', data.niveloral);
         formData.append('nivelescrito', data.nivelescrito);
+        if (data.cv && data.cv.length > 0) {
+          formData.append('cv', data.cv[0]);
+      } else {
+          alert('Por favor, adjunta tu CV en formato PDF.');
+          return;
+      }
 
 
         for (const entry of formData.entries()) {
           console.log(entry);
         }
-        await axios.post('postulante/forma', formData);
+        await axios.post('postulante/forma', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
         console.log("Exito");
         navigate("/inicio");
       } catch (error) {
@@ -309,6 +320,20 @@ function CompletarP2() {
                   </select>
                 </div>
               </div>
+              <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Añade tu CV</h2>
+              <p className="text-center mb-8">Sube tu archivo que contenga todos los datos de un cv correcto:</p>
+
+              <div className="mb-8">
+        <label htmlFor="cv" className="block text-gray-700 font-semibold mb-2">Curriculum Vitae (PDF):</label>
+        <input
+          type="file"
+          id="cv"
+          accept=".pdf"
+          {...register('cv', { required: 'Este campo es requerido' })}
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
+        />
+        {errors.cv && <p className="text-red-500 text-sm mt-2">{errors.cv.message}</p>}
+      </div>
              
         <button type="submit" className="w-full py-3 px-4 bg-blue-500 text-white font-bold rounded-lg hover:bg-slate-600">Culminar registro</button>
       </form>

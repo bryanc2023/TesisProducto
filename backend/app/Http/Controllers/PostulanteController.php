@@ -127,6 +127,7 @@ class PostulanteController extends Controller
     public function registroFormaAca(Request $request)
     {
         $request->validate([
+            
             'id_postulante' => 'required|integer|exists:postulante,id_postulante',
             'id_titulo' => 'required|integer|exists:titulo,id',
             'institucion' => 'required|string|max:220',
@@ -136,7 +137,24 @@ class PostulanteController extends Controller
             'id_idioma' => 'required|integer|exists:idioma,id',
             'niveloral' => 'required|string|max:20',
             'nivelescrito' => 'required|string|max:20',
+        
+            'cv' => 'required|file|mimes:pdf', // Validación para el archivo PDF
         ]);
+        // Manejo del archivo PDF
+    if ($request->hasFile('cv')) {
+        $file = $request->file('cv');
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $path = $file->storeAs('cvs', $filename, 'public'); // Guarda en el directorio 'storage/app/public/cvs'
+
+        // Actualiza la tabla postulante con la ruta del archivo PDF
+        $postulante = Postulante::find($request->id_postulante);
+        if ($postulante) {
+            $postulante->cv = $path;
+            $postulante->save();
+        }
+    }
+
+       
 
         $postulantefor = new PersonaFormacionPro();
         $postulantefor->id_postulante = $request->id_postulante;
@@ -156,16 +174,18 @@ class PostulanteController extends Controller
 
         $postulanteidi->save();
 
-        $postulante = Postulante::find($request->id_postulante);
-        if ($postulante && $postulante->id_usuario) {
-            $user = User::find($postulante->id_usuario);
-            if ($user) {
-                $user->first_login_at = now();
-                $user->save();
-            }
-        }
+       
+$postulante = Postulante::find($request->id_postulante);
+if ($postulante && $postulante->id_usuario) {
+    $user = User::find($postulante->id_usuario);
+    if ($user) {
+        $user->first_login_at = now();
+        $user->save();
+    }
+}
 
-        return response()->json(['message' => 'Formación académica registrada exitosamente', 'postulante_formacion' => $postulantefor], 201);
+
+        return response()->json(['message' => 'Formación académica registrada exitosamente', 'postulante_formacion' => $postulante], 201);
     }
 
     public function prueba(Request $request)

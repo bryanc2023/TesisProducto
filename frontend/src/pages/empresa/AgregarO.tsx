@@ -46,6 +46,7 @@ function AgregarO() {
   const [selectedTitulo, setSelectedTitulo] = useState('');
   const [selectedTituloId, setSelectedTituloId] = useState<number>();
   const [requireEducation, setRequireEducation] = useState(false);
+  const [requireCriterio, setRequireCriterio] = useState(false);
   const [selectedTitles, setSelectedTitles] = useState<Titulo[]>([]);
   const [showCorreo, setShowCorreo] = useState(false);
   const [showNumeroContacto, setShowNumeroContacto] = useState(false);
@@ -249,7 +250,7 @@ function AgregarO() {
           icon: 'success',
           confirmButtonText: 'Ok'
         }).then(() => {
-          navigate("/inicio-e");
+          navigate("/verOfertasE");
         });
       } catch (error) {
         console.log(error);
@@ -419,7 +420,7 @@ function AgregarO() {
             <textarea
               className="w-full p-2 border rounded"
               id="funciones"
-              placeholder="Describa a manera breve las funciones o actividades a realizarse en el puesto"
+              placeholder="Describa a manera breve las funciones o actividades a realizarse en el puesto. Cada función sepárela con una coma . Ejemplo: Funcion 1, Funcion2"
               {...register('funciones', { required: 'Funciones son requeridas' })}
             />
             {errors.funciones && <p className="text-red-500">{errors.funciones.message}</p>}
@@ -465,7 +466,7 @@ function AgregarO() {
             <textarea
               className="w-full p-2 border rounded"
               id="detalles_adicionales"
-              placeholder="Detalles Adicionales"
+              placeholder="Detalles Adicionales que desee agregar a la oferta. Cada Detalle sepárela con una coma . Ejemplo: Detalle 1, Detalle 2"
               {...register('detalles_adicionales', { required: 'Detalles Adicionales son requeridos' })}
             ></textarea>
             {errors.detalles_adicionales && <p className="text-red-500">{errors.detalles_adicionales.message}</p>}
@@ -549,9 +550,28 @@ function AgregarO() {
               </label>
             </div>
           </div>
+          
           <div className="bg-white p-6 rounded-lg shadow-lg py-7" style={{ marginTop: '20px' }}>
-            <h3 className="text-1xl text-red-500 font-bold mb-4">Criterios de evaluación:</h3>
+          
+            <h3 className="text-1xl text-red-500 font-bold mb-4">Requisitos extra de evaluación:</h3>
             <span>Para mostrar postulantes capaces, seleccione uno de los criterios importantes a resaltar en un postulante junto con su prioridad de importancia y el valor si es necesario:</span>
+            <div className="mb-4">
+            <div className="flex items-center">
+              <input
+                className="mr-2 leading-tight"
+                type="checkbox"
+                id="requireCriterio"
+                checked={requireCriterio}
+                onChange={() => setRequireCriterio(!requireCriterio)}
+              />
+              <label className="text-sm" htmlFor="requireCriterio">
+                ¿Requiere requisitos extras?
+              </label>
+            </div>
+          </div>
+
+          {requireCriterio && (
+            <>
             <div className="mb-4">
               <label className="block text-sm font-bold mb-2" htmlFor="id_criterio">Criterio</label>
               <div className="flex">
@@ -663,6 +683,7 @@ function AgregarO() {
                 </div>
               )}
             </div>
+            </>)}
             <button
               type="submit"
               className="bg-blue-500 text-white p-2 rounded-lg mt-4">
