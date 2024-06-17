@@ -20,8 +20,12 @@ const Profile: React.FC = () => {
   const [selectedFormacion, setSelectedFormacion] = useState<Formacion | null>(null);
   const [cedulaError, setCedulaError] = useState<string | null>(null);
   const [languages, setLanguages] = useState<idioma[]>([]);
+  const [selectedLanguage, setSelectedLanguage] = useState<Idioma | null>(null);
+  const [nivelOral, setNivelOral] = useState<string>('');
+  const [nivelEscrito, setNivelEscrito] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
@@ -42,16 +46,19 @@ const Profile: React.FC = () => {
   }, [user]);
 
   const reloadProfile = async () => {
-    if (user) {
-      const response = await axios.get(`/perfil/${user.id}`);
-      setProfileData(response.data);
-      const response2 = await axios.get('idiomas');
-      setLanguages(response2.data);
+    try {
+      if (user) {
+        const response = await axios.get(`/perfil/${user.id}`);
+        setProfileData(response.data);
+        const response2 = await axios.get('idiomas');
+        setLanguages(response2.data.idiomas);
+      }
+    } catch (error) {
+      console.error('Error reloading profile data:', error);
     }
   };
 
   useEffect(() => {
-    // Hacer la solicitud a la API para obtener los idiomas
     axios.get('idioma')
       .then(response => {
         setLanguages(response.data.idiomas);
@@ -60,7 +67,6 @@ const Profile: React.FC = () => {
         console.error('Error fetching languages:', error);
       });
   }, []);
-
 
   const isCedulaValid = (cedula: string): boolean => {
     if (cedula.length !== 10) return false;
@@ -129,7 +135,14 @@ const Profile: React.FC = () => {
     setModalContent('formacion');
     setIsModalOpen(true);
   };
-  
+
+  const openEditLanguageModal = (idioma: Idioma) => {
+    setSelectedLanguage(idioma);
+    setNivelOral(idioma.nivel_oral);
+    setNivelEscrito(idioma.nivel_escrito);
+    setModalContent('editIdioma');
+    setIsModalOpen(true);
+  };
 
   const handleProfileUpdate = (updatedProfile: any) => {
     setProfileData(updatedProfile);
@@ -153,9 +166,8 @@ const Profile: React.FC = () => {
       canton: string;
     };
     formaciones: Formacion[];
-    
   }
-  
+
   interface Formacion {
     id: number;
     institucion: string;
@@ -170,19 +182,17 @@ const Profile: React.FC = () => {
   }
 
   interface Idioma {
-   
     nivel_oral: string;
     nivel_escrito: string;
-    idioma:{
-       nombre:string;
-    }| null;
-   
+    idioma: {
+      id: number;
+      nombre: string;
+    } | null;
   }
 
   interface idioma {
     id: number;
     nombre: string;
-    
   }
 
   interface ExperienciaInput {
@@ -206,32 +216,61 @@ const Profile: React.FC = () => {
       return;
     }
 
-    // Lógica para guardar los datos
     closeModal();
   };
 
   const handleLanguageSubmit: React.FormEventHandler<HTMLFormElement> = async (event) => {
-    if(user){
-
-   
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const newLanguage = {
-      userId:user.id,
+      userId: user?.id,
       idiomaId: formData.get('idiomaId'),
       nivelEscrito: formData.get('nivelEscrito'),
       nivelOral: formData.get('nivelOral'),
     };
-    console.log(newLanguage);
-  
+
     try {
       await axios.post('nuevoidioma', newLanguage);
+      setSuccessMessage('Idioma agregado correctamente');
       reloadProfile();
       closeModal();
     } catch (error) {
+      setErrorMessage('Error agregando el idioma');
       console.error('Error adding language:', error);
     }
-  }
+  };
+
+  const handleEditLanguageSubmit: React.FormEventHandler<HTMLFormElement> = async (event) => {
+    event.preventDefault();
+    if (profileData && selectedLanguage) {
+      const formData = new FormData(event.currentTarget);
+      const updatedLanguage = {
+        nivelOral: formData.get('nivelOral'),
+        nivelEscrito: formData.get('nivelEscrito'),
+      };
+  
+      try {
+        // Verifica que los datos sean correctos antes de la solicitud
+        console.log('Datos a enviar:', updatedLanguage);
+  
+        // Realiza la solicitud PUT al servidor usando profileData.postulante.id
+        console.log(profileData.postulante.id)
+        console.log(selectedLanguage.idioma?.id)
+        const response = await axios.put(`/updateIdioma/${profileData.postulante.id}/${selectedLanguage.idioma?.id}`, updatedLanguage);
+  
+        // Verifica la respuesta del servidor
+        console.log('Respuesta del servidor:', response.data);
+  
+        setSuccessMessage('Idioma actualizado correctamente');
+        reloadProfile();
+        closeModal();
+      } catch (error) {
+        setErrorMessage('Error actualizando el idioma');
+        console.error('Error updating language:', error);
+      }
+    } else {
+      setErrorMessage('Error: Información del idioma o postulante no disponible.');
+    }
   };
 
   const handleDeleteFormacion = async (id: number) => {
@@ -267,7 +306,7 @@ const Profile: React.FC = () => {
           <button onClick={openEditModal} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700">Editar Datos</button>
         </div>
       </div>
-      
+
       <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
         <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Detalles del Perfil</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -279,22 +318,20 @@ const Profile: React.FC = () => {
             {cedulaError && <span className="text-red-500 ml-2">{cedulaError}</span>}
           </p>
           <p><strong>Género:</strong> {profileData.postulante.genero}</p>
-   
         </div>
       </div>
+
       <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
         <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Información extra</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <p><strong></strong> {profileData.postulante.informacion_extra}</p>
         </div>
       </div>
+
       <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Formación Académica</h2>
-          <button
-            onClick={() => openModal('formacion')}
-            className="text-orange-400 hover:underline"
-          >
+          <button onClick={() => openModal('formacion')} className="text-orange-400 hover:underline">
             + Agregar educación
           </button>
         </div>
@@ -314,28 +351,26 @@ const Profile: React.FC = () => {
                 <FaTrash className="w-4 h-4" />
               </button>
             </div>
-         
             {formacion.fechafin !== null ? (
-               <>
-    <p><strong>Institución:</strong> {formacion.institucion}</p>
-    <p><strong>Estado:</strong> {formacion.estado}</p>
-    <p><strong>Fecha de Inicio:</strong> {formacion.fechaini}</p>
-    <p><strong>Fecha de Fin:</strong> {formacion.fechafin}</p>
-    <p><strong>Título:</strong> {formacion.titulo.titulo}</p>
-    <p><strong>Nivel de Educación:</strong> {formacion.titulo.nivel_educacion}</p>
-    <p><strong>Campo Amplio:</strong> {formacion.titulo.campo_amplio}</p>
-    </>
-) : (
-  <>
-  <p><strong>Institución:</strong> {formacion.institucion}</p>
-  <p><strong>Estado:</strong> {formacion.estado}</p>
-  <p><strong>Fecha de Inicio:</strong> {formacion.fechaini}</p>
-  <p><strong>Título:</strong> {formacion.titulo.titulo}</p>
-  <p><strong>Nivel de Educación:</strong> {formacion.titulo.nivel_educacion}</p>
-  <p><strong>Campo Amplio:</strong> {formacion.titulo.campo_amplio}</p>
-  </>
-)}
-           
+              <>
+                <p><strong>Institución:</strong> {formacion.institucion}</p>
+                <p><strong>Estado:</strong> {formacion.estado}</p>
+                <p><strong>Fecha de Inicio:</strong> {formacion.fechaini}</p>
+                <p><strong>Fecha de Fin:</strong> {formacion.fechafin}</p>
+                <p><strong>Título:</strong> {formacion.titulo.titulo}</p>
+                <p><strong>Nivel de Educación:</strong> {formacion.titulo.nivel_educacion}</p>
+                <p><strong>Campo Amplio:</strong> {formacion.titulo.campo_amplio}</p>
+              </>
+            ) : (
+              <>
+                <p><strong>Institución:</strong> {formacion.institucion}</p>
+                <p><strong>Estado:</strong> {formacion.estado}</p>
+                <p><strong>Fecha de Inicio:</strong> {formacion.fechaini}</p>
+                <p><strong>Título:</strong> {formacion.titulo.titulo}</p>
+                <p><strong>Nivel de Educación:</strong> {formacion.titulo.nivel_educacion}</p>
+                <p><strong>Campo Amplio:</strong> {formacion.titulo.campo_amplio}</p>
+              </>
+            )}
           </div>
         ))}
       </div>
@@ -343,10 +378,7 @@ const Profile: React.FC = () => {
       <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
         <div className="flex justify-between items-center">
           <h3 className="text-xl font-semibold mb-4">Cursos y Capacitaciones</h3>
-          <button
-            onClick={() => openModal('cursos')}
-            className="text-orange-400 hover:underline"
-          >
+          <button onClick={() => openModal('cursos')} className="text-orange-400 hover:underline">
             + Agregar curso
           </button>
         </div>
@@ -358,10 +390,7 @@ const Profile: React.FC = () => {
       <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
         <div className="flex justify-between items-center">
           <h3 className="text-xl font-semibold mb-4">Experiencia Laboral</h3>
-          <button
-            onClick={() => openModal('experiencia')}
-            className="text-orange-400 hover:underline"
-          >
+          <button onClick={() => openModal('experiencia')} className="text-orange-400 hover:underline">
             + Agregar experiencia
           </button>
         </div>
@@ -373,45 +402,34 @@ const Profile: React.FC = () => {
       <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
         <div className="flex justify-between items-center">
           <h3 className="text-xl font-semibold mb-4">Idiomas</h3>
-          <button
-            onClick={() => openModal('idioma')}
-            className="text-orange-400 hover:underline"
-          >
+          <button onClick={() => openModal('idioma')} className="text-orange-400 hover:underline">
             + Agregar idioma
           </button>
-      
-      </div>
-      {profileData.postulante.idiomas.map((idioma, index) => (
+        </div>
+        {profileData.postulante.idiomas.map((idioma, index) => (
           <div key={index} className="mb-4 p-4 border rounded-lg bg-gray-700 relative">
             <div className="absolute top-2 right-2 flex space-x-2">
               <button
-               
+                onClick={() => openEditLanguageModal(idioma)}
                 className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 mr-2"
               >
                 <FaPencilAlt className="w-4 h-4" />
               </button>
               <button
-               
                 className="px-4 py-2 bg-rose-500 text-white rounded-md hover:bg-rose-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-rose-300 mr-2"
               >
                 <FaTrash className="w-4 h-4" />
               </button>
             </div>
-            
-         
-           
             <p><strong>Idioma:</strong> {idioma.idioma?.nombre}</p>
-    <p><strong>Nivel Oral:</strong> {idioma.nivel_escrito}</p>
-    <p><strong>Nivel Escrito:</strong> {idioma.nivel_oral}</p>
-    
-           
+            <p><strong>Nivel Oral:</strong> {idioma.nivel_oral}</p>
+            <p><strong>Nivel Escrito:</strong> {idioma.nivel_escrito}</p>
           </div>
         ))}
         <div className="border border-dashed border-gray-600 rounded-lg p-4 text-center cursor-pointer" onClick={() => openModal('idioma')}>
           <span className="text-gray-400">Agrega tu idioma</span>
         </div>
       </div>
-      
 
       <Modal
         isOpen={isModalOpen}
@@ -520,18 +538,18 @@ const Profile: React.FC = () => {
                 <div className="mb-4">
                   <label className="block text-gray-700">Idioma <span className="text-red-500">*</span></label>
                   <select name="idiomaId" className="w-full px-4 py-2 border rounded-md" required>
-                  <option value="">Elige una opción</option>
-                  {languages.map((language: idioma) => (
-        <option key={language.id} value={language.id}>
-          {language.nombre}
-        </option>
-      ))}
-    </select>
+                    <option value="">Elige una opción</option>
+                    {languages.map((language: idioma) => (
+                      <option key={language.id} value={language.id}>
+                        {language.nombre}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                
+
                 <div className="mb-4">
                   <label className="block text-gray-700">Nivel escrito <span className="text-red-500">*</span></label>
-                  <select name="nivelEscrito"  className="w-full px-4 py-2 border rounded-md" required>
+                  <select name="nivelEscrito" className="w-full px-4 py-2 border rounded-md" required>
                     <option value="">Elige una opción</option>
                     <option value="Basico">Básico</option>
                     <option value="Intermedio">Intermedio</option>
@@ -557,7 +575,42 @@ const Profile: React.FC = () => {
             </form>
           </>
         )}
+
+        {modalContent === 'editIdioma' && selectedLanguage && (
+          <>
+            <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Editar Idioma</h2>
+            {successMessage && <p className="text-green-500">{successMessage}</p>}
+            {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+            <form onSubmit={handleEditLanguageSubmit} className="space-y-4 p-4">
+              <div className="grid grid-cols-1 gap-4">
+                <div className="mb-4">
+                  <label className="block text-gray-700">Nivel escrito <span className="text-red-500">*</span></label>
+                  <select name="nivelEscrito" className="w-full px-4 py-2 border rounded-md" value={nivelEscrito} onChange={(e) => setNivelEscrito(e.target.value)} required>
+                    <option value="Basico">Básico</option>
+                    <option value="Intermedio">Intermedio</option>
+                    <option value="Avanzado">Avanzado</option>
+                    <option value="Nativo">Nativo</option>
+                  </select>
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700">Nivel oral <span className="text-red-500">*</span></label>
+                  <select name="nivelOral" className="w-full px-4 py-2 border rounded-md" value={nivelOral} onChange={(e) => setNivelOral(e.target.value)} required>
+                    <option value="Basico">Básico</option>
+                    <option value="Intermedio">Intermedio</option>
+                    <option value="Avanzado">Avanzado</option>
+                    <option value="Nativo">Nativo</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <button type="button" onClick={closeModal} className="px-4 py-2 text-red-500 border border-red-500 rounded-md hover:bg-red-500 hover:text-white">Cancelar</button>
+                <button type="submit" className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-700">Guardar</button>
+              </div>
+            </form>
+          </>
+        )}
       </Modal>
+
       <EditPostulanteModal
         isOpen={isEditModalOpen}
         closeModal={closeEditModal}
