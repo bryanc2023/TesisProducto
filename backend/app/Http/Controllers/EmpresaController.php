@@ -37,26 +37,30 @@ class EmpresaController extends Controller
         $empresa->descripcion =  $request->description;
         $empresa->logo = $request->logo->store('images', 'public');
         $empresa->cantidad_empleados=  $request->numberOfEmployees;
-        $socialLinksData = $request->input('socialLinks');
+        // Obtener los datos de socialLinks del request
 
-        // Procesar los datos
-       
-      
-        $empresa->save();
+$empresa->save();
+$socialLinksData = $request->input('socialLinks');
+// Procesar los datos solo si socialLinksData no está vacío
+if (!empty($socialLinksData)) {
+    // Guardar los datos principales de la empresa
+    $empresa->save();
 
-        foreach ($socialLinksData as $linkData) {
-            // Crear un nuevo modelo o hacer lo que necesites con cada enlace social
-            $platform = $linkData['platform'];
-            $url = $linkData['url'];
+    // Iterar sobre cada enlace social y guardar en la base de datos
+    foreach ($socialLinksData as $linkData) {
+        // Obtener plataforma y URL del enlace social
+        $platform = $linkData['platform'];
+        $url = $linkData['url'];
+
+        // Crear un nuevo registro en la tabla EmpresaRed
+        EmpresaRed::create([
+            'nombre_red' => $platform,
+            'enlace' => $url,
+            'id_empresa' => $empresa->id_empresa,
+        ]);
     
-            // Por ejemplo, puedes crear un nuevo registro en la base de datos
-            EmpresaRed::create([
-                'nombre_red' => $platform,
-                'enlace' => $url,
-                'id_empresa'=>$empresa->id_empresa,
-            ]);
-        }
-
+    }
+}
         if ( $empresa->id_usuario) {
             $user = User::find($empresa->id_usuario);
             if ($user) {

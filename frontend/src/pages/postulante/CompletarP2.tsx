@@ -28,6 +28,16 @@ function CompletarP2() {
   const [selectedCampo, setSelectedCampo] = useState('');
   const [selectedTitulo, setSelectedTitulo] = useState('');
   const [selectedTituloId, setSelectedTituloId] = useState<string>('');
+  const [isEnCurso, setIsEnCurso] = useState(false); // Estado para controlar si está seleccionado "En curso"
+
+    const handleEstadoChange = (e:any) => {
+        const selectedEstado = e.target.value;
+        if (selectedEstado === 'En curso') {
+            setIsEnCurso(true);
+        } else {
+            setIsEnCurso(false);
+        }
+    };
 
   const watchFechaini = watch('fechaini');
   const watchFechafin = watch('fechafin');
@@ -209,34 +219,37 @@ function CompletarP2() {
             {errors.institucion && <p className="text-red-500 text-sm mt-2">{errors.institucion.message}</p>}
           </div>
           <div className="form-group">
-            <label htmlFor="estado" className="block text-gray-700 font-semibold mb-2">Estado:</label>
-            <select id="estado" {...register('estado', { required: 'Este campo es requerido' })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600">
-              <option value="">Seleccione</option>
-              <option value="En curso">En curso</option>
-              <option value="Culminado">Culminado</option>
-            </select>
-            {errors.estado && <p className="text-red-500 text-sm mt-2">{errors.estado.message}</p>}
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          <div className="form-group">
-            <label htmlFor="fechaini" className="block text-gray-700 font-semibold mb-2">Fecha de inicio:</label>
-            <input type="date" id="fechaini" {...register('fechaini', { required: 'Este campo es requerido', validate: value => {
-              const today = new Date().toISOString().split('T')[0];
-              return value <= today || 'La fecha no puede ser mayor a hoy';
-            } })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600" />
-            {errors.fechaini && <p className="text-red-500 text-sm mt-2">{errors.fechaini.message}</p>}
-          </div>
-          <div className="form-group">
-            <label htmlFor="fechafin" className="block text-gray-700 font-semibold mb-2">Fecha de Fin:</label>
-            <input type="date" id="fechafin" {...register('fechafin', { required: 'Este campo es requerido', validate: value => {
-              const today = new Date().toISOString().split('T')[0];
-              return value <= today || 'La fecha no puede ser mayor a hoy';
-            } })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600" />
-            {errors.fechafin && <p className="text-red-500 text-sm mt-2">{errors.fechafin.message}</p>}
-          </div>
-        </div>
+                    <label htmlFor="estado" className="block text-gray-700 font-semibold mb-2">Estado:</label>
+                    <select id="estado" {...register('estado', { required: 'Este campo es requerido' })} onChange={handleEstadoChange} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600">
+                        <option value="">Seleccione</option>
+                        <option value="En curso">En curso</option>
+                        <option value="Culminado">Culminado</option>
+                    </select>
+                    {errors.estado && <p className="text-red-500 text-sm mt-2">{errors.estado.message}</p>}
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div className="form-group">
+                    <label htmlFor="fechaini" className="block text-gray-700 font-semibold mb-2">Fecha de inicio:</label>
+                    <input type="date" id="fechaini" {...register('fechaini', { required: 'Este campo es requerido', validate: value => {
+                        const today = new Date().toISOString().split('T')[0];
+                        return value <= today || 'La fecha no puede ser mayor a hoy';
+                    } })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600" />
+                    {errors.fechaini && <p className="text-red-500 text-sm mt-2">{errors.fechaini.message}</p>}
+                </div>
+
+                {!isEnCurso && (
+                    <div className="form-group">
+                        <label htmlFor="fechafin" className="block text-gray-700 font-semibold mb-2">Fecha de Fin:</label>
+                        <input type="date" id="fechafin" {...register('fechafin', { required: 'Este campo es requerido', validate: value => {
+                            const today = new Date().toISOString().split('T')[0];
+                            return value <= today || 'La fecha no puede ser mayor a hoy';
+                        } })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600" />
+                        {errors.fechafin && <p className="text-red-500 text-sm mt-2">{errors.fechafin.message}</p>}
+                    </div>
+                )}
+            </div>
 
         <button type="submit" className="w-full py-3 px-4 bg-blue-500 text-white font-bold rounded-lg hover:bg-slate-600">Añadir</button>
       </form>

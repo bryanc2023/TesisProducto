@@ -21,7 +21,6 @@ class Postulante extends Model
         'id_usuario',
         'nombres',
         'apellidos',
-        'nacionalidad',
         'fecha_nac',
         'edad',
         'estado_civil',
