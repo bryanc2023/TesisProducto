@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Postulante\PostulanteRequest;
 use App\Models\PersonaFormacionPro;
 use App\Models\Postulante;
+use App\Models\PostulanteIdioma;
 use App\Models\User;
 use DateTime;
 use Illuminate\Http\Request;
@@ -90,7 +91,7 @@ class PostulanteController extends Controller
     public function getPerfil($id)
     {
         try {
-            $postulante = Postulante::with(['ubicacion', 'formaciones.titulo'])->where('id_usuario', $id)->first();
+            $postulante = Postulante::with(['ubicacion', 'formaciones.titulo','idiomas.idioma'])->where('id_usuario', $id)->first();
             if (!$postulante) {
                 return response()->json(['message' => 'User not found'], 404);
             }
@@ -105,6 +106,14 @@ class PostulanteController extends Controller
                         'fechaini' => $formacion->fecha_ini,
                         'fechafin' => $formacion->fecha_fin,
                         'titulo' => $formacion->titulo,
+                    ];
+                }),
+                'idiomas' => $postulante->idiomas->map(function ($idioma) {
+                    return [
+                        'idioma' => $idioma->nombre,
+                        'nivel_oral' => $idioma->nivel_oral,
+                        'nivel_escrito' => $idioma->nivel_escrito,
+                        
                     ];
                 }),
             ];
@@ -123,7 +132,10 @@ class PostulanteController extends Controller
             'institucion' => 'required|string|max:220',
             'estado' => 'required|string|max:30',
             'fechaini' => 'nullable|date',
-            'fechafin' => 'nullable|date'
+            'fechafin' => 'nullable|date',
+            'id_idioma' => 'required|integer|exists:idioma,id',
+            'niveloral' => 'required|string|max:20',
+            'nivelescrito' => 'required|string|max:20',
         ]);
 
         $postulantefor = new PersonaFormacionPro();
@@ -135,6 +147,14 @@ class PostulanteController extends Controller
         $postulantefor->fecha_fin = $request->fechafin;
 
         $postulantefor->save();
+
+        $postulanteidi = new PostulanteIdioma();
+        $postulanteidi->id_postulante  = $request->id_postulante;
+        $postulanteidi->id_idioma = $request->id_idioma;
+        $postulanteidi->nivel_oral = $request->niveloral;
+        $postulanteidi->nivel_escrito = $request->nivelescrito;
+
+        $postulanteidi->save();
 
         $postulante = Postulante::find($request->id_postulante);
         if ($postulante && $postulante->id_usuario) {
@@ -156,5 +176,40 @@ class PostulanteController extends Controller
     }
     $idp=  $postulante->id_postulante;
     return response()->json(['id_postulante' => $idp], 200);
+
+    
 }
+
+public function registroIdioma(Request $request)
+{
+    $request->validate([
+        'userId' => 'required|integer',
+        'idiomaId' => 'required|integer|exists:idioma,id',
+        'nivelOral' => 'required|string|max:220',
+        'nivelEscrito' => 'required|string|max:30'
+       
+    ]);
+
+   
+    
+    $postulante = Postulante::where('id_usuario', $request->userId)->first();
+if (!$postulante) {
+    return response()->json(['error' => 'Postulante no encontrado'], 404);
+}
+
+    $idp=  $postulante->id_postulante;
+    $postulanteidi = new PostulanteIdioma();
+    $postulanteidi->id_postulante = $idp;
+    $postulanteidi->id_idioma = $request->idiomaId;
+    $postulanteidi->nivel_oral = $request->nivelOral;
+    $postulanteidi->nivel_escrito = $request->nivelEscrito;
+  
+
+    $postulanteidi->save();
+
+
+
+    return response()->json(['message' => 'Postulante registrada exitosamente', 'postulante_formacion' => $postulanteidi], 201);
+}
+
 }

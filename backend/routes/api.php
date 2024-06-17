@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\UploadController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\CriterioController;
 use App\Http\Controllers\EmpresaController;
+use App\Http\Controllers\IdiomaController;
 use App\Http\Controllers\OfertaController;
 use App\Http\Controllers\PostulacionController;
 use App\Http\Controllers\PostulanteController;
@@ -40,6 +41,7 @@ Route::post('uploadTit',[UploadController::class,'uploadTitulo']);
 Route::post('uploadSec',[UploadController::class,'uploadSector']);
 Route::post('uploadA',[UploadController::class,'uploadArea']);
 Route::post('uploadC',[UploadController::class,'uploadCriterio']);
+Route::post('uploadI',[UploadController::class,'uploadIdioma']);
 
 Route::get('/ubicaciones', [UbicacionController::class, 'getProvinciasCantones']);
 Route::get('/ubicaciones/cantones/{province}', [UbicacionController::class, 'getCantonesPorProvincia']);
@@ -58,6 +60,9 @@ Route::get('/titulos/{nivel}/{campo}/{titulo}', [TituloController::class, 'getTi
 Route::post('empresaC',[EmpresaController::class,'registerEmp']);
 Route::post('completo',[EmpresaController::class,'completo']);
 Route::get('empresaById/{id}', [EmpresaController::class, 'getEmpresaByIdUser']);
+
+Route::get('idioma', [IdiomaController::class, 'getIdiomas']);
+Route::post('nuevoidioma', [PostulanteController::class, 'registroIdioma']);
 
 //Rutas para Postulante
 Route::post('postulanteC',[PostulanteController::class,'registerPos']);
@@ -78,5 +83,7 @@ Route::middleware('auth:api')->group(function () {
 
 Route::get('empresa/{idEmpresa}/ofertas', [OfertaController::class, 'getOfertasByEmpresa']);
 Route::get('/ofertas', [OfertaController::class, 'getAllOfertas']);
+Route::post('/pos', [PostulacionController::class, 'verPostulante']);
+
 
 Route::post('postular', [PostulacionController::class, 'registroPostulacion']);
