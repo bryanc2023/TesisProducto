@@ -225,10 +225,10 @@ const EditPostulanteModal: React.FC<EditPostulanteModalProps> = ({ isOpen, close
               value={estado_civil}
               onChange={handleInputChange}
             >
-              <option value="soltero">Soltero</option>
-              <option value="casado">Casado</option>
-              <option value="divorciado">Divorciado</option>
-              <option value="viudo">Viudo</option>
+              <option value="Soltero">Soltero</option>
+              <option value="Casado">Casado</option>
+              <option value="Divorciado">Divorciado</option>
+              <option value="Viudo">Viudo</option>
             </select>
           </div>
         </div>
@@ -241,9 +241,9 @@ const EditPostulanteModal: React.FC<EditPostulanteModalProps> = ({ isOpen, close
               value={genero}
               onChange={handleInputChange}
             >
-              <option value="masculino">Masculino</option>
-              <option value="femenino">Femenino</option>
-              <option value="otro">Otro</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Femenino">Femenino</option>
+              <option value="Otro">Otro</option>
             </select>
           </div>
           <div className="flex-1">
