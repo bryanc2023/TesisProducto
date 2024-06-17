@@ -62,4 +62,8 @@ public function expe()
 {
     return $this->belongsToMany(Postulante::class, 'postulacion', 'id_oferta', 'id_postulante');
 }
+public function ubicacion()
+{
+    return $this->empresa ? $this->empresa->ubicacion() : null;
+}
 }

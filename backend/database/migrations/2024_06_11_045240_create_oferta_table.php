@@ -19,14 +19,14 @@ class CreateOfertaTable extends Migration
             $table->unsignedBigInteger('id_area')->nullable();
             $table->string('cargo', 30)->nullable();
             $table->unsignedInteger('experiencia')->nullable();
-            $table->string('objetivo_cargo', 50)->nullable();
+            $table->string('objetivo_cargo', 500)->nullable();
             $table->unsignedInteger('sueldo')->nullable();
-            $table->string('funciones', 200)->nullable();
+            $table->string('funciones', 500)->nullable();
             $table->string('carga_horaria', 50)->nullable();
             $table->string('modalidad', 50)->nullable();
             $table->date('fecha_publi')->nullable();
             $table->date('fecha_max_pos')->nullable();
-            $table->string('detalles_adicionales', 50)->nullable();
+            $table->string('detalles_adicionales', 500)->nullable();
             $table->string('correo_contacto', 30)->nullable();
             $table->string('numero_contacto', 10)->nullable();
             $table->string('estado', 50)->nullable();
