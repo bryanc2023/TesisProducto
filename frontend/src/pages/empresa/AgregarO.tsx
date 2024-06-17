@@ -608,6 +608,18 @@ function AgregarO() {
         </option>
          ))}
                       </select>
+                    ): selectedCriterioId === 7 ? (
+                      <select
+                        className="w-1/3 p-2 border rounded mr-2"
+                        id="valor e"
+                        value={valorCriterio}
+                        onChange={(e) => setValorCriterio(e.target.value)}
+                      >
+                        <option value="">Rango de edad...</option>
+                        <option value="Joven">18 - 25 años</option>
+                        <option value="Adulto">26 - 35 años</option>
+                        <option value="Mayor">36 años en adelante</option>
+                      </select>
                     ): (
                       <div></div>
                     )}
