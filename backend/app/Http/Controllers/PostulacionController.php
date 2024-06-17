@@ -54,6 +54,11 @@ foreach ($oferta->criterios as $criterio) {
                 $matchingCriteriaCount++;
             }
             break;
+        case 'Género':
+                if ($postulante->genero == $criterio->pivot->valor) {
+                    $matchingCriteriaCount++;
+                }
+                break;
         case 'Idioma':
             foreach ($postulante->idiomas as $idioma) {
                     if ($idioma->idioma->id == $criterio->pivot->valor) {
@@ -62,6 +67,20 @@ foreach ($oferta->criterios as $criterio) {
                 }
               
                 break;
+        case 'Edad':
+            if($postulante->edad >=18 && $postulante->edad<=25){
+                $edad= "Joven";
+            }else if($postulante->edad >=26 && $postulante->edad<=35){
+                $edad= "Adulto";
+            }else if($postulante->edad >=36){
+                $edad= "Mayor";
+            }
+            if ($edad == $criterio->pivot->valor) {
+                $matchingCriteriaCount++;
+            }
+            break;
+                      
+              
         // Aquí puedes agregar más casos para otros criterios
     }
 }
