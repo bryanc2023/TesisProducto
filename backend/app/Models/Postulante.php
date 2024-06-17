@@ -54,6 +54,15 @@ public function titulos()
     return $this->belongsToMany(Titulo::class, 'formacion_academica', 'id_postulante', 'id_titulo');
 }
 
+
+public function idiomas()
+{
+    return $this->hasMany(PostulanteIdioma::class, 'id_postulante');
+}
+public function idiomasp()
+{
+    return $this->belongsToMany(Idioma::class, 'postulante_idioma', 'id_postulante', 'id_idioma');
+}
 public static function getIdPostulantePorIdUsuario($idUsuario)
 {
     $postulante = self::where('id_usuario', $idUsuario)->first();

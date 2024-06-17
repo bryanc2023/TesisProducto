@@ -10,11 +10,20 @@ interface IFormInput {
   estado: string;
   fechaini: string;
   fechafin: string;
+  id_idioma:number;
+  niveloral:string;
+  nivelescrito:string;
 }
 
 interface Titulo {
   id: number;
   titulo: string;
+}
+
+interface idioma {
+  id: number;
+  nombre: string;
+  
 }
 
 function CompletarP2() {
@@ -29,7 +38,7 @@ function CompletarP2() {
   const [selectedTitulo, setSelectedTitulo] = useState('');
   const [selectedTituloId, setSelectedTituloId] = useState<string>('');
   const [isEnCurso, setIsEnCurso] = useState(false); // Estado para controlar si está seleccionado "En curso"
-
+  const [languages, setLanguages] = useState<idioma[]>([]);
     const handleEstadoChange = (e:any) => {
         const selectedEstado = e.target.value;
         if (selectedEstado === 'En curso') {
@@ -47,9 +56,11 @@ function CompletarP2() {
     const fetchData = async () => {
       try {
         const response = await axios.get('titulos');
+        const response2 = await axios.get('idioma');
         setNiveles(response.data.nivel);
         setCampos(response.data.campo);
         setTitulos(response.data.titulo);
+        setLanguages(response2.data.idiomas);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -152,6 +163,10 @@ function CompletarP2() {
         formData.append('estado', data.estado);
         formData.append('fechaini', data.fechaini);
         formData.append('fechafin', data.fechafin);
+        formData.append('id_idioma', data.id_idioma.toString());
+        formData.append('niveloral', data.niveloral);
+        formData.append('nivelescrito', data.nivelescrito);
+
 
         for (const entry of formData.entries()) {
           console.log(entry);
@@ -168,9 +183,10 @@ function CompletarP2() {
   return (
     <div className="min-h-screen flex flex-col justify-center items-center p-5 bg-gray-100">
       <h1 className="text-3xl font-bold text-center mb-8">Completar registro</h1>
-      <p className="text-center mb-8">Formación Académica:</p>
+      <p className="text-center mb-8">Necesitamos más información acerca de tu trayectoria, tranquilo podras aumentar más experiencia, títulos e idiomas en tu perfil.</p>
       <form onSubmit={handleSubmit(onSubmit)} className="bg-white p-10 rounded-lg shadow-lg w-full max-w-4xl">
-
+      <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Agregar Título</h2>
+      <p className="text-center mb-8">Añade mínimo un título para comenzar:</p>
         <div className="form-group mb-8">
           <label htmlFor="nivelEducacion" className="block text-gray-700 font-semibold mb-2">Nivel de Educación:</label>
           <select id="nivelEducacion" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
@@ -214,6 +230,7 @@ function CompletarP2() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           <div className="form-group">
+       
             <label htmlFor="institucion" className="block text-gray-700 font-semibold mb-2">Institución:</label>
             <input type="text" id="institucion" {...register('institucion', { required: 'Este campo es requerido' })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600" />
             {errors.institucion && <p className="text-red-500 text-sm mt-2">{errors.institucion.message}</p>}
@@ -251,7 +268,49 @@ function CompletarP2() {
                 )}
             </div>
 
-        <button type="submit" className="w-full py-3 px-4 bg-blue-500 text-white font-bold rounded-lg hover:bg-slate-600">Añadir</button>
+
+            <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Agregar Idioma</h2>
+            <p className="text-center mb-8">Añade mínimo un idioma para comenzar:</p>
+              <p className="text-right text-gray-500 text-sm">*Campos obligatorios</p>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="mb-4">
+                  <label className="block text-gray-700">Idioma <span className="text-red-500">*</span></label>
+                  <select  className="w-full px-4 py-2 border rounded-md" required
+                  {...register('id_idioma', { required: 'Este campo es requerido' })}>
+                  <option value="">Elige una opción</option>
+                  {languages.map((language: idioma) => (
+        <option key={language.id} value={language.id}>
+          {language.nombre}
+        </option>
+      ))}
+    </select>
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-gray-700">Nivel escrito <span className="text-red-500">*</span></label>
+                  <select  className="w-full px-4 py-2 border rounded-md" required
+                  {...register('nivelescrito', { required: 'Este campo es requerido' })}>
+                    <option value="">Elige una opción</option>
+                    <option value="Basico">Básico</option>
+                    <option value="Intermedio">Intermedio</option>
+                    <option value="Avanzado">Avanzado</option>
+                    <option value="Nativo">Nativo</option>
+                  </select>
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700">Nivel oral <span className="text-red-500">*</span></label>
+                  <select className="w-full px-4 py-2 border rounded-md" required
+                  {...register('niveloral', { required: 'Este campo es requerido' })}>
+                    <option value="">Elige una opción</option>
+                    <option value="Basico">Básico</option>
+                    <option value="Intermedio">Intermedio</option>
+                    <option value="Avanzado">Avanzado</option>
+                    <option value="Nativo">Nativo</option>
+                  </select>
+                </div>
+              </div>
+             
+        <button type="submit" className="w-full py-3 px-4 bg-blue-500 text-white font-bold rounded-lg hover:bg-slate-600">Culminar registro</button>
       </form>
     </div>
   );
