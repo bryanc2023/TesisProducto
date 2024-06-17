@@ -31,7 +31,7 @@ class PostulacionController extends Controller
         $postulacion->fecha_postulacion= now();
         $postulacion->estado_postulacion='P'; 
 
-        $postulante = Postulante::with('titulos')->find($idp);
+        $postulante = Postulante::with('titulos','idiomas.idioma')->find($idp);
         $oferta = Oferta::with('expe','criterios')->find($ido);
         
 
@@ -46,6 +46,7 @@ class PostulacionController extends Controller
         }
 
         // Recorrer los criterios de la oferta y compararlos con los atributos del postulante
+      
 foreach ($oferta->criterios as $criterio) {
     switch ($criterio->criterio) {
         case 'Estado Civil':
@@ -53,10 +54,19 @@ foreach ($oferta->criterios as $criterio) {
                 $matchingCriteriaCount++;
             }
             break;
+        case 'Idioma':
+            foreach ($postulante->idiomas as $idioma) {
+                    if ($idioma->idioma->id == $criterio->pivot->valor) {
+                        $matchingCriteriaCount++;
+                    }
+                }
+              
+                break;
         // Aquí puedes agregar más casos para otros criterios
     }
 }
-        $postulacion->total_evaluación=$matchingTitlesCount+$matchingCriteriaCount;
+
+        $postulacion->total_evaluacion=$matchingTitlesCount+$matchingCriteriaCount;
     
         $postulacion->save();
 

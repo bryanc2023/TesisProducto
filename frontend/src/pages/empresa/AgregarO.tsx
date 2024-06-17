@@ -28,6 +28,12 @@ interface SelectedCriterio extends Criterio {
   prioridad: number;
 }
 
+interface idioma {
+  id: number;
+  nombre: string;
+  
+}
+
 function AgregarO() {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
@@ -49,6 +55,8 @@ function AgregarO() {
   const [valorCriterio, setValorCriterio] = useState<string>('');
   const [prioridadCriterio, setPrioridadCriterio] = useState<number | null>(null);
   const { user } = useSelector((state: RootState) => state.auth);
+  const [languages, setLanguages] = useState<idioma[]>([]);
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,6 +64,13 @@ function AgregarO() {
         const response = await axios.get('titulos');
         const response2 = await axios.get('areas');
         const response3 = await axios.get('criterios');
+        axios.get('idioma')
+        .then(response => {
+          setLanguages(response.data.idiomas);
+        })
+        .catch(error => {
+          console.error('Error fetching languages:', error);
+        });
         setNiveles(response.data.nivel);
         setCampos(response.data.campo);
         setTitulos(response.data.titulo);
@@ -578,7 +593,22 @@ function AgregarO() {
                         <option value="Soltero">Soltero/a</option>
                         <option value="Viudo">Viudo/a</option>
                       </select>
-                    ) : (
+                    ) : selectedCriterioId === 6 ? (
+                      <select
+                        className="w-1/3 p-2 border rounded mr-2"
+                        id="valor e"
+                        value={valorCriterio}
+                        onChange={(e) => setValorCriterio(e.target.value)}
+                      >
+                        <option value="">Seleccione un idioma...</option>
+                       
+                  {languages.map((language: idioma) => (
+        <option key={language.id} value={language.id}>
+          {language.nombre}
+        </option>
+         ))}
+                      </select>
+                    ): (
                       <div></div>
                     )}
                   </>
