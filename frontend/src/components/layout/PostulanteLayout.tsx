@@ -63,7 +63,11 @@ function PostulanteLayout() {
                 </div>
                 <div className="relative" ref={dropdownRef}>
                     <button onClick={toggleDropdown} className="flex items-center focus:outline-none">
-                        <FontAwesomeIcon icon={faBuilding} className="mr-2" />
+                         <img
+                            src={profileData ? `http://localhost:8000/storage/${profileData.postulante.foto}` : 'https://via.placeholder.com/30'}
+                            alt="Foto de Perfil"
+                            className="rounded-full w-8 h-8 object-cover mr-2"
+                        />
                         <span className="hidden lg:inline">{user ? `${user.name} ` : 'Postulante'}</span>
                         <FontAwesomeIcon icon={faChevronDown} className="ml-2" />
                     </button>
