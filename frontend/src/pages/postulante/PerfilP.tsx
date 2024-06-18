@@ -250,17 +250,7 @@ const Profile: React.FC = () => {
       };
   
       try {
-        // Verifica que los datos sean correctos antes de la solicitud
-        console.log('Datos a enviar:', updatedLanguage);
-  
-        // Realiza la solicitud PUT al servidor usando profileData.postulante.id
-        console.log(profileData.postulante.id)
-        console.log(selectedLanguage.idioma?.id)
         const response = await axios.put(`/updateIdioma/${profileData.postulante.id}/${selectedLanguage.idioma?.id}`, updatedLanguage);
-  
-        // Verifica la respuesta del servidor
-        console.log('Respuesta del servidor:', response.data);
-  
         setSuccessMessage('Idioma actualizado correctamente');
         reloadProfile();
         closeModal();
@@ -294,7 +284,7 @@ const Profile: React.FC = () => {
     <div className="max-w-4xl mx-auto mt-10 p-6 bg-[#111827] rounded-lg shadow-md text-white">
       <div className="flex items-center space-x-4">
         <img
-          src={`http://localhost:8000/storage/${profileData.postulante.foto}`}
+          src={profileData.postulante.foto}
           alt={`${profileData.postulante.nombres} ${profileData.postulante.apellidos}`}
           className="w-24 h-24 rounded-full object-cover border-4 border-white"
         />

@@ -162,11 +162,11 @@ function Modal({ oferta, onClose, userId }: ModalProps) {
                <button onClick={onClose} className="text-white bg-red-500 rounded-full w-8 h-8 absolute top-4 right-4 z-50 flex items-center justify-center">X</button>
                 <h2 className="text-xl font-bold mb-4">{oferta.cargo}</h2>
                 <div className="flex justify-center items-center mb-4">
-                    <img
-                        src={oferta.mostrar_empresa === 1 ? '/images/anonima.png' : `http://localhost:8000/storage/${oferta.empresa.logo}`}
-                        alt="Logo"
-                        className="w-20 h-16 shadow-lg"
-                    />
+                <img
+                                    src={oferta.mostrar_empresa === 1 ? '/images/anonima.png' : oferta.empresa.logo}
+                                    alt="Logo"
+                                    className="w-20 h-16 rounded-full shadow-lg mr-4"
+                                />
                 </div>
                 <div className="text-center">
                     <div>
@@ -250,11 +250,11 @@ function InicioP() {
     {filteredOfertas.map((oferta) => (
         <div key={oferta.id_oferta} className="bg-gray-100 p-4 rounded shadow-md flex-shrink-0 w-full md:w-1/2 lg:w-3/4">
             <div className="flex items-center justify-center mb-2"> {/* Alineación vertical y horizontal centrada */}
-                <img
-                    src={oferta.mostrar_empresa === 1 ? '/images/anonima.png' : `http://localhost:8000/storage/${oferta.empresa.logo}`}
-                    alt="Logo"
-                    className="w-20 h-16 rounded-full shadow-lg mr-4"
-                />
+            <img
+                                    src={oferta.mostrar_empresa === 1 ? '/images/anonima.png' : oferta.empresa.logo}
+                                    alt="Logo"
+                                    className="w-20 h-16 rounded-full shadow-lg mr-4"
+                                />
                 <div className="text-center"> {/* Contenedor para centrar el título */}
                     <h2 className="text-xl font-bold">{oferta.cargo}</h2>
                 </div>

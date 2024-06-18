@@ -24,7 +24,7 @@ class PostulanteRequest extends FormRequest
     public function rules()
     {
         return [
-            'image' => 'required|image|max:2048', // Ejemplo de validación para una imagen
+            'foto' => 'required|string', // Ejemplo de validación para una imagen
             'firstName' => 'required|string|max:255',
             'lastName' => 'required|string|max:255',
             'ubicacion_id' => 'required|exists:ubicacion,id', // Validación para asegurarse de que el ID de ubicación existe en la tabla 'ubicaciones'

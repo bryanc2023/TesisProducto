@@ -23,21 +23,20 @@ const PostulanteDetail: React.FC<PostulanteDetailProps> = ({ postulante, onClose
         <div className="p-4 bg-white text-gray-900 rounded-lg">
             <h1 className="text-2xl font-bold mb-4 text-gray-900">Detalles del Postulante</h1>
             <div className="flex items-center justify-center mb-4">
-                    <img src={`http://localhost:8000/storage/${postulante.foto}`} alt="Foto del postulante" className="w-32 h-32 object-cover rounded-full" />
-                </div>
+                <img src={postulante.foto} alt="Foto del postulante" className="w-32 h-32 object-cover rounded-full" />
+            </div>
             <div className="mb-4">
                 <p className="text-gray-900 mb-2"><span className="font-bold">Nombre:</span> {postulante.nombres} {postulante.apellidos}</p>
                 <p className="text-gray-900 mb-2"><span className="font-bold">Edad:</span> {postulante.edad}</p>
                 <p className="text-gray-900 mb-2"><span className="font-bold">Estado civil:</span> {postulante.estado_civil}</p>
                 <p className="text-gray-900 mb-2"><span className="font-bold">Género:</span> {postulante.genero}</p>
                 <p className="text-gray-900 mb-2"><span className="font-bold">Información extra:</span> {postulante.informacion_extra}</p>
-              
             </div>
             {postulante.cv && (
                 <div className="mb-4">
                     <p className="text-gray-900 mb-2">
                         <span className="font-bold">CV:</span>
-                        <a href={`http://localhost:8000/storage/${postulante.cv}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline ml-2">Descargar CV</a>
+                        <a href={postulante.cv} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline ml-2">Descargar CV</a>
                     </p>
                 </div>
             )}
