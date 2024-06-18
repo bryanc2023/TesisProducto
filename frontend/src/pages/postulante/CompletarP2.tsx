@@ -4,16 +4,18 @@ import axios from "../../services/axios";
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { useNavigate } from 'react-router-dom';
+import { storage } from '../../config/firebaseConfig';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 interface IFormInput {
   institucion: string;
   estado: string;
   fechaini: string;
   fechafin: string;
-  id_idioma:number;
-  niveloral:string;
-  nivelescrito:string;
-  cv:FileList;
+  id_idioma: number;
+  niveloral: string;
+  nivelescrito: string;
+  cv: FileList;
 }
 
 interface Titulo {
@@ -21,10 +23,9 @@ interface Titulo {
   titulo: string;
 }
 
-interface idioma {
+interface Idioma {
   id: number;
   nombre: string;
-  
 }
 
 function CompletarP2() {
@@ -38,22 +39,10 @@ function CompletarP2() {
   const [selectedCampo, setSelectedCampo] = useState('');
   const [selectedTitulo, setSelectedTitulo] = useState('');
   const [selectedTituloId, setSelectedTituloId] = useState<string>('');
-  const [isEnCurso, setIsEnCurso] = useState(false); // Estado para controlar si está seleccionado "En curso"
-  const [languages, setLanguages] = useState<idioma[]>([]);
-    const handleEstadoChange = (e:any) => {
-        const selectedEstado = e.target.value;
-        if (selectedEstado === 'En curso') {
-            setIsEnCurso(true);
-        } else {
-            setIsEnCurso(false);
-        }
-    };
+  const [isEnCurso, setIsEnCurso] = useState(false);
+  const [languages, setLanguages] = useState<Idioma[]>([]);
 
-  const watchFechaini = watch('fechaini');
-  const watchFechafin = watch('fechafin');
-  
   useEffect(() => {
-    // Obtener titulo nivel y campo
     const fetchData = async () => {
       try {
         const response = await axios.get('titulos');
@@ -71,7 +60,6 @@ function CompletarP2() {
   }, []);
 
   useEffect(() => {
-    // Obtener campos cuando se selecciona un nivel
     const fetchCampos = async () => {
       if (selectedNivel) {
         try {
@@ -87,7 +75,6 @@ function CompletarP2() {
   }, [selectedNivel]);
 
   useEffect(() => {
-    // Obtener titulos por anteriores
     const fetchTitulos = async () => {
       if (selectedNivel && selectedCampo) {
         try {
@@ -104,19 +91,19 @@ function CompletarP2() {
 
   const handleNivelChange = (event: any) => {
     setSelectedNivel(event.target.value);
-    setSelectedTitulo(''); 
+    setSelectedTitulo('');
     setSelectedTituloId('');
-    setCampos([]); // Clear campos when nivel changes
-    setTitulos([]); // Clear titulos when nivel changes
+    setCampos([]);
+    setTitulos([]);
     setValue('estado', '');
     clearErrors('estado');
   };
 
   const handleCampoChange = (event: any) => {
     setSelectedCampo(event.target.value);
-    setSelectedTitulo(''); 
+    setSelectedTitulo('');
     setSelectedTituloId('');
-    setTitulos([]); // Clear titulos when campo changes
+    setTitulos([]);
     setValue('estado', '');
     clearErrors('estado');
   };
@@ -125,7 +112,6 @@ function CompletarP2() {
     const selectedTituloValue = event.target.value;
     setSelectedTitulo(selectedTituloValue);
 
-    // Buscar el ID del título seleccionado en la lista de títulos
     const selectedTituloObject = titulos.find(titulo => titulo.id.toString() === selectedTituloValue);
     if (selectedTituloObject) {
       setSelectedTituloId(selectedTituloObject.id.toString());
@@ -134,8 +120,17 @@ function CompletarP2() {
     }
   };
 
+  const handleEstadoChange = (e: any) => {
+    const selectedEstado = e.target.value;
+    if (selectedEstado === 'En curso') {
+      setIsEnCurso(true);
+    } else {
+      setIsEnCurso(false);
+    }
+  };
+
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
-    const today = new Date().toISOString().split('T')[0]; // Obtener la fecha actual en formato YYYY-MM-DD
+    const today = new Date().toISOString().split('T')[0];
     
     if (new Date(data.fechaini) > new Date(data.fechafin)) {
       alert('La fecha de inicio no puede ser mayor a la fecha de fin');
@@ -151,12 +146,16 @@ function CompletarP2() {
       try {
         const response2 = await axios.get('postulanteId/id', {
           params: {
-            id_usuario: user.id // Aquí debes proporcionar el ID de usuario correcto
+            id_usuario: user.id
           }
         });
         const postulanteId = response2.data.id_postulante;
 
-        // Ahora puedes enviar el ID de la ubicación junto con otros datos del formulario
+        const cvFile = data.cv[0];
+        const cvRef = ref(storage, `cvs/${cvFile.name}`);
+        await uploadBytes(cvRef, cvFile);
+        const cvUrl = await getDownloadURL(cvRef);
+
         const formData = new FormData();
         formData.append('id_postulante', postulanteId.toString());
         formData.append('id_titulo', selectedTituloId);
@@ -167,17 +166,8 @@ function CompletarP2() {
         formData.append('id_idioma', data.id_idioma.toString());
         formData.append('niveloral', data.niveloral);
         formData.append('nivelescrito', data.nivelescrito);
-        if (data.cv && data.cv.length > 0) {
-          formData.append('cv', data.cv[0]);
-      } else {
-          alert('Por favor, adjunta tu CV en formato PDF.');
-          return;
-      }
+        formData.append('cv', cvUrl);
 
-
-        for (const entry of formData.entries()) {
-          console.log(entry);
-        }
         await axios.post('postulante/forma', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
@@ -186,7 +176,7 @@ function CompletarP2() {
         console.log("Exito");
         navigate("/inicio");
       } catch (error) {
-        console.error('Error fetching ubicacion ID:', error);
+        console.error('Error uploading CV or submitting form:', error);
       }
     }
   };
@@ -196,8 +186,8 @@ function CompletarP2() {
       <h1 className="text-3xl font-bold text-center mb-8">Completar registro</h1>
       <p className="text-center mb-8">Necesitamos más información acerca de tu trayectoria, tranquilo podras aumentar más experiencia, títulos e idiomas en tu perfil.</p>
       <form onSubmit={handleSubmit(onSubmit)} className="bg-white p-10 rounded-lg shadow-lg w-full max-w-4xl">
-      <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Agregar Título</h2>
-      <p className="text-center mb-8">Añade mínimo un título para comenzar:</p>
+        <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Agregar Título</h2>
+        <p className="text-center mb-8">Añade mínimo un título para comenzar:</p>
         <div className="form-group mb-8">
           <label htmlFor="nivelEducacion" className="block text-gray-700 font-semibold mb-2">Nivel de Educación:</label>
           <select id="nivelEducacion" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
@@ -238,103 +228,101 @@ function CompletarP2() {
             ))}
           </select>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           <div className="form-group">
-       
             <label htmlFor="institucion" className="block text-gray-700 font-semibold mb-2">Institución:</label>
             <input type="text" id="institucion" {...register('institucion', { required: 'Este campo es requerido' })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600" />
             {errors.institucion && <p className="text-red-500 text-sm mt-2">{errors.institucion.message}</p>}
           </div>
           <div className="form-group">
-                    <label htmlFor="estado" className="block text-gray-700 font-semibold mb-2">Estado:</label>
-                    <select id="estado" {...register('estado', { required: 'Este campo es requerido' })} onChange={handleEstadoChange} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600">
-                        <option value="">Seleccione</option>
-                        <option value="En curso">En curso</option>
-                        <option value="Culminado">Culminado</option>
-                    </select>
-                    {errors.estado && <p className="text-red-500 text-sm mt-2">{errors.estado.message}</p>}
-                </div>
+            <label htmlFor="estado" className="block text-gray-700 font-semibold mb-2">Estado:</label>
+            <select id="estado" {...register('estado', { required: 'Este campo es requerido' })} onChange={handleEstadoChange} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600">
+              <option value="">Seleccione</option>
+              <option value="En curso">En curso</option>
+              <option value="Culminado">Culminado</option>
+            </select>
+            {errors.estado && <p className="text-red-500 text-sm mt-2">{errors.estado.message}</p>}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div className="form-group">
+            <label htmlFor="fechaini" className="block text-gray-700 font-semibold mb-2">Fecha de inicio:</label>
+            <input type="date" id="fechaini" {...register('fechaini', { required: 'Este campo es requerido', validate: value => {
+              const today = new Date().toISOString().split('T')[0];
+              return value <= today || 'La fecha no puede ser mayor a hoy';
+            } })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600" />
+            {errors.fechaini && <p className="text-red-500 text-sm mt-2">{errors.fechaini.message}</p>}
+          </div>
+
+          {!isEnCurso && (
+            <div className="form-group">
+              <label htmlFor="fechafin" className="block text-gray-700 font-semibold mb-2">Fecha de Fin:</label>
+              <input type="date" id="fechafin" {...register('fechafin', { required: 'Este campo es requerido', validate: value => {
+                const today = new Date().toISOString().split('T')[0];
+                return value <= today || 'La fecha no puede ser mayor a hoy';
+              } })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600" />
+              {errors.fechafin && <p className="text-red-500 text-sm mt-2">{errors.fechafin.message}</p>}
             </div>
+          )}
+        </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                <div className="form-group">
-                    <label htmlFor="fechaini" className="block text-gray-700 font-semibold mb-2">Fecha de inicio:</label>
-                    <input type="date" id="fechaini" {...register('fechaini', { required: 'Este campo es requerido', validate: value => {
-                        const today = new Date().toISOString().split('T')[0];
-                        return value <= today || 'La fecha no puede ser mayor a hoy';
-                    } })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600" />
-                    {errors.fechaini && <p className="text-red-500 text-sm mt-2">{errors.fechaini.message}</p>}
-                </div>
+        <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Agregar Idioma</h2>
+        <p className="text-center mb-8">Añade mínimo un idioma para comenzar:</p>
+        <p className="text-right text-gray-500 text-sm">*Campos obligatorios</p>
+        <div className="grid grid-cols-1 gap-4">
+          <div className="mb-4">
+            <label className="block text-gray-700">Idioma <span className="text-red-500">*</span></label>
+            <select className="w-full px-4 py-2 border rounded-md" required
+              {...register('id_idioma', { required: 'Este campo es requerido' })}>
+              <option value="">Elige una opción</option>
+              {languages.map((language: Idioma) => (
+                <option key={language.id} value={language.id}>
+                  {language.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
 
-                {!isEnCurso && (
-                    <div className="form-group">
-                        <label htmlFor="fechafin" className="block text-gray-700 font-semibold mb-2">Fecha de Fin:</label>
-                        <input type="date" id="fechafin" {...register('fechafin', { required: 'Este campo es requerido', validate: value => {
-                            const today = new Date().toISOString().split('T')[0];
-                            return value <= today || 'La fecha no puede ser mayor a hoy';
-                        } })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600" />
-                        {errors.fechafin && <p className="text-red-500 text-sm mt-2">{errors.fechafin.message}</p>}
-                    </div>
-                )}
-            </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Nivel escrito <span className="text-red-500">*</span></label>
+            <select className="w-full px-4 py-2 border rounded-md" required
+              {...register('nivelescrito', { required: 'Este campo es requerido' })}>
+              <option value="">Elige una opción</option>
+              <option value="Basico">Básico</option>
+              <option value="Intermedio">Intermedio</option>
+              <option value="Avanzado">Avanzado</option>
+              <option value="Nativo">Nativo</option>
+            </select>
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Nivel oral <span className="text-red-500">*</span></label>
+            <select className="w-full px-4 py-2 border rounded-md" required
+              {...register('niveloral', { required: 'Este campo es requerido' })}>
+              <option value="">Elige una opción</option>
+              <option value="Basico">Básico</option>
+              <option value="Intermedio">Intermedio</option>
+              <option value="Avanzado">Avanzado</option>
+              <option value="Nativo">Nativo</option>
+            </select>
+          </div>
+        </div>
+        <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Añade tu CV</h2>
+        <p className="text-center mb-8">Sube tu archivo que contenga todos los datos de un CV correcto:</p>
 
+        <div className="mb-8">
+          <label htmlFor="cv" className="block text-gray-700 font-semibold mb-2">Curriculum Vitae (PDF):</label>
+          <input
+            type="file"
+            id="cv"
+            accept=".pdf"
+            {...register('cv', { required: 'Este campo es requerido' })}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
+          />
+          {errors.cv && <p className="text-red-500 text-sm mt-2">{errors.cv.message}</p>}
+        </div>
 
-            <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Agregar Idioma</h2>
-            <p className="text-center mb-8">Añade mínimo un idioma para comenzar:</p>
-              <p className="text-right text-gray-500 text-sm">*Campos obligatorios</p>
-              <div className="grid grid-cols-1 gap-4">
-                <div className="mb-4">
-                  <label className="block text-gray-700">Idioma <span className="text-red-500">*</span></label>
-                  <select  className="w-full px-4 py-2 border rounded-md" required
-                  {...register('id_idioma', { required: 'Este campo es requerido' })}>
-                  <option value="">Elige una opción</option>
-                  {languages.map((language: idioma) => (
-        <option key={language.id} value={language.id}>
-          {language.nombre}
-        </option>
-      ))}
-    </select>
-                </div>
-                
-                <div className="mb-4">
-                  <label className="block text-gray-700">Nivel escrito <span className="text-red-500">*</span></label>
-                  <select  className="w-full px-4 py-2 border rounded-md" required
-                  {...register('nivelescrito', { required: 'Este campo es requerido' })}>
-                    <option value="">Elige una opción</option>
-                    <option value="Basico">Básico</option>
-                    <option value="Intermedio">Intermedio</option>
-                    <option value="Avanzado">Avanzado</option>
-                    <option value="Nativo">Nativo</option>
-                  </select>
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700">Nivel oral <span className="text-red-500">*</span></label>
-                  <select className="w-full px-4 py-2 border rounded-md" required
-                  {...register('niveloral', { required: 'Este campo es requerido' })}>
-                    <option value="">Elige una opción</option>
-                    <option value="Basico">Básico</option>
-                    <option value="Intermedio">Intermedio</option>
-                    <option value="Avanzado">Avanzado</option>
-                    <option value="Nativo">Nativo</option>
-                  </select>
-                </div>
-              </div>
-              <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Añade tu CV</h2>
-              <p className="text-center mb-8">Sube tu archivo que contenga todos los datos de un cv correcto:</p>
-
-              <div className="mb-8">
-        <label htmlFor="cv" className="block text-gray-700 font-semibold mb-2">Curriculum Vitae (PDF):</label>
-        <input
-          type="file"
-          id="cv"
-          accept=".pdf"
-          {...register('cv', { required: 'Este campo es requerido' })}
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
-        />
-        {errors.cv && <p className="text-red-500 text-sm mt-2">{errors.cv.message}</p>}
-      </div>
-             
         <button type="submit" className="w-full py-3 px-4 bg-blue-500 text-white font-bold rounded-lg hover:bg-slate-600">Culminar registro</button>
       </form>
     </div>

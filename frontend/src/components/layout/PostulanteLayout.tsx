@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBuilding, faUser, faEnvelope, faSearch, faChevronDown, faBars, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faEnvelope, faSearch, faChevronDown, faBars, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import axios from '../../services/axios';
@@ -64,7 +64,7 @@ function PostulanteLayout() {
                 <div className="relative" ref={dropdownRef}>
                     <button onClick={toggleDropdown} className="flex items-center focus:outline-none">
                          <img
-                            src={profileData ? `http://localhost:8000/storage/${profileData.postulante.foto}` : 'https://via.placeholder.com/30'}
+                            src={profileData ? profileData.postulante.foto : 'https://via.placeholder.com/30'}
                             alt="Foto de Perfil"
                             className="rounded-full w-8 h-8 object-cover mr-2"
                         />
@@ -98,14 +98,14 @@ function PostulanteLayout() {
                 <nav style={{ backgroundColor: '#111827' }} className={`w-1/6 text-white p-4 fixed top-12 bottom-0 transition-transform transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
                     <div className="flex flex-col items-center mb-4">
                         <img
-                            src={profileData ? `http://localhost:8000/storage/${profileData.postulante.foto}` : 'https://via.placeholder.com/100'}
+                            src={profileData ? profileData.postulante.foto : 'https://via.placeholder.com/100'}
                             alt="Foto de Perfil"
                             className="rounded-full profile-image w-24 h-24 object-cover border-4 border-white"
                         />
                         <span className="mt-2 hidden lg:block">{user ? `${user.name} ` : 'Nombre del Usuario'}</span>
                     </div>
                     <ul>
-                    <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
+                        <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
                             <Link to="/inicio" className="flex items-center w-full">
                                 <FontAwesomeIcon icon={faEnvelope} className="mr-2" />
                                 <span className="hidden lg:inline">Inicio</span>

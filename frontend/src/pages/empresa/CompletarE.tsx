@@ -5,6 +5,8 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { storage } from '../../config/firebaseConfig';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 interface IFormInput {
   logo: FileList;
@@ -135,29 +137,27 @@ const CompletarE: React.FC = () => {
         const response = await axios.get(`ubicaciones/${selectedProvince}/${selectedCanton}`);
         const ubicacionId = response.data.ubicacion_id;
 
-        const formData = new FormData();
-        formData.append('logo', data.logo[0]);
-        formData.append('companyName', data.companyName);
-        formData.append('numberOfEmployees', data.numberOfEmployees.toString());
-        formData.append('sector', selectedDivision.id.toString());
-        formData.append('ubicacion', ubicacionId.toString());
-        formData.append('division', data.division);
-        formData.append('email', data.email);
-        formData.append('description', data.description);
-        formData.append('usuario_id', user.id.toString());
+        const logoFile = data.logo[0];
+        const storageRef = ref(storage, `logos/${logoFile.name}`);
+        await uploadBytes(storageRef, logoFile);
+        const logoUrl = await getDownloadURL(storageRef);
 
-        data.socialLinks.forEach((link, index) => {
-          formData.append(`socialLinks[${index}][platform]`, link.platform);
-          formData.append(`socialLinks[${index}][url]`, link.url);
-        });
-
-        for (const entry of formData.entries()) {
-          console.log(entry);
-        }
+        const formData = {
+          logo: logoUrl, // URL del logo subido a Firebase
+          companyName: data.companyName,
+          numberOfEmployees: data.numberOfEmployees,
+          sector: selectedDivision.id.toString(),
+          ubicacion: ubicacionId,
+          division: data.division,
+          email: data.email,
+          description: data.description,
+          usuario_id: user.id,
+          socialLinks: data.socialLinks
+        };
 
         await axios.post('empresaC', formData, {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            'Content-Type': 'application/json',
           },
         });
 
@@ -207,220 +207,188 @@ const CompletarE: React.FC = () => {
               onChange={handleLogoChange}
               className={`block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 ${errors.logo ? 'border-red-500' : ''}`}
             />
-            
             {errors.logo && <p className="text-red-500 text-xs mt-1">{errors.logo.message}</p>}
-            </div>
           </div>
-  
-          <div className="grid grid-cols-7 gap-8 mb-8">
-            <div className="form-group col-span-7 md:col-span-5">
-              <label htmlFor="companyName" className="block text-gray-700 font-semibold mb-2">Nombre comercial:</label>
-              <input
-                type="text"
-                id="companyName"
-                {...register('companyName', { required: 'El nombre comercial es requerido.' })}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600 ${errors.companyName ? 'border-red-500' : ''}`}
-              />
-              {errors.companyName && <p className="text-red-500 text-xs mt-1">{errors.companyName.message}</p>}
-            </div>
-  
-            <div className="form-group col-span-7 md:col-span-2">
-              <label htmlFor="numberOfEmployees" className="block text-gray-700 font-semibold mb-2">Número de empleados:</label>
-              <input
-                type="number"
-                id="numberOfEmployees"
-                {...register('numberOfEmployees', {
-                  required: 'El número de empleados es requerido.',
-                  min: { value: 0, message: 'El número de empleados no puede ser negativo.' },
-                })}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600 ${errors.numberOfEmployees ? 'border-red-500' : ''}`}
-              />
-              {errors.numberOfEmployees && <p className="text-red-500 text-xs mt-1">{errors.numberOfEmployees.message}</p>}
-            </div>
+        </div>
+
+        <div className="grid grid-cols-7 gap-8 mb-8">
+          <div className="form-group col-span-7 md:col-span-5">
+            <label htmlFor="companyName" className="block text-gray-700 font-semibold mb-2">Nombre comercial:</label>
+            <input
+              type="text"
+              id="companyName"
+              {...register('companyName', { required: 'El nombre comercial es requerido.' })}
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600 ${errors.companyName ? 'border-red-500' : ''}`}
+            />
+            {errors.companyName && <p className="text-red-500 text-xs mt-1">{errors.companyName.message}</p>}
           </div>
-  
-          <div className="form-group mb-8">
-            <label htmlFor="sector" className="block text-gray-700 font-semibold mb-2">Sector:</label>
+
+          <div className="form-group col-span-7 md:col-span-2">
+            <label htmlFor="numberOfEmployees" className="block text-gray-700 font-semibold mb-2">Número de empleados:</label>
+            <input
+              type="number"
+              id="numberOfEmployees"
+              {...register('numberOfEmployees', {
+                required: 'El número de empleados es requerido.',
+                min: { value: 0, message: 'El número de empleados no puede ser negativo.' },
+              })}
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600 ${errors.numberOfEmployees ? 'border-red-500' : ''}`}
+            />
+            {errors.numberOfEmployees && <p className="text-red-500 text-xs mt-1">{errors.numberOfEmployees.message}</p>}
+          </div>
+        </div>
+
+        <div className="form-group mb-8">
+          <label htmlFor="sector" className="block text-gray-700 font-semibold mb-2">Sector:</label>
+          <select
+            id="sector"
+            onChange={handleSectorChange}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
+          >
+            <option value="">Seleccione</option>
+            {sectores.map((sector, index) => (
+              <option key={index} value={sector}>
+                {sector}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-group mb-8">
+          <label htmlFor="division" className="block text-gray-700 font-semibold mb-2">División:</label>
+          <select
+            id="division"
+            value={selectedDivision?.division || ''}
+            onChange={(e) => {
+              const selected = divisiones.find(div => div.division === e.target.value);
+              setSelectedDivision(selected || null);
+            }}
+            disabled={!isDivisionEnabled}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
+          >
+            <option value="">Seleccione</option>
+            {divisiones.map((division) => (
+              <option key={division.id} value={division.division}>
+                {division.division}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div className="form-group">
+            <label htmlFor="province" className="block text-gray-700 font-semibold mb-2">Provincia:</label>
             <select
-              id="sector"
-              onChange={handleSectorChange}
+              id="province"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
+              onChange={handleProvinceChange}
+              style={{ position: 'relative' }}
             >
               <option value="">Seleccione</option>
-              {sectores.map((sector, index) => (
-                <option key={index} value={sector}>
-                  {sector}
+              {provinces.map((province, index) => (
+                <option key={index} value={province}>
+                  {province}
                 </option>
               ))}
             </select>
           </div>
-  
-          <div className="form-group mb-8">
-            <label htmlFor="division" className="block text-gray-700 font-semibold mb-2">División:</label>
+
+          <div className="form-group">
+            <label htmlFor="canton" className="block text-gray-700 font-semibold mb-2">Cantón:</label>
             <select
-              id="division"
-              value={selectedDivision?.division || ''}
-              onChange={(e) => {
-                const selected = divisiones.find(div => div.division === e.target.value);
-                setSelectedDivision(selected || null);
+              id="canton"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
+              disabled={!selectedProvince}
+              onChange={handleCantonChange}
+              style={{ position: 'relative' }}
+            >
+              <option value="">Seleccione</option>
+              {cantons.map((canton, index) => (
+                <option key={index} value={canton}>
+                  {canton}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="form-group mb-8">
+          <label className="block text-gray-700 font-semibold mb-2">¿La empresa tiene redes sociales?</label>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="hasSocialLinks"
+              onChange={() => {
+                setHasSocialLinks(!hasSocialLinks);
+                if (!hasSocialLinks) {
+                  setValue('socialLinks', []);
+                } else {
+                  setValue('socialLinks', [{ platform: '', url: '' }]);
+                }
               }}
-              disabled={!isDivisionEnabled}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
-            >
-              <option value="">Seleccione</option>
-              {divisiones.map((division) => (
-                <option key={division.id} value={division.division}>
-                  {division.division}
-                </option>
-              ))}
-            </select>
+              className="mr-2"
+            />
+            <label htmlFor="hasSocialLinks" className="text-gray-700">Sí</label>
           </div>
-  
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div className="form-group">
-              <label htmlFor="province" className="block text-gray-700 font-semibold mb-2">Provincia:</label>
-              <select
-                id="province"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
-                onChange={handleProvinceChange}
-                style={{ position: 'relative' }}
-              >
-                <option value="">Seleccione</option>
-                {provinces.map((province, index) => (
-                  <option key={index} value={province}>
-                    {province}
-                  </option>
-                ))}
-              </select>
-            </div>
-  
-            <div className="form-group">
-              <label htmlFor="canton" className="block text-gray-700 font-semibold mb-2">Cantón:</label>
-              <select
-                id="canton"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
-                disabled={!selectedProvince}
-                onChange={handleCantonChange}
-                style={{ position: 'relative' }}
-              >
-                <option value="">Seleccione</option>
-                {cantons.map((canton, index) => (
-                  <option key={index} value={canton}>
-                    {canton}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-  {/*}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div className="form-group">
-              <label htmlFor="email" className="block text-gray-700 font-semibold mb-2">Correo de contacto:</label>
-              <input
-                type="email"
-                id="email"
-                {...register('email', {
-                  required: 'El correo de contacto es requerido.',
-                  pattern: {
-                    value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-                    message: 'Correo electrónico no válido.',
-                  },
-                })}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600 ${errors.email ? 'border-red-500' : ''}`}
-              />
-              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
-            </div>
-  
-            <div className="form-group">
-              <label htmlFor="contactNumber" className="block text-gray-700 font-semibold mb-2">Número de contacto:</label>
-              <input
-                type="tel"
-                id="contactNumber"
-                {...register('contactNumber', { required: 'El número de contacto es requerido.' })}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600 ${errors.contactNumber ? 'border-red-500' : ''}`}
-              />
-              {errors.contactNumber && <p className="text-red-500 text-xs mt-1">{errors.contactNumber.message}</p>}
-            </div>
-          </div>
- */ }
+        </div>
+
+        {hasSocialLinks && (
           <div className="form-group mb-8">
-            <label className="block text-gray-700 font-semibold mb-2">¿La empresa tiene redes sociales?</label>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="hasSocialLinks"
-                onChange={() => {
-                  setHasSocialLinks(!hasSocialLinks);
-                  if (!hasSocialLinks) {
-                    setValue('socialLinks', []);
-                  } else {
-                    setValue('socialLinks', [{ platform: '', url: '' }]);
-                  }
-                }}
-                className="mr-2"
-              />
-              <label htmlFor="hasSocialLinks" className="text-gray-700">Sí</label>
-            </div>
+            <label className="block text-gray-700 font-semibold mb-2">Redes Sociales:</label>
+            {fields.map((field, index) => (
+              <div key={field.id} className="flex items-center mb-4">
+                <button type="button" onClick={() => handleRemoveSocialLink(index)} className="bg-red-500 text-white py-2 px-4 rounded">x</button>
+                <img src={getPlatformLogo(field.platform)} alt={field.platform} className="w-6 h-6 mr-2" />
+                <select
+                  {...register(`socialLinks.${index}.platform`, { required: 'Seleccione una plataforma.' })}
+                  className="form-select mr-2"
+                  defaultValue={field.platform}
+                  onChange={(e) => setValue(`socialLinks.${index}.platform`, e.target.value)}
+                >
+                  <option value="">Seleccione una plataforma</option>
+                  {socialPlatforms.map((platform) => (
+                    <option key={platform.value} value={platform.value}>{platform.label}</option>
+                  ))}
+                </select>
+                <input
+                  type="url"
+                  {...register(`socialLinks.${index}.url`, { required: 'La URL es requerida.' })}
+                  placeholder="URL"
+                  className="form-input mr-2"
+                  defaultValue={field.url}
+                  onChange={(e) => setValue(`socialLinks.${index}.url`, e.target.value)}
+                />
+                {errors.socialLinks && errors.socialLinks[index] && (
+                  <>
+                    {errors.socialLinks[index].platform && (
+                      <p className="text-red-500 text-xs mt-1">{errors.socialLinks[index].platform.message}</p>
+                    )}
+                    {errors.socialLinks[index].url && (
+                      <p className="text-red-500 text-xs mt-1">{errors.socialLinks[index].url.message}</p>
+                    )}
+                  </>
+                )}
+              </div>
+            ))}
+            <button type="button" onClick={handleAddSocialLink} className="bg-green-500 text-white py-2 px-4 rounded">Agregar otra red social</button>
           </div>
-  
-          {hasSocialLinks && (
-            <div className="form-group mb-8">
-              <label className="block text-gray-700 font-semibold mb-2">Redes Sociales:</label>
-              {fields.map((field, index) => (
-                <div key={field.id} className="flex items-center mb-4">
-                  <button type="button" onClick={() => handleRemoveSocialLink(index)} className="bg-red-500 text-white py-2 px-4 rounded">x</button>
-                  <img src={getPlatformLogo(field.platform)} alt={field.platform} className="w-6 h-6 mr-2" />
-                  <select
-                    {...register(`socialLinks.${index}.platform`, { required: 'Seleccione una plataforma.' })}
-                    className="form-select mr-2"
-                    defaultValue={field.platform}
-                    onChange={(e) => setValue(`socialLinks.${index}.platform`, e.target.value)}
-                  >
-                    <option value="">Seleccione una plataforma</option>
-                    {socialPlatforms.map((platform) => (
-                      <option key={platform.value} value={platform.value}>{platform.label}</option>
-                    ))}
-                  </select>
-                  <input
-                    type="url"
-                    {...register(`socialLinks.${index}.url`, { required: 'La URL es requerida.' })}
-                    placeholder="URL"
-                    className="form-input mr-2"
-                    defaultValue={field.url}
-                    onChange={(e) => setValue(`socialLinks.${index}.url`, e.target.value)}
-                  />
-                  {errors.socialLinks && errors.socialLinks[index] && (
-                    <>
-                      {errors.socialLinks[index].platform && (
-                        <p className="text-red-500 text-xs mt-1">{errors.socialLinks[index].platform.message}</p>
-                      )}
-                      {errors.socialLinks[index].url && (
-                        <p className="text-red-500 text-xs mt-1">{errors.socialLinks[index].url.message}</p>
-                      )}
-                    </>
-                  )}
-                </div>
-              ))}
-              <button type="button" onClick={handleAddSocialLink} className="bg-green-500 text-white py-2 px-4 rounded">Agregar otra red social</button>
-            </div>
-          )}
-  
-          <div className="form-group mb-8">
-            <label htmlFor="description" className="block text-gray-700 font-semibold mb-2">Descripción:</label>
-            <textarea
-              id="description"
-              {...register('description', { required: 'La descripción es requerida.' })}
-              placeholder="Descripción de la empresa..."
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600 ${errors.description ? 'border-red-500' : ''}`}
-            ></textarea>
-            {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
-          </div>
-  
-          <button type="submit" className="w-full py-3 px-4 bg-blue-500 text-white font-bold rounded-lg hover:bg-slate-600">Registrar empresa</button>
-        </form>
-      </div>
-    );
-  };
-  
-  export default CompletarE;
-  
+        )}
+
+        <div className="form-group mb-8">
+          <label htmlFor="description" className="block text-gray-700 font-semibold mb-2">Descripción:</label>
+          <textarea
+            id="description"
+            {...register('description', { required: 'La descripción es requerida.' })}
+            placeholder="Descripción de la empresa..."
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600 ${errors.description ? 'border-red-500' : ''}`}
+          ></textarea>
+          {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
+        </div>
+
+        <button type="submit" className="w-full py-3 px-4 bg-blue-500 text-white font-bold rounded-lg hover:bg-slate-600">Registrar empresa</button>
+      </form>
+    </div>
+  );
+};
+
+export default CompletarE;

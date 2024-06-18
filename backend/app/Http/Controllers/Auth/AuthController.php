@@ -65,25 +65,28 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request){
         $credentials = $request->only('email','password');
-
-        if(!$token =JWTAuth::attempt($credentials)){
+    
+        if(!$token = JWTAuth::attempt($credentials)){
             return response()->json(['error'=>'Credenciales invalidas'],401);
         }
-
+    
         $user = User::with('role')->where('email', $request->email)->first();
-
+    
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no encontrado'], 404);
+        }
+    
         if (!$user->hasVerifiedEmail()) {
             return response()->json(['error' => 'Por favor, verifica tu correo electrónico primero'], 403);
         }
-
-     
     
         return response()->json([
             'user' => $user,
             'token' => $token,
-            'role' => $user->role->name  // Asegúrate de que el rol se incluya en la respuesta
+            'role' => $user->role ? $user->role->name : 'Sin rol asignado'  // Verifica que $user->role no sea null
         ], 200);
     }
+    
 
     public function loginEmpresa(LoginRequest $request){
         $credentials = $request->only('email','password');

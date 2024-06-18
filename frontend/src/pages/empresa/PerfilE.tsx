@@ -206,11 +206,11 @@ const EmpresaDetails: React.FC = () => {
                 <div className="flex flex-col items-center sm:items-start text-center sm:text-left mr-0 sm:mr-8">
                     <h1 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 inline-block pb-2 w-40 text-center text-black">{empresa?.nombre_comercial}</h1>
                     <img 
-                        src={empresa?.logo ? `http://localhost:8000/storage/${empresa.logo}` : '/path/to/default/image.jpg'} 
+                        src={empresa?.logo} 
                         alt="Logo" 
                         className="w-32 h-32 object-cover border-2 border-black rounded-full mb-4 sm:mb-0 mx-auto" 
                     />
-                    <button onClick={openModal} className="bg-blue-500 text-white px-4 py-2 rounded mb-4 mt-4">Editar Datos</button>
+                    <button onClick={openModal} className="bg-blue-500 text-white px-4 py-2 rounded mb-4 mt-4 self-center">Editar Datos</button>
                 </div>
                 <div className="w-full">
                     <div className="bg-gray-100 p-4 rounded-lg mb-6">
@@ -385,13 +385,11 @@ const EmpresaDetails: React.FC = () => {
                                         </div>
                                     </div>
                                      
-                                    <div className="flex items-center justify-between mt-4">
+                                    <div className="flex items-center justify-center mt-4">
                                         <button onClick={handleSave} className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-700">
                                             Guardar
-                                           
                                         </button>
-                                       
-                                        <button onClick={closeModal} className="px-4 py-2 text-red-500 border border-red-500 rounded-md hover:bg-red-500 hover:text-white">
+                                        <button onClick={closeModal} className="px-4 py-2 text-red-500 border border-red-500 rounded-md hover:bg-red-500 hover:text-white ml-4">
                                             Cancelar
                                         </button>
                                     </div>

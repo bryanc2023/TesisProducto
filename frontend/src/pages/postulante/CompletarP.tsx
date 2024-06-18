@@ -1,9 +1,12 @@
+// src/components/CompletarP.tsx
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import axios from "../../services/axios";
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { useNavigate } from 'react-router-dom';
+import { storage } from '../../config/firebaseConfig';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 interface IFormInput {
   image: FileList;
@@ -14,8 +17,8 @@ interface IFormInput {
   gender: string;
   maritalStatus: string;
   description: string;
-  province:string;
-  canton:string;
+  province: string;
+  canton: string;
 }
 
 const CompletarP: React.FC = () => {
@@ -66,18 +69,18 @@ const CompletarP: React.FC = () => {
     setSelectedCanton(event.target.value);
   };
 
-  const getMaxBirthDate = () => {
+  const getMaxBirthDate = (): string => {
     const currentDate = new Date();
     currentDate.setFullYear(currentDate.getFullYear() - 18); // Restar 18 años
     return currentDate.toISOString().split('T')[0];
   };
 
-  const getMinBirthDate = () => {
+  const getMinBirthDate = (): string => {
     const minDate = new Date(1900, 0, 1);
     return minDate.toISOString().split('T')[0];
   };
 
-  const validateCedula = (value: string) => {
+  const validateCedula = (value: string): boolean => {
     if (value.length !== 10) return false;
     const digits = value.split('').map(Number);
     const provinceCode = parseInt(value.substring(0, 2), 10);
@@ -102,26 +105,28 @@ const CompletarP: React.FC = () => {
         const response = await axios.get(`ubicaciones/${selectedProvince}/${selectedCanton}`);
         const ubicacionId = response.data.ubicacion_id;
 
-        const formData = new FormData();
-        formData.append('image', data.image[0]);
-        formData.append('firstName', data.firstName);
-        formData.append('lastName', data.lastName);
-        formData.append('ubicacion_id', ubicacionId.toString());
-        formData.append('birthDate', data.birthDate);
-        formData.append('idNumber', data.idNumber);
-        formData.append('gender', data.gender);
-        formData.append('maritalStatus', data.maritalStatus);
-        formData.append('description', data.description);
-        formData.append('usuario_id', user.id.toString());
+        const imageFile = data.image[0];
+        const storageRef = ref(storage, `images/${imageFile.name}`);
+        await uploadBytes(storageRef, imageFile);
+        const imageUrl = await getDownloadURL(storageRef);
 
-        await axios.post('postulanteC', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
+        const formData = {
+          foto: imageUrl, // Aquí cambiamos imageUrl a foto
+          firstName: data.firstName,
+          lastName: data.lastName,
+          ubicacion_id: ubicacionId,
+          birthDate: data.birthDate,
+          idNumber: data.idNumber,
+          gender: data.gender,
+          maritalStatus: data.maritalStatus,
+          description: data.description,
+          usuario_id: user.id
+        };
+
+        await axios.post('postulanteC', formData);
         navigate("/completar-2");
       } catch (error) {
-        console.error('Error fetching ubicacion ID:', error);
+        console.error('Error uploading image or submitting form:', error);
       }
     }
   };
@@ -137,7 +142,7 @@ const CompletarP: React.FC = () => {
     }
   };
 
-  const getInputClassName = (error: any) => {
+  const getInputClassName = (error: any): string => {
     return error ? "w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600" : "w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600";
   };
 
