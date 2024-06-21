@@ -11,11 +11,9 @@ import InicioAdmin from "../pages/admin/InicioAdmin"
 import CompletarE from "../pages/empresa/CompletarE"
 import InicioE from "../pages/empresa/InicioE"
 import VerOfertasPPage from "../pages/empresa/VerOfertasPage"
-import BaseDashboard from "../pages/layout/BaseDashboard"
 import CompletarP from "../pages/postulante/CompletarP"
 import CompletarP2 from "../pages/postulante/CompletarP2"
 import InicioP from "../pages/postulante/InicioP"
-import Postulante from "../pages/postulante/Postulante"
 import VerifyEmail from "../pages/postulante/VerifyEmail"
 import ConsultoPostu from "../pages/empresa/ConsultoPostu"
 import MoniR from "../pages/empresa/MoniR"
@@ -25,6 +23,12 @@ import AgregarO from "../pages/empresa/AgregarO"
 import VerOfertasAll from "../pages/postulante/VerOfertasAll"
 import PerfilE from "../pages/empresa/PerfilE"
 import EmpresaGLayout from "../components/layout/EmpresaGLayout"
+import InicioG from "../pages/empresaG/InicioG"
+import CatalogoRegistro from "../pages/empresaG/CatalogoRegistro"
+import AgregarOferG from "../pages/empresaG/AgregarOferG"
+import MonitoreoG from "../pages/empresaG/MonitoreoG"
+import PerfilG from "../pages/empresaG/PerfilG"
+import ReportesG from "../pages/empresaG/ReportesG"
 
 
 
@@ -224,10 +228,7 @@ export const routes: TypeRoute[] = [
             
         ],
     },
-    {
-        path: '/unauthorized',
-        element: Unauthorized, // Asegúrate de que esta ruta existe
-    },
+    
   
     {
         path: '/administrador',
@@ -237,11 +238,46 @@ export const routes: TypeRoute[] = [
     },
     
     {
-        path: '/EmpresaGlayout',
+        path: '/',
         element: EmpresaGLayout,
         isProtected: true,
         allowedRoles: ['empresa_gestora'],
-       
+        children: [
+            {
+                path: 'InicioG',
+                element: InicioG,
+                allowedRoles: ['empresa_gestora'],
+            },
+            {
+                path: 'CatalogoRegistro',
+                element: CatalogoRegistro,
+                allowedRoles: ['empresa_gestora'],
+            },
+            {
+                path: 'add-ofertaG',
+                element: AgregarOferG,
+                allowedRoles: ['empresa_gestora'],
+            },
+            {
+                path: 'MonitoreoG',
+                element: MonitoreoG,
+                allowedRoles: ['empresa_gestora'],
+            },
+            {
+                path: 'PerfilG',
+                element: PerfilG,
+                allowedRoles: ['empresa_gestora'],
+            },
+            {
+                path: 'ReportesG',
+                element: ReportesG,
+                allowedRoles: ['empresa_gestora'],
+            },
+        ],
     },
     
+    {
+        path: '/unauthorized',
+        element: Unauthorized, // Asegúrate de que esta ruta existe
+    },
 ];

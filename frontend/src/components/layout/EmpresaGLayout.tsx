@@ -46,6 +46,11 @@ function EmpresaLayout() {
     const toggleSidebar = () => {
         setSidebarOpen(!sidebarOpen);
     };
+    const getLogoUrl = (logoPath: string) => {
+        // Assume the logoPath is a full URL if it starts with "http", otherwise build the URL.
+        return logoPath.startsWith('http') ? logoPath : `http://localhost:8000/storage/${logoPath}`;
+    };
+
 
     return (
         <div>
@@ -55,8 +60,8 @@ function EmpresaLayout() {
                     <span>ProaJob Empresa</span>
                 </div>
                 <div className="relative" ref={dropdownRef}>
-                    <button onClick={toggleDropdown} className="flex items-center focus:outline-none">
-                        {empresa && <img src={`http://localhost:8000/storage/${empresa.logo}`} alt="Logo" className="w-8 h-8 object-cover border-2 border-white rounded-full mr-2" />}
+                <button onClick={toggleDropdown} className="flex items-center focus:outline-none">
+                        {empresa && <img src={getLogoUrl(empresa.logo)} alt="Logo" className="w-8 h-8 object-cover border-2 border-white rounded-full mr-2" />}
                         <span className="hidden lg:inline">{empresa ? empresa.nombre_comercial : 'Empresa oferente'}</span>
                         <FontAwesomeIcon icon={faChevronDown} className="ml-2" />
                     </button>
@@ -86,28 +91,35 @@ function EmpresaLayout() {
                 {/* Lateral Nav */}
                 <nav style={{ backgroundColor: '#d1552a' }} className={`w-1/6 text-white p-4 fixed top-14 bottom-0 transition-transform transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
                     <div className="flex flex-col items-center mb-4">
-                        {empresa && <img src={`http://localhost:8000/storage/${empresa.logo}`} alt="Foto de Perfil" className="rounded-full profile-image w-24 h-24 object-cover mb-2" />}
+                    {empresa && <img src={getLogoUrl(empresa.logo)} alt="Foto de Perfil" className="rounded-full profile-image w-24 h-24 object-cover mb-2" />}
                         <span className="mt-2 hidden lg:block">{empresa ? empresa.nombre_comercial : 'Nombre del Usuario'}</span>
                     </div>
                     <ul>
                         <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
-                            <Link to="/verOfertasE" className="flex items-center w-full">
+                            <Link to="CatalogoRegistro" className="flex items-center w-full">
                                 <FontAwesomeIcon icon={faClipboardList} className="mr-2" />
                                 <span className="hidden lg:inline">Registro de catálogos</span>
                             </Link>
                         </li>
                         <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
-                            <Link to="/ConsPost" className="flex items-center w-full">
+                            <Link to="MonitoreoG" className="flex items-center w-full">
                                 <FontAwesomeIcon icon={faUsers} className="mr-2" />
                                 <span className="hidden lg:inline">Control y monitoreo</span>
                             </Link>
                         </li>
                         <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
-                            <Link to="/PerfilE" className="flex items-center w-full">
+                            <Link to="ReportesG" className="flex items-center w-full">
+                                <FontAwesomeIcon icon={faUsers} className="mr-2" />
+                                <span className="hidden lg:inline">Reportes</span>
+                            </Link>
+                        </li>
+                        <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
+                            <Link to="PerfilG" className="flex items-center w-full">
                                 <FontAwesomeIcon icon={faUser} className="mr-2" />
                                 <span className="hidden lg:inline">Mi perfil</span>
                             </Link>
                         </li>
+                        
                     </ul>
                 </nav>
 
