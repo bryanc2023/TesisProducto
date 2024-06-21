@@ -25,8 +25,8 @@ class CreatePostulantesTable extends Migration
             $table->string('cedula', 10)->nullable();
             $table->string('genero', 30)->nullable();
             $table->string('informacion_extra', 200)->nullable();
-            $table->string('foto', 255)->nullable();
-            $table->string('cv', 255)->nullable();
+            $table->string('foto', 500)->nullable();
+            $table->string('cv', 500)->nullable();
       
 
             // Agregar claves foráneas
