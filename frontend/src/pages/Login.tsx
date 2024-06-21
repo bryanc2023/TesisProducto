@@ -90,6 +90,16 @@ const Login = () => {
                     } else {
                         navigate("/inicio-e");
                     }
+                }else if (role === 'empresa_gestora') {
+                    console.log(JSON.stringify(user, null, 4));
+                    setIdEmpresa(user.id);
+                    localStorage.setItem("idEmpresa", user.id); 
+                    navigate("/inicioG");
+                    /*if (user.first_login_at === null) {
+                        navigate("/completare");
+                    } else {
+                        navigate("/inicio-e");
+                    }*/
                 }
            
         }
