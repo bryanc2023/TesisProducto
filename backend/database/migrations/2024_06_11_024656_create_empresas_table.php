@@ -21,7 +21,7 @@ class CreateEmpresasTable extends Migration
             $table->string('nombre_comercial', 50);
             $table->string('tamanio', 30);
             $table->string('descripcion', 50);
-            $table->string('logo', 255);
+            $table->string('logo', 500);
             $table->integer('cantidad_empleados');
            
 
