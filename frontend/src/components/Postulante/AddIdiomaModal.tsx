@@ -25,6 +25,9 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
   const [selectedIdioma, setSelectedIdioma] = useState<Idioma | null>(null);
   const [languages, setLanguages] = useState<{ id: number; nombre: string }[]>([]);
   const { user } = useSelector((state: RootState) => state.auth);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [profileData, setProfileData] = useState<Postulante | null>(null);
 
   const reloadProfile = async () => {
     try {
@@ -114,7 +117,7 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
       await axios.post('nuevoidioma', newLanguage);
       setSuccessMessage('Idioma agregado correctamente');
       reloadProfile();
-      closeModal();
+      setIsAddModalOpen(false); // Cierra el modal
     } catch (error) {
       setErrorMessage('Error agregando el idioma');
       console.error('Error adding language:', error);
@@ -123,7 +126,7 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
 
   const handleEditLanguageSubmit: React.FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
-    if (profileData && selectedLanguage) {
+    if (profileData && selectedIdioma) {
       const formData = new FormData(event.currentTarget);
       const updatedLanguage = {
         nivelOral: formData.get('nivelOral'),
@@ -131,10 +134,10 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
       };
 
       try {
-        const response = await axios.put(`/updateIdioma/${profileData.postulante.id}/${selectedLanguage.idioma?.id}`, updatedLanguage);
+        await axios.put(`/updateIdioma/${profileData.postulante.id}/${selectedIdioma.idioma?.id}`, updatedLanguage);
         setSuccessMessage('Idioma actualizado correctamente');
         reloadProfile();
-        closeModal();
+        setIsEditModalOpen(false); // Cierra el modal
       } catch (error) {
         setErrorMessage('Error actualizando el idioma');
         console.error('Error updating language:', error);
@@ -196,6 +199,8 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
           onIdiomaUpdated={handleIdiomaUpdated}
         />
       )}
+      {successMessage && <p className="text-green-500">{successMessage}</p>}
+      {errorMessage && <p className="text-red-500">{errorMessage}</p>}
     </div>
   );
 };

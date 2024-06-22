@@ -78,6 +78,12 @@ Route::post('add-oferta', [OfertaController::class, 'registerOferta']);
 Route::put('/updatePostulanteById/{id}', [PostulanteController::class, 'updatePostulanteByIdUser']);
 Route::put('/updateIdioma/{id_postulante}/{id_idioma}', [IdiomaController::class, 'updateIdioma']);
 Route::put('/updatePostulanteById/{id}', [PostulanteController::class, 'updatePostulanteByIdUser']);
+Route::put('/formacion-academica/{id}', [PostulanteController::class, 'actualizarFormaAcaPlus']);
+Route::delete('/formacion-academica/{id}', [PostulanteController::class, 'eliminarFormaAcaPlus']);
+
+
+
+
 
 Route::middleware('auth:api')->group(function () {
   // Aquí van las rutas protegidas por JWT

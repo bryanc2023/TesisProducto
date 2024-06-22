@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PersonaFormacionPro;
 use App\Models\Empresa;
 use App\Models\Oferta;
 use App\Models\Postulacion;
 use App\Models\Postulante;
+use App\Models\Titulo;
 use App\Models\Ubicacion;
 use Illuminate\Http\Request;
+
 
 class PostulacionController extends Controller
 {
@@ -280,6 +283,15 @@ return response()->json(['postulaciones' => $groupedPostulaciones]);
             ], 500);
         }
     }
+
+    
+}
     
 
-}
+
+    
+
+
+    
+
+
