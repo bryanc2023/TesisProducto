@@ -80,7 +80,7 @@ function PostulanteLayout() {
                                 <Link to="/mi-cv">Mi CV</Link>
                             </li>
                             <li className="px-4 py-2 hover:bg-gray-200 rounded-md">
-                                <Link to="/mi-cuenta">Mi Cuenta</Link>
+                                <Link to="/perfilP">Mi Cuenta</Link>
                             </li>
                             <li className="px-4 py-2 hover:bg-gray-200 rounded-md">
                                 <Link to="/" onClick={() => dispatch(logout())}>Cerrar Sesión</Link>
