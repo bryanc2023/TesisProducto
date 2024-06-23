@@ -3,8 +3,7 @@ import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import AddIdiomaModal from './AddIdiomaModal';
 import EditIdiomaModal from './EditIdiomaModal';
 import axios from '../../services/axios';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../store';
+import { Idioma } from '../../types';
 
 interface LanguagesTabProps {
   idiomas: Idioma[];
@@ -23,31 +22,7 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedIdioma, setSelectedIdioma] = useState<Idioma | null>(null);
-  const [languages, setLanguages] = useState<{ id: number; nombre: string }[]>([]);
-  const { user } = useSelector((state: RootState) => state.auth);
-
-  const reloadProfile = async () => {
-    try {
-      if (user) {
-        const response = await axios.get(`/perfil/${user.id}`);
-        setProfileData(response.data);
-        const response2 = await axios.get('idiomas');
-        setLanguages(response2.data.idiomas);
-      }
-    } catch (error) {
-      console.error('Error reloading profile data:', error);
-    }
-  };
-
-  useEffect(() => {
-    axios.get('idioma')
-      .then(response => {
-        setLanguages(response.data.idiomas);
-      })
-      .catch(error => {
-        console.error('Error fetching languages:', error);
-      });
-  }, []);
+  const [languages, setLanguages] = useState<Idioma[]>([]);
 
   useEffect(() => {
     const fetchIdiomas = async () => {
@@ -76,72 +51,14 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
     setIsEditModalOpen(true);
   };
 
-  const handleIdiomaAdded = async () => {
+  const handleIdiomaAdded = () => {
     setIsAddModalOpen(false);
-    await reloadIdiomas(); // Reload idiomas after adding
+    // Aquí puedes agregar lógica para actualizar la lista de idiomas después de agregar uno nuevo
   };
 
-  const handleIdiomaUpdated = async () => {
+  const handleIdiomaUpdated = () => {
     setIsEditModalOpen(false);
-    await reloadIdiomas(); // Reload idiomas after updating
-  };
-
-  const reloadIdiomas = async () => {
-    try {
-      const response = await axios.get('/idioma');
-      if (response.data && Array.isArray(response.data.idiomas)) {
-        setLanguages(response.data.idiomas);
-      } else {
-        setLanguages([]);
-      }
-    } catch (error) {
-      console.error('Error reloading idiomas:', error);
-      setLanguages([]);
-    }
-  };
-
-  const handleLanguageSubmit: React.FormEventHandler<HTMLFormElement> = async (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const newLanguage = {
-      userId: user?.id,
-      idiomaId: formData.get('idiomaId'),
-      nivelEscrito: formData.get('nivelEscrito'),
-      nivelOral: formData.get('nivelOral'),
-    };
-
-    try {
-      await axios.post('nuevoidioma', newLanguage);
-      setSuccessMessage('Idioma agregado correctamente');
-      reloadProfile();
-      closeModal();
-    } catch (error) {
-      setErrorMessage('Error agregando el idioma');
-      console.error('Error adding language:', error);
-    }
-  };
-
-  const handleEditLanguageSubmit: React.FormEventHandler<HTMLFormElement> = async (event) => {
-    event.preventDefault();
-    if (profileData && selectedLanguage) {
-      const formData = new FormData(event.currentTarget);
-      const updatedLanguage = {
-        nivelOral: formData.get('nivelOral'),
-        nivelEscrito: formData.get('nivelEscrito'),
-      };
-
-      try {
-        const response = await axios.put(`/updateIdioma/${profileData.postulante.id}/${selectedLanguage.idioma?.id}`, updatedLanguage);
-        setSuccessMessage('Idioma actualizado correctamente');
-        reloadProfile();
-        closeModal();
-      } catch (error) {
-        setErrorMessage('Error actualizando el idioma');
-        console.error('Error updating language:', error);
-      }
-    } else {
-      setErrorMessage('Error: Información del idioma o postulante no disponible.');
-    }
+    // Aquí puedes agregar lógica para actualizar la lista de idiomas después de actualizar uno existente
   };
 
   return (
@@ -179,15 +96,12 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
       <div className="border border-dashed border-gray-600 rounded-lg p-4 text-center cursor-pointer" onClick={handleOpenAddModal}>
         <span className="text-gray-400">Agrega tu idioma</span>
       </div>
-      {user && (
-        <AddIdiomaModal
-          isOpen={isAddModalOpen}
-          onRequestClose={() => setIsAddModalOpen(false)}
-          onIdiomaAdded={handleIdiomaAdded}
-          languages={languages}
-          userId={user.id}
-        />
-      )}
+      <AddIdiomaModal
+        isOpen={isAddModalOpen}
+        onRequestClose={() => setIsAddModalOpen(false)}
+        onIdiomaAdded={handleIdiomaAdded}
+        languages={languages}
+      />
       {selectedIdioma && (
         <EditIdiomaModal
           isOpen={isEditModalOpen}
