@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Titulo;
 use DateTime;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PostulanteController extends Controller
 {
@@ -66,34 +67,7 @@ class PostulanteController extends Controller
         }
     }
 
-    public function registroFormaAcaPlus(Request $request)
-    {
-        $request->validate([
-            'id_postulante' => 'required|integer',
-            'id_titulo' => 'required|integer|exists:titulo,id',
-            'institucion' => 'required|string|max:220',
-            'estado' => 'required|string|max:30',
-            'fechaini' => 'nullable|date',
-            'fechafin' => 'nullable|date'
-        ]);
-
-        $postulante = Postulante::where('id_usuario', $request->id_postulante)->first();
-        if (!$postulante) {
-            return response()->json(['error' => 'Postulante no encontrado'], 404);
-        }
-
-        $idp = $postulante->id_postulante;
-        $postulantefor = new PersonaFormacionPro();
-        $postulantefor->id_postulante = $idp;
-        $postulantefor->id_titulo = $request->id_titulo;
-        $postulantefor->institucion = $request->institucion;
-        $postulantefor->estado = $request->estado;
-        $postulantefor->fecha_ini = $request->fechaini;
-        $postulantefor->fecha_fin = $request->fechafin;
-        $postulantefor->save();
-
-        return response()->json(['message' => 'Formación académica registrada exitosamente', 'postulante_formacion' => $postulantefor], 201);
-    }
+    
 
     public function getPerfil($id)
     {
@@ -202,7 +176,7 @@ class PostulanteController extends Controller
         $postulanteidi->nivel_escrito = $request->nivelEscrito;
         $postulanteidi->save();
 
-        return response()->json(['message' => 'Postulante registrada exitosamente', 'postulante_formacion' => $postulanteid], 201);
+        return response()->json(['message' => 'Postulante registrada exitosamente', 'postulante_formacion' => $postulanteidi], 201);
     }
 
     public function updatePostulanteByIdUser(Request $request, $idUser)
@@ -272,9 +246,91 @@ class PostulanteController extends Controller
             ], 500);
         }
     }
-   
+
+    public function registroFormaAcaPlus(Request $request)
+    {
+        $request->validate([
+            'id_postulante' => 'required|integer',
+            'id_titulo' => 'required|integer|exists:titulo,id',
+            'institucion' => 'required|string|max:220',
+            'estado' => 'required|string|max:30',
+            'fechaini' => 'nullable|date',
+            'fechafin' => 'nullable|date'
+        ]);
+
+        $postulante = Postulante::where('id_usuario', $request->id_postulante)->first();
+        if (!$postulante) {
+            return response()->json(['error' => 'Postulante no encontrado'], 404);
+        }
+
+        $idp = $postulante->id_postulante;
+        $postulantefor = new PersonaFormacionPro();
+        $postulantefor->id_postulante = $idp;
+        $postulantefor->id_titulo = $request->id_titulo;
+        $postulantefor->institucion = $request->institucion;
+        $postulantefor->estado = $request->estado;
+        $postulantefor->fecha_ini = $request->fechaini;
+        $postulantefor->fecha_fin = $request->fechafin;
+        $postulantefor->save();
+
+        return response()->json(['message' => 'Formación académica registrada exitosamente', 'postulante_formacion' => $postulantefor], 201);
+    }
+
+    
+    public function updateFormacionAcademica (Request $request ) {
+        try {
+            
+            $idPostulante =  $request->input('id_postulante');
+            $idTitulo = $request->input('id_titulo');
+            $institucion = $request->input('institucion');
+            $estado = $request->input('estado');
+            $fechaini = $request->input('fechaini');
+            $fechafin = $request->input('fechafin');
+            $newIdTitulo = $request->input('new_id_titulo') ? $request->input('new_id_titulo') : $request->input('id_titulo');
+
+            DB::table('formacion_academica')
+            ->where('id_postulante', $idPostulante)
+            ->where('id_titulo', $idTitulo)
+            ->update([
+                'institucion' => $institucion,
+                'estado' => $estado,
+                'fecha_ini' => $fechaini,
+                'fecha_fin' => $fechafin,
+                'id_titulo' => $newIdTitulo
+            ]);
+
+            $postulanteInfo = DB::table('formacion_academica')
+                    ->where('id_postulante', $idPostulante)
+                    ->where('id_titulo', $newIdTitulo)
+                    ->first();
+
+            return response()->json(['postulante_formacion' => $postulanteInfo]);
+
+
+        } catch (\Throwable $th) {
+            return response()->json(['message' => 'No se pudo actualizar la información académica', 'error' => $th->getMessage()], 500);
+        }
+    }   
+
+    //Eliminar
+    public function deleteFormacionAcademica(Request $request) {
+        try {
+            $idPostulante = $request->input('id_postulante');
+            $idTitulo = $request->input('id_titulo');
+
+            DB::table('formacion_academica')
+            ->where('id_postulante', $idPostulante)
+            ->where('id_titulo', $idTitulo)
+            ->delete();
+
+            return response()->json(['message' => 'Formación académica eliminada correctamente'], 200);
+
+        } catch (\Throwable $th) {
+            return response()->json(['message' => 'No se pudo eliminar la formación académica', 'error' => $th->getMessage()], 500);
+        }
+
+}   
+
+
 }
-
-
-   
 
