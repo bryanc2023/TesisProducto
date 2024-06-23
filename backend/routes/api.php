@@ -62,8 +62,11 @@ Route::post('completo',[EmpresaController::class,'completo']);
 Route::get('empresaById/{id}', [EmpresaController::class, 'getEmpresaByIdUser']);
 Route::put('updateEmpresaById/{id}', [EmpresaController::class, 'updateEmpresaByIdUser']);
 
+//Rutas para Idioma
 Route::get('idioma', [IdiomaController::class, 'getIdiomas']);
 Route::post('nuevoidioma', [PostulanteController::class, 'registroIdioma']);
+Route::put('postulante_idioma/update', [IdiomaController::class, 'updateidiomas']);
+Route::delete('postulante_idioma/delete', [IdiomaController::class, 'deleteidiomaPostulante']);
 
 //Rutas para Postulante
 Route::post('postulanteC',[PostulanteController::class,'registerPos']);
@@ -78,10 +81,10 @@ Route::post('add-oferta', [OfertaController::class, 'registerOferta']);
 Route::put('/updatePostulanteById/{id}', [PostulanteController::class, 'updatePostulanteByIdUser']);
 Route::put('/updateIdioma/{id_postulante}/{id_idioma}', [IdiomaController::class, 'updateIdioma']);
 Route::put('/updatePostulanteById/{id}', [PostulanteController::class, 'updatePostulanteByIdUser']);
-Route::put('/formacion-academica/{id}', [PostulanteController::class, 'actualizarFormaAcaPlus']);
-Route::delete('/formacion-academica/{id}', [PostulanteController::class, 'eliminarFormaAcaPlus']);
 
+Route::put('/formacion_academica/update', [PostulanteController::class, 'updateFormacionAcademica']);
 
+Route::delete('/formacion_academica/delete', [PostulanteController::class, 'deleteFormacionAcademica']);
 
 
 
