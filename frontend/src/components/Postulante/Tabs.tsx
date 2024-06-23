@@ -104,17 +104,17 @@ const Tabs: React.FC<TabsProps> = ({ profileData, openEditFormacionModal, handle
 
   return (
     <div className="mt-6">
-      <div className="flex space-x-4">
-        <button onClick={() => setActiveTab('education')} className={`py-2 px-4 rounded-t-lg ${activeTab === 'education' ? 'bg-gray-800 text-white' : 'bg-gray-400 text-black'}`}>
+      <div className="flex space-x-1 overflow-x-auto">
+        <button onClick={() => setActiveTab('education')} className={`py-2 px-4 flex-shrink-0 ${activeTab === 'education' ? 'bg-gray-800 text-white rounded-t-lg' : 'bg-gray-400 text-black rounded-lg'}`}>
           Educación
         </button>
-        <button onClick={() => setActiveTab('experience')} className={`py-2 px-4 rounded-t-lg ${activeTab === 'experience' ? 'bg-gray-800 text-white' : 'bg-gray-400 text-black'}`}>
+        <button onClick={() => setActiveTab('experience')} className={`py-2 px-4 flex-shrink-0 ${activeTab === 'experience' ? 'bg-gray-800 text-white rounded-t-lg' : 'bg-gray-400 text-black rounded-lg'}`}>
           Experiencia
         </button>
-        <button onClick={() => setActiveTab('languages')} className={`py-2 px-4 rounded-t-lg ${activeTab === 'languages' ? 'bg-gray-800 text-white' : 'bg-gray-400 text-black'}`}>
+        <button onClick={() => setActiveTab('languages')} className={`py-2 px-4 flex-shrink-0 ${activeTab === 'languages' ? 'bg-gray-800 text-white rounded-t-lg' : 'bg-gray-400 text-black rounded-lg'}`}>
           Idiomas
         </button>
-        <button onClick={() => setActiveTab('courses')} className={`py-2 px-4 rounded-t-lg ${activeTab === 'courses' ? 'bg-gray-800 text-white' : 'bg-gray-400 text-black'}`}>
+        <button onClick={() => setActiveTab('courses')} className={`py-2 px-4 flex-shrink-0 ${activeTab === 'courses' ? 'bg-gray-800 text-white rounded-t-lg' : 'bg-gray-400 text-black rounded-lg'}`}>
           Cursos
         </button>
       </div>
