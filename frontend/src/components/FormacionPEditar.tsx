@@ -203,7 +203,10 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
         reloadProfile();
       } catch (error) {
         console.error('Error saving formacion:', error);
+        setErrorMessage('Error al guardar la formación.');
       }
+    } else {
+      setErrorMessage('Por favor complete todos los campos.');
     }
   };
 

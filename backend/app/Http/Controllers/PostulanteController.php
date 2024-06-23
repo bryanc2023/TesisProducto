@@ -7,6 +7,7 @@ use App\Models\PersonaFormacionPro;
 use App\Models\Postulante;
 use App\Models\PostulanteIdioma;
 use App\Models\User;
+use App\Models\Titulo;
 use DateTime;
 use Illuminate\Http\Request;
 
@@ -201,7 +202,7 @@ class PostulanteController extends Controller
         $postulanteidi->nivel_escrito = $request->nivelEscrito;
         $postulanteidi->save();
 
-        return response()->json(['message' => 'Postulante registrada exitosamente', 'postulante_formacion' => $postulanteidi], 201);
+        return response()->json(['message' => 'Postulante registrada exitosamente', 'postulante_formacion' => $postulanteid], 201);
     }
 
     public function updatePostulanteByIdUser(Request $request, $idUser)
@@ -271,4 +272,9 @@ class PostulanteController extends Controller
             ], 500);
         }
     }
+   
 }
+
+
+   
+
