@@ -57,6 +57,11 @@ function AgregarO() {
   const [prioridadCriterio, setPrioridadCriterio] = useState<number | null>(null);
   const { user } = useSelector((state: RootState) => state.auth);
   const [languages, setLanguages] = useState<idioma[]>([]);
+  const [showExperiencia, setShowExperiencia] = useState(false);
+
+  const handleCheckboxChange = (event:any) => {
+    setShowExperiencia(event.target.checked);
+  };
   
 
   useEffect(() => {
@@ -227,6 +232,7 @@ function AgregarO() {
         const dataToSend = {
           ...values,
           usuario: usuario,
+          experiencia: showExperiencia? values.experiencia : 0,
           correo_contacto: showCorreo ? values.correo_contacto : null,
           numero_contacto: showNumeroContacto ? values.numero_contacto : null,
           titulos: selectedTitles,
@@ -383,16 +389,36 @@ function AgregarO() {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-bold mb-2" htmlFor="experiencia">Años de Experiencia requerida</label>
-            <input
-              className="w-full p-2 border rounded"
-              type="number"
-              id="experiencia"
-              placeholder="Describa los años de experiencia en puestos similares"
-              {...register('experiencia', { required: 'Experiencia es requerida', validate: validateNoNegative })}
-            />
-            {errors.experiencia && <p className="text-red-500">{errors.experiencia.message}</p>}
-          </div>
+      <label className="block text-sm font-bold mb-2" htmlFor="experienciaCheckbox">
+        <input
+          type="checkbox"
+          id="experienciaCheckbox"
+          onChange={handleCheckboxChange}
+        />{' '}
+        Requiere experiencia
+      </label>
+      {showExperiencia && (
+        <div id="experienciaContainer">
+          <label className="block text-sm font-bold mb-2" htmlFor="experiencia">
+            Años de Experiencia requerida
+          </label>
+          <input
+            className="w-full p-2 border rounded"
+            type="number"
+            id="experiencia"
+            placeholder="Describa los años de experiencia en puestos similares"
+            {...register('experiencia', {
+              required: 'Experiencia es requerida',
+              validate: validateNoNegative,
+            })}
+          />
+          {errors.experiencia && (
+            <p className="text-red-500">{errors.experiencia.message}</p>
+          )}
+        </div>
+      )}
+    </div>
+
 
           <div className="mb-4">
             <label className="block text-sm font-bold mb-2" htmlFor="objetivo_cargo">Objetivo del puesto de trabajo</label>
@@ -471,6 +497,8 @@ function AgregarO() {
             ></textarea>
             {errors.detalles_adicionales && <p className="text-red-500">{errors.detalles_adicionales.message}</p>}
           </div>
+          <div  className="bg-white p-6 rounded-lg shadow-lg py-8" >
+          <h3 className="text-1xl text-red-500 font-bold mb-4">Datos de contacto extra:</h3>
           <div className="flex items-center">
             <input
               className="mr-2 leading-tight"
@@ -523,7 +551,10 @@ function AgregarO() {
               </div>
             </>
           )}
-          <label className="block text-sm font-bold mb-2" htmlFor="mostrar_sueldo">¿Desea datos confidenciales? Si no desea que se visualicen estos dos datos dé click en las siguientes opciones:</label>
+          </div>
+          <div></div>
+         <div  className="bg-white p-6 rounded-lg shadow-lg py-8" style={{ marginTop: '20px' }}>
+         <h3 className="text-1xl text-red-500 font-bold mb-4">Datos confidenciales:</h3>
           <div className="mb-4">
             <div className="flex items-center">
               <input
@@ -550,11 +581,11 @@ function AgregarO() {
               </label>
             </div>
           </div>
-          
+          </div>
           <div className="bg-white p-6 rounded-lg shadow-lg py-7" style={{ marginTop: '20px' }}>
           
             <h3 className="text-1xl text-red-500 font-bold mb-4">Requisitos extra de evaluación:</h3>
-            <span>Para mostrar postulantes capaces, seleccione uno de los criterios importantes a resaltar en un postulante junto con su prioridad de importancia y el valor si es necesario:</span>
+            <span>Para mostrar postulantes capaces,puede seleccionar prioridad y requisitos extras de un postulante. Si no selecciona ningún criterio automaticamente se buscaran postulantes con los puntos de la oferta anteriormente planteada:</span>
             <div className="mb-4">
             <div className="flex items-center">
               <input
@@ -623,7 +654,7 @@ function AgregarO() {
                         <option value="">Seleccione un idioma...</option>
                        
                   {languages.map((language: idioma) => (
-        <option key={language.id} value={language.id}>
+        <option key={language.id} value={language.id+','+language.nombre}>
           {language.nombre}
         </option>
          ))}
@@ -636,9 +667,9 @@ function AgregarO() {
                         onChange={(e) => setValorCriterio(e.target.value)}
                       >
                         <option value="">Rango de edad...</option>
-                        <option value="Joven">18 - 25 años</option>
-                        <option value="Adulto">26 - 35 años</option>
-                        <option value="Mayor">36 años en adelante</option>
+                        <option value="Joven,(18-25 años)">18 - 25 años</option>
+                        <option value="Adulto,(26-35 años)">26 - 35 años</option>
+                        <option value="Mayor,(Más de 36 años)">36 años en adelante</option>
                       </select>
                     ): (
                       <div></div>

@@ -19,7 +19,7 @@ class OfertaController extends Controller
           $validatedData = $request->validate([
             'cargo' => 'required|string|max:255',
             'id_area' => 'required|integer',
-            'experiencia' => 'required|integer',
+            'experiencia' => 'integer',
             'objetivo_cargo' => 'required|string|max:500',
             'sueldo' => 'required|numeric',
             'correo_contacto' => 'nullable|email|max:255',

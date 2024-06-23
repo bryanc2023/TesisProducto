@@ -66,9 +66,10 @@ foreach ($oferta->criterios as $criterio) {
                 break;
         case 'Idioma':
             foreach ($postulante->idiomas as $idioma) {
-                    if ($idioma->idioma->id == $criterio->pivot->valor) {
-                        $matchingCriteriaCount++;
-                    }
+                list($criterioId, $criterioValor) = explode(',', $criterio->pivot->valor);
+                if ($idioma->idioma->id == $criterioId) {
+                    $matchingCriteriaCount++;
+                }
                 }
               
                 break;
