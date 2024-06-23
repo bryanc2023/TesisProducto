@@ -152,6 +152,10 @@ function Modal({ oferta, onClose, userId }: ModalProps) {
     };
 
     const renderCriterioValor = (criterio: Criterio) => {
+        const criteriosSolicitados = ["Experiencia", "Titulo", "Sueldo"];
+       if (criteriosSolicitados.includes(criterio.criterio)) {
+          return "El solicitado";
+         }
         if (criterio.criterio === 'Idioma') {
             const idiomaId = Number(criterio.pivot.valor);
             console.log(idiomaId);
@@ -206,15 +210,22 @@ function Modal({ oferta, onClose, userId }: ModalProps) {
                         {renderDetalles()}
                     </div>
                     <div>
-                        <p className="text-gray-700 mb-1"><strong>Requisitos adicionales:</strong></p>
-                        <ul>
-                            {oferta.criterios.map((criterio, index) => (
-                                <li key={index}>
-                                    <p><strong>⁃ {criterio.criterio}:</strong> {renderCriterioValor(criterio)}</p>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+      <p className="text-gray-700 mb-1"><strong>Requisitos adicionales:</strong></p>
+      {oferta.criterios.length > 0 ? (
+        <>
+          <p>La empresa especificó que se requiere los siguientes criterios adicionales:</p>
+          <ul>
+            {oferta.criterios.map((criterio, index) => (
+              <li key={index}>
+                <p><strong>⁃ {criterio.criterio}:</strong> {renderCriterioValor(criterio)}</p>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <p>No se requiere criterios extras.</p>
+      )}
+    </div>
                 </div>
                 <button onClick={handlePostular} className="mt-4 bg-blue-500 text-white p-2 rounded">Postular</button>
             </div>

@@ -6,16 +6,22 @@ interface ExperienceTabProps {
   experiencias: Experiencia[];
 }
 
+interface Area {
+  id: number;
+  nombre_area: string;
+}
+
 interface Experiencia {
   empresa: string;
   puesto: string;
+  area:Area;
   fechaini: string;
   fechafin: string;
   descripcion: string;
   referencia: string;
   contacto: string;
-  numero: string;
 }
+
 
 const ExperienceTab: React.FC<ExperienceTabProps> = ({ experiencias }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,12 +68,12 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experiencias }) => {
             </div>
             <p><strong>Empresa:</strong> {experiencia.empresa}</p>
             <p><strong>Puesto:</strong> {experiencia.puesto}</p>
+            <p><strong>Area:</strong> {experiencia.area.nombre_area}</p>
             <p><strong>Fecha de Inicio:</strong> {experiencia.fechaini}</p>
             <p><strong>Fecha de Fin:</strong> {experiencia.fechafin}</p>
             <p><strong>Descripción:</strong> {experiencia.descripcion}</p>
             <p><strong>Referencia:</strong> {experiencia.referencia}</p>
             <p><strong>Contacto:</strong> {experiencia.contacto}</p>
-            <p><strong>Número:</strong> {experiencia.numero}</p>
           </div>
         ))
       ) : (

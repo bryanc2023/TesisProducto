@@ -6,6 +6,7 @@ import { RootState } from '../../store';
 import { useNavigate } from 'react-router-dom';
 import { storage } from '../../config/firebaseConfig';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import Swal from 'sweetalert2';
 
 interface IFormInput {
   institucion: string;
@@ -174,7 +175,19 @@ function CompletarP2() {
           },
         });
         console.log("Exito");
-        navigate("/inicio");
+        
+        Swal.fire({
+          icon: 'success',
+          title: '¡Registro completo!',
+          text: 'Bienvenido a proajob',
+        }).then(() => {
+          navigate("/perfilP");
+          Swal.fire({
+            icon: 'success',
+            title: '¡Para tener mejores oportunidades!',
+            text: 'Completa tu registro añadiendo experiencias , cursos, idiomas , certificaciones..',
+          })
+        });
       } catch (error) {
         console.error('Error uploading CV or submitting form:', error);
       }

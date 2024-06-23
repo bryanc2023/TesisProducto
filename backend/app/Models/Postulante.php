@@ -78,4 +78,9 @@ public function postulacion()
 {
     return $this->belongsToMany(Postulacion::class, 'postulacion', 'id_oferta', 'id_postulante');
 }
+
+public function formapro()
+{
+    return $this->hasMany(FormacionPro::class, 'id_formacion_pro');
+}
 }
