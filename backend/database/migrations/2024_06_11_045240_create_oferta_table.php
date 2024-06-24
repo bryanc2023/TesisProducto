@@ -30,8 +30,9 @@ class CreateOfertaTable extends Migration
             $table->string('correo_contacto', 30)->nullable();
             $table->string('numero_contacto', 10)->nullable();
             $table->string('estado', 50)->nullable();
-            $table->boolean('mostrar_sueldo')->nullable();
-            $table->boolean('mostrar_empresa')->nullable();
+            $table->boolean('n_mostrar_sueldo')->nullable();
+            $table->boolean('n_mostrar_empresa')->nullable();
+            $table->boolean('soli_sueldo')->nullable();
 
             $table->foreign('id_empresa')->references('id_empresa')->on('empresa')->onDelete('cascade');
            

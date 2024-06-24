@@ -81,7 +81,7 @@ public function postulacion()
 
 public function formapro()
 {
-    return $this->hasMany(FormacionPro::class, 'id_formacion_pro');
+    return $this->hasMany(FormacionPro::class, 'id_postulante');
 }
 
 public function certificado()

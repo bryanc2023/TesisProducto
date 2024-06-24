@@ -31,7 +31,13 @@ interface SelectedCriterio extends Criterio {
 interface idioma {
   id: number;
   nombre: string;
-  
+
+}
+
+interface canton {
+  id: number;
+  canton: string;
+
 }
 
 function AgregarO() {
@@ -58,11 +64,15 @@ function AgregarO() {
   const { user } = useSelector((state: RootState) => state.auth);
   const [languages, setLanguages] = useState<idioma[]>([]);
   const [showExperiencia, setShowExperiencia] = useState(false);
+  const [provinces, setProvinces] = useState<string[]>([]);
+  const [cantons, setCantons] = useState<canton[]>([]);
+  const [selectedProvince, setSelectedProvince] = useState('');
+  const [selectedCanton, setSelectedCanton] = useState<canton[]>([]);
 
-  const handleCheckboxChange = (event:any) => {
+  const handleCheckboxChange = (event: any) => {
     setShowExperiencia(event.target.checked);
   };
-  
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,13 +80,16 @@ function AgregarO() {
         const response = await axios.get('titulos');
         const response2 = await axios.get('areas');
         const response3 = await axios.get('criterios');
+        const response4 = await axios.get('ubicaciones');
+        setProvinces(response4.data.provinces);
+        setCantons(response4.data.cantons);
         axios.get('idioma')
-        .then(response => {
-          setLanguages(response.data.idiomas);
-        })
-        .catch(error => {
-          console.error('Error fetching languages:', error);
-        });
+          .then(response => {
+            setLanguages(response.data.idiomas);
+          })
+          .catch(error => {
+            console.error('Error fetching languages:', error);
+          });
         setNiveles(response.data.nivel);
         setCampos(response.data.campo);
         setTitulos(response.data.titulo);
@@ -106,6 +119,21 @@ function AgregarO() {
   }, [selectedNivel]);
 
   useEffect(() => {
+    const fetchCantons = async () => {
+      if (selectedProvince) {
+        try {
+          const response = await axios.get(`ubicaciones/cantonesid/${selectedProvince}`);
+          setCantons(response.data);
+        } catch (error) {
+          console.error('Error fetching cantons:', error);
+        }
+      }
+    };
+
+    fetchCantons();
+  }, [selectedProvince]);
+
+  useEffect(() => {
     const fetchTitulos = async () => {
       if (selectedNivel && selectedCampo) {
         try {
@@ -119,6 +147,15 @@ function AgregarO() {
 
     fetchTitulos();
   }, [selectedNivel, selectedCampo]);
+
+  const handleProvinceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedProvince(event.target.value);
+    setSelectedCanton('');
+  };
+
+  const handleCantonChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCanton(event.target.value);
+  };
 
   const handleNivelChange = (event: any) => {
     setSelectedNivel(event.target.value);
@@ -232,7 +269,7 @@ function AgregarO() {
         const dataToSend = {
           ...values,
           usuario: usuario,
-          experiencia: showExperiencia? values.experiencia : 0,
+          experiencia: showExperiencia ? values.experiencia : 0,
           correo_contacto: showCorreo ? values.correo_contacto : null,
           numero_contacto: showNumeroContacto ? values.numero_contacto : null,
           titulos: selectedTitles,
@@ -389,35 +426,35 @@ function AgregarO() {
           </div>
 
           <div className="mb-4">
-      <label className="block text-sm font-bold mb-2" htmlFor="experienciaCheckbox">
-        <input
-          type="checkbox"
-          id="experienciaCheckbox"
-          onChange={handleCheckboxChange}
-        />{' '}
-        Requiere experiencia
-      </label>
-      {showExperiencia && (
-        <div id="experienciaContainer">
-          <label className="block text-sm font-bold mb-2" htmlFor="experiencia">
-            Años de Experiencia requerida
-          </label>
-          <input
-            className="w-full p-2 border rounded"
-            type="number"
-            id="experiencia"
-            placeholder="Describa los años de experiencia en puestos similares"
-            {...register('experiencia', {
-              required: 'Experiencia es requerida',
-              validate: validateNoNegative,
-            })}
-          />
-          {errors.experiencia && (
-            <p className="text-red-500">{errors.experiencia.message}</p>
-          )}
-        </div>
-      )}
-    </div>
+            <label className="block text-sm font-bold mb-2" htmlFor="experienciaCheckbox">
+              <input
+                type="checkbox"
+                id="experienciaCheckbox"
+                onChange={handleCheckboxChange}
+              />{' '}
+              Requiere experiencia
+            </label>
+            {showExperiencia && (
+              <div id="experienciaContainer">
+                <label className="block text-sm font-bold mb-2" htmlFor="experiencia">
+                  Años de Experiencia requerida
+                </label>
+                <input
+                  className="w-full p-2 border rounded"
+                  type="number"
+                  id="experiencia"
+                  placeholder="Describa los años de experiencia en puestos similares"
+                  {...register('experiencia', {
+                    required: 'Experiencia es requerida',
+                    validate: validateNoNegative,
+                  })}
+                />
+                {errors.experiencia && (
+                  <p className="text-red-500">{errors.experiencia.message}</p>
+                )}
+              </div>
+            )}
+          </div>
 
 
           <div className="mb-4">
@@ -497,224 +534,263 @@ function AgregarO() {
             ></textarea>
             {errors.detalles_adicionales && <p className="text-red-500">{errors.detalles_adicionales.message}</p>}
           </div>
-          <div  className="bg-white p-6 rounded-lg shadow-lg py-8" >
-          <h3 className="text-1xl text-red-500 font-bold mb-4">Datos de contacto extra:</h3>
           <div className="flex items-center">
-            <input
-              className="mr-2 leading-tight"
-              type="checkbox"
-              id="showCorreo"
-              checked={showCorreo}
-              onChange={() => setShowCorreo(!showCorreo)}
-            />
-            <label className="text-sm" htmlFor="showCorreo">
-              ¿Requiere correo extra de contacto?
-            </label>
-          </div>
-          {showCorreo && (
-            <>
-              <div className="mb-4">
-                <label className="block text-sm font-bold mb-2" htmlFor="correo_contacto">Correo de Contacto</label>
                 <input
-                  className="w-full p-2 border rounded"
-                  type="email"
-                  id="correo_contacto"
-                  placeholder="Correo de Contacto"
-                  {...register('correo_contacto')}
+                  className="mr-2 leading-tight"
+                  type="checkbox"
+                  id="solicitar_sueldo"
+                  {...register('solicitar_sueldo')}
                 />
+                <label className="text-sm" htmlFor="solicitar_sueldo">
+                  Solicitar al postulante el sueldo que espera ganar en este puesto.
+                </label>
               </div>
-            </>
-          )}
-          <div className="flex items-center">
-            <input
-              className="mr-2 leading-tight"
-              type="checkbox"
-              id="showNumeroContacto"
-              checked={showNumeroContacto}
-              onChange={() => setShowNumeroContacto(!showNumeroContacto)}
-            />
-            <label className="text-sm" htmlFor="showNumeroContacto">
-              ¿Requiere un número extra de contacto?
-            </label>
-          </div>
-          {showNumeroContacto && (
-            <>
-              <div className="mb-4">
-                <label className="block text-sm font-bold mb-2" htmlFor="numero_contacto">Número de Contacto</label>
-                <input
-                  className="w-full p-2 border rounded"
-                  type="tel"
-                  id="numero_contacto"
-                  placeholder="Número de Contacto"
-                  {...register('numero_contacto')}
-                />
-              </div>
-            </>
-          )}
+          <div className="bg-white p-6 rounded-lg shadow-lg py-8" >
+            <h3 className="text-1xl text-red-500 font-bold mb-4">Datos de contacto extra:</h3>
+            <div className="flex items-center">
+              <input
+                className="mr-2 leading-tight"
+                type="checkbox"
+                id="showCorreo"
+                checked={showCorreo}
+                onChange={() => setShowCorreo(!showCorreo)}
+              />
+              <label className="text-sm" htmlFor="showCorreo">
+                ¿Requiere correo extra de contacto?
+              </label>
+            </div>
+            {showCorreo && (
+              <>
+                <div className="mb-4">
+                  <label className="block text-sm font-bold mb-2" htmlFor="correo_contacto">Correo de Contacto</label>
+                  <input
+                    className="w-full p-2 border rounded"
+                    type="email"
+                    id="correo_contacto"
+                    placeholder="Correo de Contacto"
+                    {...register('correo_contacto')}
+                  />
+                </div>
+              </>
+            )}
+            <div className="flex items-center">
+              <input
+                className="mr-2 leading-tight"
+                type="checkbox"
+                id="showNumeroContacto"
+                checked={showNumeroContacto}
+                onChange={() => setShowNumeroContacto(!showNumeroContacto)}
+              />
+              <label className="text-sm" htmlFor="showNumeroContacto">
+                ¿Requiere un número extra de contacto?
+              </label>
+            </div>
+            {showNumeroContacto && (
+              <>
+                <div className="mb-4">
+                  <label className="block text-sm font-bold mb-2" htmlFor="numero_contacto">Número de Contacto</label>
+                  <input
+                    className="w-full p-2 border rounded"
+                    type="tel"
+                    id="numero_contacto"
+                    placeholder="Número de Contacto"
+                    {...register('numero_contacto')}
+                  />
+                </div>
+              </>
+            )}
           </div>
           <div></div>
-         <div  className="bg-white p-6 rounded-lg shadow-lg py-8" style={{ marginTop: '20px' }}>
-         <h3 className="text-1xl text-red-500 font-bold mb-4">Datos confidenciales:</h3>
-          <div className="mb-4">
-            <div className="flex items-center">
-              <input
-                className="mr-2 leading-tight"
-                type="checkbox"
-                id="mostrar_sueldo"
-                {...register('mostrar_sueldo')}
-              />
-              <label className="text-sm" htmlFor="mostrar_sueldo">
-                No mostrar el sueldo ofrecido al postulante
-              </label>
+          <div className="bg-white p-6 rounded-lg shadow-lg py-8" style={{ marginTop: '20px' }}>
+            <h3 className="text-1xl text-red-500 font-bold mb-4">Datos confidenciales:</h3>
+            <div className="mb-4">
+              <div className="flex items-center">
+                <input
+                  className="mr-2 leading-tight"
+                  type="checkbox"
+                  id="mostrar_sueldo"
+                  {...register('mostrar_sueldo')}
+                />
+                <label className="text-sm" htmlFor="mostrar_sueldo">
+                  No mostrar el sueldo ofrecido al postulante
+                </label>
+              </div>
             </div>
-          </div>
-          <div className="mb-4">
-            <div className="flex items-center">
-              <input
-                className="mr-2 leading-tight"
-                type="checkbox"
-                id="mostrar_empresa"
-                {...register('mostrar_empresa')}
-              />
-              <label className="text-sm" htmlFor="mostrar_empresa">
-                No mostrar nombre de Empresa publicadora
-              </label>
+            <div className="mb-4">
+              <div className="flex items-center">
+                <input
+                  className="mr-2 leading-tight"
+                  type="checkbox"
+                  id="mostrar_empresa"
+                  {...register('mostrar_empresa')}
+                />
+                <label className="text-sm" htmlFor="mostrar_empresa">
+                  No mostrar nombre de Empresa publicadora
+                </label>
+              </div>
+             
             </div>
-          </div>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-lg py-7" style={{ marginTop: '20px' }}>
-          
+
             <h3 className="text-1xl text-red-500 font-bold mb-4">Requisitos extra de evaluación:</h3>
             <span>Para mostrar postulantes capaces,puede seleccionar prioridad y requisitos extras de un postulante. Si no selecciona ningún criterio automaticamente se buscaran postulantes con los puntos de la oferta anteriormente planteada:</span>
             <div className="mb-4">
-            <div className="flex items-center">
-              <input
-                className="mr-2 leading-tight"
-                type="checkbox"
-                id="requireCriterio"
-                checked={requireCriterio}
-                onChange={() => setRequireCriterio(!requireCriterio)}
-              />
-              <label className="text-sm" htmlFor="requireCriterio">
-                ¿Requiere requisitos extras?
-              </label>
-            </div>
-          </div>
-
-          {requireCriterio && (
-            <>
-            <div className="mb-4">
-              <label className="block text-sm font-bold mb-2" htmlFor="id_criterio">Criterio</label>
-              <div className="flex">
-                <select
-                  className="w-2/3 p-2 border rounded mr-2"
-                  id="criterio"
-                  onChange={handleCriterioChange}
-                  value={selectedCriterioId || ''}>
-                  <option value="0">Seleccione un criterio...</option>
-                  {criterios.map(criterio => (
-                    <option key={criterio.id_criterio} value={criterio.id_criterio}>
-                      {criterio.criterio}
-                    </option>
-                  ))}
-                </select>
-                {selectedCriterioId && (
-                  <>
-                    {selectedCriterioId === 4 ? (
-                      <select
-                        className="w-1/3 p-2 border rounded mr-2"
-                        id="valor g"
-                        value={valorCriterio}
-                        onChange={(e) => setValorCriterio(e.target.value)}
-                      >
-                        <option value="">Seleccione un género...</option>
-                        <option value="Masculino">Masculino</option>
-                        <option value="Femenino">Femenino</option>
-                        <option value="Otro">Otro</option>
-                      </select>
-                    ) : selectedCriterioId === 5 ? (
-                      <select
-                        className="w-1/3 p-2 border rounded mr-2"
-                        id="valor e"
-                        value={valorCriterio}
-                        onChange={(e) => setValorCriterio(e.target.value)}
-                      >
-                        <option value="">Seleccione un estado civil...</option>
-                        <option value="Casado">Casado/a</option>
-                        <option value="Soltero">Soltero/a</option>
-                        <option value="Viudo">Viudo/a</option>
-                      </select>
-                    ) : selectedCriterioId === 6 ? (
-                      <select
-                        className="w-1/3 p-2 border rounded mr-2"
-                        id="valor e"
-                        value={valorCriterio}
-                        onChange={(e) => setValorCriterio(e.target.value)}
-                      >
-                        <option value="">Seleccione un idioma...</option>
-                       
-                  {languages.map((language: idioma) => (
-        <option key={language.id} value={language.id+','+language.nombre}>
-          {language.nombre}
-        </option>
-         ))}
-                      </select>
-                    ): selectedCriterioId === 7 ? (
-                      <select
-                        className="w-1/3 p-2 border rounded mr-2"
-                        id="valor e"
-                        value={valorCriterio}
-                        onChange={(e) => setValorCriterio(e.target.value)}
-                      >
-                        <option value="">Rango de edad...</option>
-                        <option value="Joven,(18-25 años)">18 - 25 años</option>
-                        <option value="Adulto,(26-35 años)">26 - 35 años</option>
-                        <option value="Mayor,(Más de 36 años)">36 años en adelante</option>
-                      </select>
-                    ): (
-                      <div></div>
-                    )}
-                  </>
-                )}
-                <select
-                  className="w-1/4 p-1 border rounded mr-2"
-                  id="prioridad"
-                  value={prioridadCriterio || ''}
-                  onChange={(e) => setPrioridadCriterio(parseInt(e.target.value))}>
-                  <option value="">Seleccione una prioridad...</option>
-                  <option value="1">Alta</option>
-                  <option value="2">Media</option>
-                  <option value="3">Baja</option>
-                </select>
+              <div className="flex items-center">
+                <input
+                  className="mr-2 leading-tight"
+                  type="checkbox"
+                  id="requireCriterio"
+                  checked={requireCriterio}
+                  onChange={() => setRequireCriterio(!requireCriterio)}
+                />
+                <label className="text-sm" htmlFor="requireCriterio">
+                  ¿Requiere requisitos extras?
+                </label>
               </div>
-              <button
-                type="button"
-                className="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                onClick={handleAgregarCriterio}
-              >
-                Agregar Criterio
-              </button>
-              {selectedCriterios.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="font-semibold">Criterios Seleccionados:</h4>
-                  <ul>
-                    {selectedCriterios.map(criterio => (
-                      <li key={criterio.id_criterio} className="flex items-center justify-between mb-2">
-                        <span>{criterio.valor ? `${criterio.criterio} = ${criterio.valor}  ` : `${criterio.criterio}`}</span>
-                        <button
-                          type="button"
-                          className="text-red-500"
-                          onClick={() => handleEliminarCriterio(criterio.id_criterio)}
-                        >
-                          x
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </div>
-            </>)}
+
+            {requireCriterio && (
+              <>
+                <div className="mb-4">
+                  <label className="block text-sm font-bold mb-2" htmlFor="id_criterio">Criterio</label>
+                  <div className="flex">
+                    <select
+                      className="w-2/3 p-2 border rounded mr-2"
+                      id="criterio"
+                      onChange={handleCriterioChange}
+                      value={selectedCriterioId || ''}>
+                      <option value="0">Seleccione un criterio...</option>
+                      {criterios.map(criterio => (
+                        <option key={criterio.id_criterio} value={criterio.id_criterio}>
+                          {criterio.criterio}
+                        </option>
+                      ))}
+                    </select>
+                    {selectedCriterioId && (
+                      <>
+                        {selectedCriterioId === 4 ? (
+                          <select
+                            className="w-1/3 p-2 border rounded mr-2"
+                            id="valor g"
+                            value={valorCriterio}
+                            onChange={(e) => setValorCriterio(e.target.value)}
+                          >
+                            <option value="">Seleccione un género...</option>
+                            <option value="Masculino">Masculino</option>
+                            <option value="Femenino">Femenino</option>
+                            <option value="Otro">Otro</option>
+                          </select>
+                        ) : selectedCriterioId === 5 ? (
+                          <select
+                            className="w-1/3 p-2 border rounded mr-2"
+                            id="valor e"
+                            value={valorCriterio}
+                            onChange={(e) => setValorCriterio(e.target.value)}
+                          >
+                            <option value="">Seleccione un estado civil...</option>
+                            <option value="Casado">Casado/a</option>
+                            <option value="Soltero">Soltero/a</option>
+                            <option value="Viudo">Viudo/a</option>
+                          </select>
+                        ) : selectedCriterioId === 6 ? (
+                          <select
+                            className="w-1/3 p-2 border rounded mr-2"
+                            id="valor e"
+                            value={valorCriterio}
+                            onChange={(e) => setValorCriterio(e.target.value)}
+                          >
+                            <option value="">Seleccione un idioma...</option>
+
+                            {languages.map((language: idioma) => (
+                              <option key={language.id} value={language.id + ',' + language.nombre}>
+                                {language.nombre}
+                              </option>
+                            ))}
+                          </select>
+                        ) : selectedCriterioId === 7 ? (
+                          <select
+                            className="w-1/3 p-2 border rounded mr-2"
+                            id="valor e"
+                            value={valorCriterio}
+                            onChange={(e) => setValorCriterio(e.target.value)}
+                          >
+                            <option value="">Rango de edad...</option>
+                            <option value="Joven,(18-25 años)">18 - 25 años</option>
+                            <option value="Adulto,(26-35 años)">26 - 35 años</option>
+                            <option value="Mayor,(Más de 36 años)">36 años en adelante</option>
+                          </select>
+                        ) : selectedCriterioId === 8 ? (
+
+                          <>
+                            <select id="province" className="w-1/3 p-2 border rounded mr-2" onChange={handleProvinceChange}>
+                              <option value="">Provincia..</option>
+                              {provinces.map((province, index) => (
+                                <option key={index} value={province}>
+                                  {province}
+                                </option>
+                              ))}
+                            </select>
+                            <select
+                              className="w-1/3 p-2 border rounded mr-2"
+                              id="valor e"
+                              value={valorCriterio}
+                              onChange={(e) => setValorCriterio(e.target.value)}
+                              disabled={!selectedProvince}
+                            >
+                              <option value="">Canton..</option>
+                              {cantons.map((canton) => (
+                                <option key={canton.id} value={`${canton.id},${canton.canton}`}>
+                                  {canton.canton}
+                                </option>
+                              ))}
+
+                            </select>
+                          </>
+                        ) : (
+                          <div></div>
+                        )}
+                      </>
+                    )}
+                    <select
+                      className="w-1/4 p-1 border rounded mr-2"
+                      id="prioridad"
+                      value={prioridadCriterio || ''}
+                      onChange={(e) => setPrioridadCriterio(parseInt(e.target.value))}>
+                      <option value="">Seleccione una prioridad...</option>
+                      <option value="1">Alta</option>
+                      <option value="2">Media</option>
+                      <option value="3">Baja</option>
+                    </select>
+                  </div>
+                  <button
+                    type="button"
+                    className="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                    onClick={handleAgregarCriterio}
+                  >
+                    Agregar Criterio
+                  </button>
+                  {selectedCriterios.length > 0 && (
+                    <div className="mt-4">
+                      <h4 className="font-semibold">Criterios Seleccionados:</h4>
+                      <ul>
+                        {selectedCriterios.map(criterio => (
+                          <li key={criterio.id_criterio} className="flex items-center justify-between mb-2">
+                            <span>{criterio.valor ? `${criterio.criterio} = ${criterio.valor}  ` : `${criterio.criterio}`}</span>
+                            <button
+                              type="button"
+                              className="text-red-500"
+                              onClick={() => handleEliminarCriterio(criterio.id_criterio)}
+                            >
+                              x
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </>)}
             <button
               type="submit"
               className="bg-blue-500 text-white p-2 rounded-lg mt-4">

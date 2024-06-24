@@ -28,8 +28,9 @@ class Oferta extends Model
         'correo_contacto',
         'numero_contacto',
         'estado',
-        'mostrar_sueldo',
-        'mostrar_empresa'
+        'n_mostrar_sueldo',
+        'n_mostrar_empresa',
+        'soli_sueldo'
     ];
 
     // Relación con la tabla Empresa
