@@ -172,6 +172,13 @@ const Profile: React.FC = () => {
         </div>
       </div>
 
+      <div className="mt-6 bg-gray-800 p-4 rounded-lg pb-6 shadow-inner text-gray-200">
+        <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Información extra</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-6">
+          <p><strong>Información Extra:</strong> {profileData.postulante.informacion_extra}</p>
+        </div>
+      </div>
+
       <Tabs
         profileData={profileData}
         openEditFormacionModal={openEditFormacionModal}

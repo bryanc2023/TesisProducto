@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faEnvelope, faSearch, faChevronDown, faBars, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown, faBars, faTimes, faEnvelope, faUser, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import axios from '../../services/axios';
@@ -21,16 +21,29 @@ function PostulanteLayout() {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 setDropdownOpen(false);
             }
-            if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node) && sidebarOpen) {
-                setSidebarOpen(false);
-            }
         };
 
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [dropdownRef, sidebarOpen]);
+    }, [dropdownRef]);
+
+   
+
+    const toggleDropdown = () => {
+        setDropdownOpen(!dropdownOpen);
+    };
+
+    const toggleSidebar = () => {
+        setSidebarOpen(!sidebarOpen);
+    };
+
+    const handleContentClick = () => {
+        if (sidebarOpen) {
+            setSidebarOpen(false);
+        }
+    };
 
     useEffect(() => {
         const fetchProfileData = async () => {
@@ -49,16 +62,16 @@ function PostulanteLayout() {
         }
     }, [user]);
 
-    const toggleDropdown = () => {
-        setDropdownOpen(!dropdownOpen);
+ 
+
+    const closeSidebar = () => {
+        setSidebarOpen(false);
     };
 
-    const toggleSidebar = () => {
-        setSidebarOpen(!sidebarOpen);
-    };
+
 
     return (
-        <div className="flex h-screen overflow-hidden">
+        <div className="flex h-screen overflow-hidden" onClick={handleContentClick}>
             {/* Lateral Nav */}
             <nav ref={sidebarRef} className={`bg-gray-900 text-white p-4 fixed top-16 bottom-0 lg:relative lg:translate-x-0 transition-transform transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:w-64 z-20`}>
                 <div className="flex flex-col items-center mb-4">
@@ -71,25 +84,25 @@ function PostulanteLayout() {
                 </div>
                 <ul>
                     <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
-                        <Link to="/inicio" className="flex items-center w-full">
+                        <Link to="/inicio" className="flex items-center w-full" onClick={closeSidebar}>
                             <FontAwesomeIcon icon={faEnvelope} className="mr-2" />
                             <span>Inicio</span>
                         </Link>
                     </li>
                     <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
-                        <Link to="/verOfertasAll" className="flex items-center w-full">
+                        <Link to="/verOfertasAll" className="flex items-center w-full" onClick={closeSidebar}>
                             <FontAwesomeIcon icon={faEnvelope} className="mr-2" />
                             <span>Realizar Postulación</span>
                         </Link>
                     </li>
                     <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
-                        <Link to="/resultadosP" className="flex items-center w-full">
+                        <Link to="/resultadosP" className="flex items-center w-full" onClick={closeSidebar}>
                             <FontAwesomeIcon icon={faSearch} className="mr-2" />
                             <span>Consulta de Resultados</span>
                         </Link>
                     </li>
                     <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
-                        <Link to="/perfilP" className="flex items-center w-full">
+                        <Link to="/perfilP" className="flex items-center w-full" onClick={closeSidebar}>
                             <FontAwesomeIcon icon={faUser} className="mr-2" />
                             <span>Mi Perfil</span>
                         </Link>

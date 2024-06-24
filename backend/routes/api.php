@@ -81,6 +81,8 @@ Route::post('add-oferta', [OfertaController::class, 'registerOferta']);
 Route::put('/updatePostulanteById/{id}', [PostulanteController::class, 'updatePostulanteByIdUser']);
 Route::put('/updateIdioma/{id_postulante}/{id_idioma}', [IdiomaController::class, 'updateIdioma']);
 Route::put('/updatePostulanteById/{id}', [PostulanteController::class, 'updatePostulanteByIdUser']);
+Route::get('postulante/{id}/cv', [PostulanteController::class, 'getCV']);
+Route::post('postulante-red', [PostulanteRedController::class, 'redPostulante']);
 
 Route::put('/formacion_academica/update', [PostulanteController::class, 'updateFormacionAcademica']);
 

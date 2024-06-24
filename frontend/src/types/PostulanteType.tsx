@@ -1,6 +1,7 @@
 interface Postulante {
     id_usuario: number;
     foto: string;
+    cv: string;
     nombres: string;
     apellidos: string;
     fecha_nac: string;
