@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import EducationTab from './EducationTab';
 import ExperienceTab from './ExperienceTab';
 import LanguagesTab from './LanguagesTab';
 import CoursesTab from './CoursesTab';
+import CurriTab from './CurriTab';
+import axios from 'axios';
 
 interface TabsProps {
   profileData: ProfileData;
@@ -12,6 +14,8 @@ interface TabsProps {
   openEditLanguageModal: (idioma: Idioma) => void;
   openEditCursoModal: (curso: Curso | null) => void;
   handleDeleteCurso: (id: number) => void;
+  handleViewCV: (id: number) => void;
+  handleDownloadCV: (url: string) => void;
 }
 
 interface ProfileData {
@@ -26,6 +30,7 @@ interface ProfileData {
     genero: string;
     informacion_extra: string;
     idiomas: Idioma[];
+    cv: string; // URL del CV
   };
   ubicacion: {
     provincia: string;
@@ -66,8 +71,39 @@ interface Curso {
   certificado: string;
 }
 
-const Tabs: React.FC<TabsProps> = ({ profileData, openEditFormacionModal, handleDeleteFormacion, openModal, openEditLanguageModal, openEditCursoModal, handleDeleteCurso }) => {
+interface CV {
+  id: number;
+  nombre: string;
+  imagen: string;
+  url: string;
+}
+
+const Tabs: React.FC<TabsProps> = ({
+  profileData,
+  openEditFormacionModal,
+  handleDeleteFormacion,
+  openModal,
+  openEditLanguageModal,
+  openEditCursoModal,
+  handleDeleteCurso,
+  handleViewCV,
+  handleDownloadCV,
+}) => {
   const [activeTab, setActiveTab] = useState('education');
+
+  useEffect(() => {
+    // Cargar datos del perfil si es necesario
+    const fetchProfileData = async () => {
+      try {
+        const response = await axios.get(`/api/postulante/${user.id}`);
+        setProfileData(response.data);
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+      }
+    };
+
+    fetchProfileData();
+  }, []);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -97,6 +133,21 @@ const Tabs: React.FC<TabsProps> = ({ profileData, openEditFormacionModal, handle
             handleDeleteCurso={handleDeleteCurso}
           />
         );
+      case 'cv':
+        return (
+          <CurriTab
+            cvs={[
+              {
+                id: profileData.postulante.id,
+                nombre: `${profileData.postulante.nombres} ${profileData.postulante.apellidos}`,
+                imagen: profileData.postulante.foto,
+                url: profileData.postulante.cv,
+              },
+            ]}
+            handleViewCV={handleViewCV}
+            handleDownloadCV={handleDownloadCV}
+          />
+        );
       default:
         return null;
     }
@@ -105,17 +156,35 @@ const Tabs: React.FC<TabsProps> = ({ profileData, openEditFormacionModal, handle
   return (
     <div className="mt-6">
       <div className="flex space-x-1 overflow-x-auto">
-        <button onClick={() => setActiveTab('education')} className={`py-2 px-4 flex-shrink-0 ${activeTab === 'education' ? 'bg-gray-800 text-white rounded-t-lg' : 'bg-gray-400 text-black rounded-lg'}`}>
+        <button
+          onClick={() => setActiveTab('education')}
+          className={`py-2 px-4 flex-shrink-0 ${activeTab === 'education' ? 'bg-gray-800 text-white rounded-t-lg' : 'bg-gray-400 text-black rounded-lg'}`}
+        >
           Educación
         </button>
-        <button onClick={() => setActiveTab('experience')} className={`py-2 px-4 flex-shrink-0 ${activeTab === 'experience' ? 'bg-gray-800 text-white rounded-t-lg' : 'bg-gray-400 text-black rounded-lg'}`}>
+        <button
+          onClick={() => setActiveTab('experience')}
+          className={`py-2 px-4 flex-shrink-0 ${activeTab === 'experience' ? 'bg-gray-800 text-white rounded-t-lg' : 'bg-gray-400 text-black rounded-lg'}`}
+        >
           Experiencia
         </button>
-        <button onClick={() => setActiveTab('languages')} className={`py-2 px-4 flex-shrink-0 ${activeTab === 'languages' ? 'bg-gray-800 text-white rounded-t-lg' : 'bg-gray-400 text-black rounded-lg'}`}>
+        <button
+          onClick={() => setActiveTab('languages')}
+          className={`py-2 px-4 flex-shrink-0 ${activeTab === 'languages' ? 'bg-gray-800 text-white rounded-t-lg' : 'bg-gray-400 text-black rounded-lg'}`}
+        >
           Idiomas
         </button>
-        <button onClick={() => setActiveTab('courses')} className={`py-2 px-4 flex-shrink-0 ${activeTab === 'courses' ? 'bg-gray-800 text-white rounded-t-lg' : 'bg-gray-400 text-black rounded-lg'}`}>
+        <button
+          onClick={() => setActiveTab('courses')}
+          className={`py-2 px-4 flex-shrink-0 ${activeTab === 'courses' ? 'bg-gray-800 text-white rounded-t-lg' : 'bg-gray-400 text-black rounded-lg'}`}
+        >
           Cursos
+        </button>
+        <button
+          onClick={() => setActiveTab('cv')}
+          className={`py-2 px-4 flex-shrink-0 ${activeTab === 'cv' ? 'bg-gray-800 text-white rounded-t-lg' : 'bg-gray-400 text-black rounded-lg'}`}
+        >
+          CV
         </button>
       </div>
       <div className="p-4 bg-gray-700 rounded-b-lg">

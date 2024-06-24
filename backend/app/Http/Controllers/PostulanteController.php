@@ -59,6 +59,18 @@ class PostulanteController extends Controller
         return response()->json(['message' => 'Postulante creado exitosamente', 'postulante' => $postulante], 201);
     }
 
+    public function getCV($id_usuario)
+{
+    // Verificar si existe un registro de postulante para este usuario
+    $postulante = Postulante::where('id_usuario', $id_usuario)->first();
+    if (!$postulante) {
+        return response()->json(['message' => 'No se encontró el registro del postulante'], 404);
+    }
+
+    // Devolver la URL del CV
+    return response()->json(['cv_url' => $postulante->cv], 200);
+}
+
     public function obtenerIdPostulante(Request $request)
     {
         $idUsuario = $request->input('id_usuario');

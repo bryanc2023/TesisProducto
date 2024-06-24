@@ -34,20 +34,7 @@ function EmpresaLayout() {
         };
     }, [dropdownRef]);
 
-    useEffect(() => {
-        const fetchEmpresa = async () => {
-            if (user) {
-                try {
-                    const response = await axios.get<Empresa>(`http://localhost:8000/api/empresaById/${user.id}`);
-                    setEmpresa(response.data);
-                } catch (err) {
-                    console.error('Error fetching empresa data:', err);
-                }
-            }
-        };
-
-        fetchEmpresa();
-    }, [user]);
+   
 
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen);
@@ -62,6 +49,20 @@ function EmpresaLayout() {
             setSidebarOpen(false);
         }
     };
+    useEffect(() => {
+        const fetchEmpresa = async () => {
+            if (user) {
+                try {
+                    const response = await axios.get<Empresa>(`http://localhost:8000/api/empresaById/${user.id}`);
+                    setEmpresa(response.data);
+                } catch (err) {
+                    console.error('Error fetching empresa data:', err);
+                }
+            }
+        };
+
+        fetchEmpresa();
+    }, [user]);
 
     const getLogoUrl = (logoPath: string) => {
         return logoPath.startsWith('http') ? logoPath : `http://localhost:8000/storage/${logoPath}`;
