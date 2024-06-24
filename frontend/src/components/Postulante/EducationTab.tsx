@@ -31,16 +31,16 @@ const EducationTab: React.FC<EducationTabProps> = ({ formaciones, openEditFormac
     {formaciones.length > 0 ? (
       formaciones.map((formacion, index) => (
         <div key={index} className="mb-4 p-4 border rounded-lg bg-gray-700 relative">
-          <div className="absolute top-2 right-2 flex space-x-2">
+          <div className="flex justify-end space-x-2 mb-2">
             <button
               onClick={() => openEditFormacionModal(formacion)}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 mr-2"
+              className="px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
             >
               <FaPencilAlt className="w-4 h-4" />
             </button>
             <button
               onClick={() => handleDeleteFormacion(formacion.id)}
-              className="px-4 py-2 bg-rose-500 text-white rounded-md hover:bg-rose-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-rose-300 mr-2"
+              className="px-2 py-1 bg-rose-500 text-white rounded-md hover:bg-rose-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-rose-300"
             >
               <FaTrash className="w-4 h-4" />
             </button>

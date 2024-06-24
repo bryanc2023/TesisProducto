@@ -45,7 +45,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experiencias }) => {
   return (
     <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
       <div className="flex justify-between items-center">
-        <h3 className="text-xl font-semibold mb-4">Experiencia</h3>
+        <h3 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Experiencia</h3>
         <button onClick={openModal} className="text-orange-400 hover:underline">
           + Agregar experiencia
         </button>
@@ -53,15 +53,15 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experiencias }) => {
       {experiencias && experiencias.length > 0 ? (
         experiencias.map((experiencia, index) => (
           <div key={index} className="mb-4 p-4 border rounded-lg bg-gray-700 relative">
-            <div className="absolute top-2 right-2 flex space-x-2">
+            <div className="flex justify-end space-x-2 mb-2">
               <button
                 onClick={() => openModal()}
-                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 mr-2"
+                className="px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
               >
                 <FaPencilAlt className="w-4 h-4" />
               </button>
               <button
-                className="px-4 py-2 bg-rose-500 text-white rounded-md hover:bg-rose-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-rose-300 mr-2"
+                className="px-2 py-1 bg-rose-500 text-white rounded-md hover:bg-rose-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-rose-300"
               >
                 <FaTrash className="w-4 h-4" />
               </button>

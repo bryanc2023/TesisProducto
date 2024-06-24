@@ -44,7 +44,7 @@ const EmpresaDetails: React.FC = () => {
         const fetchProfileData = async () => {
             try {
                 if (user) {
-                    console.log(user.id)
+                    console.log(user.id);
                     const response = await axios.get(`/empresaById/${user.id}`);
                     setEmpresa(response.data);
                     if (response.data.ubicacion) {
@@ -166,10 +166,10 @@ const EmpresaDetails: React.FC = () => {
                 setTimeout(() => {
                     setSuccessMessage(null);
                 }, 3000);
-                
+
                 // Recargar los datos del perfil después de guardar
                 await reloadProfile();
-    
+
                 setModalIsOpen(false);
                 setError(null);
             } catch (err) {
@@ -243,8 +243,8 @@ const EmpresaDetails: React.FC = () => {
                 </div>
             </div>
             {modalIsOpen && (
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-                    <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-3xl shadow-lg rounded-md bg-white">
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center">
+                    <div className="relative mx-auto p-5 border w-full max-w-3xl shadow-lg rounded-md bg-white">
                         <button
                             onClick={closeModal}
                             className="absolute top-2 right-2 text-gray-700 hover:text-gray-900"
@@ -282,7 +282,7 @@ const EmpresaDetails: React.FC = () => {
                                                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                             />
                                         </div>
-                                        <div className="mb-4 col-span-2">
+                                        <div className="mb-4 sm:col-span-2">
                                             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="descripcion">
                                                 Descripción
                                             </label>
@@ -384,7 +384,6 @@ const EmpresaDetails: React.FC = () => {
                                             </select>
                                         </div>
                                     </div>
-                                     
                                     <div className="flex items-center justify-center mt-4">
                                         <button onClick={handleSave} className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-700">
                                             Guardar
