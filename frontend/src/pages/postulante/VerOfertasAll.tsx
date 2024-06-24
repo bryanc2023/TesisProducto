@@ -10,7 +10,7 @@ interface Oferta {
     estado: string;
     cargo: string;
     areas: {
-        id:number;
+        id: number;
         nombre_area: string;
     };
     empresa: {
@@ -22,18 +22,18 @@ interface Oferta {
     n_mostrar_empresa: number;
     modalidad: string;
     carga_horaria: string;
-    experiencia: string;
-    funciones:string;
-    objetivo_cargo:string;
-    detalles_adicionales:string;
+    experiencia: number;
+    funciones: string;
+    objetivo_cargo: string;
+    detalles_adicionales: string;
     criterios: Criterio[];
     expe: {
         titulo: string;
         nivel_educacion: string;
     }[];
-    sueldo:string;
+    sueldo: string;
     n_mostrar_sueldo: number;
-    soli_sueldo:number;
+    soli_sueldo: number;
     // Define otros campos de la oferta según sea necesario
 }
 interface Idioma {
@@ -51,7 +51,7 @@ interface Criterio {
 interface ModalProps {
     oferta: Oferta | null;
     onClose: () => void;
-    userId: number| undefined;
+    userId: number | undefined;
 }
 
 interface Area {
@@ -63,33 +63,19 @@ interface PostData {
     id_postulante: number | undefined;
     id_oferta: number;
     sueldo?: number | null; // Hacer sueldo opcional en la interfaz
-  }
-  
+}
+
 
 function Modal({ oferta, onClose, userId }: ModalProps) {
-    const [idiomas, setIdiomas] = useState<{ [key: number]: string }>({});
-    const [sueldoDeseado, setSueldoDeseado] = useState(null);
-   
-    useEffect(() => {
-        const fetchIdiomas = async () => {
-            try {
-                const response = await axios.get('idioma'); // Cambia la URL a la correcta
-                const idiomasData = response.data.idiomas.reduce((acc: { [key: number]: string }, idioma: Idioma) => {
-                    acc[idioma.id] = idioma.nombre;
-                    return acc;
-                }, {});
-                setIdiomas(idiomasData);
-            } catch (error) {
-                console.error('Error fetching idiomas:', error);
-            }
-        };
 
-        fetchIdiomas();
-    }, []);
+    const [sueldoDeseado, setSueldoDeseado] = useState(null);
+
+
+
     const navigate = useNavigate();
 
-       // Función para formatear fecha
-       const formatFechaMaxPos = (fecha: string) => {
+    // Función para formatear fecha
+    const formatFechaMaxPos = (fecha: string) => {
         const date = new Date(fecha);
         const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
         return date.toLocaleDateString('es-ES', options);
@@ -102,31 +88,31 @@ function Modal({ oferta, onClose, userId }: ModalProps) {
             const postData: PostData = {
                 id_postulante: userId,
                 id_oferta: oferta.id_oferta,
-              };
-        
-              // Agregar sueldoDeseado al postData solo si está definido y no es null
-              if (sueldoDeseado !== null && sueldoDeseado !== undefined) {
+            };
+
+            // Agregar sueldoDeseado al postData solo si está definido y no es null
+            if (sueldoDeseado !== null && sueldoDeseado !== undefined) {
                 postData.sueldo = sueldoDeseado;
-              }
+            }
             await axios.post('postular', postData);
             Swal.fire({
                 title: '¡Hecho!',
                 text: 'Te has postulado a la oferta seleccionado, verifica el estado de tu postulación en los resultados',
                 icon: 'success',
                 confirmButtonText: 'Ok'
-              }).then(() => {
+            }).then(() => {
                 navigate("/verOfertasAll");
-              });
+            });
         } catch (error) {
             console.error('Error postulando:', error);
-    Swal.fire({
-        title: '¡Ha ocurrido un error!',
-        text:  'Ya  has postulado para esta oferta, consulta su estado en la pestaña de "Consultar postulación" ',
-        icon: 'error',
-        confirmButtonText: 'Ok'
-    }).then(() => {
-        navigate("/verOfertasAll");
-    });
+            Swal.fire({
+                title: '¡Ha ocurrido un error!',
+                text: 'Ya  has postulado para esta oferta, consulta su estado en la pestaña de "Consultar postulación" ',
+                icon: 'error',
+                confirmButtonText: 'Ok'
+            }).then(() => {
+                navigate("/verOfertasAll");
+            });
         }
     };
 
@@ -137,7 +123,7 @@ function Modal({ oferta, onClose, userId }: ModalProps) {
         if (oferta.funciones.includes(',')) {
             // Dividir las funciones por comas y renderizar como lista con viñetas
             const funcionesList = oferta.funciones.split(',').map((funcion, index) => (
-                <li  key={index}>+ {funcion.trim()} </li> 
+                <li key={index}>+ {funcion.trim()} </li>
             ));
             return <ul> {funcionesList}</ul>;
         } else {
@@ -152,7 +138,7 @@ function Modal({ oferta, onClose, userId }: ModalProps) {
         if (oferta.detalles_adicionales.includes(',')) {
             // Dividir las funciones por comas y renderizar como lista con viñetas
             const detallesList = oferta.detalles_adicionales.split(',').map((detalle, index) => (
-                <li  key={index}>+ {detalle.trim()} </li> 
+                <li key={index}>+ {detalle.trim()} </li>
             ));
             return <ul> {detallesList}</ul>;
         } else {
@@ -161,31 +147,40 @@ function Modal({ oferta, onClose, userId }: ModalProps) {
         }
     };
 
-    const renderValorCriterioE = (criterio: Criterio) => {
-        switch (criterio.pivot.valor) {
-            case 'Joven':
-                return '18 - 25 años';
-            case 'Adulto':
-                return '26 - 35 años';
-            case 'Mayor':
-                return '36 años en adelante';
-            default:
-                return criterio.pivot.valor;
-        }
-    };
+
 
     const renderCriterioValor = (criterio: Criterio) => {
-        const criteriosSolicitados = ["Experiencia", "Titulo", "Sueldo"];
-       if (criteriosSolicitados.includes(criterio.criterio)) {
-          return "El solicitado";
-         }
-        if (criterio.criterio === 'Idioma') {
-            const idiomaId = Number(criterio.pivot.valor);
-            console.log(idiomaId);
-            return idiomas[idiomaId]  || criterio.pivot.valor;
+
+        if (criterio.criterio === 'Experiencia') {
+            return "Los años mínimos indicados";
         }
+        if (criterio.criterio === 'Titulo') {
+            return "Alguno de los títulos mencionados";
+        }
+        if (criterio.criterio === 'Sueldo') {
+            return "Indicar el sueldo prospecto a ganar";
+        }
+
         if (criterio.criterio === 'Edad') {
-            return renderValorCriterioE(criterio);
+            const valorArray = criterio.pivot.valor.split(",");
+            return valorArray.length > 1 ? valorArray[2].trim() : criterio.pivot.valor;
+        }
+        if (criterio.criterio === "Ubicación") {
+            const valorArray = criterio.pivot.valor.split(",");
+            return valorArray.length > 1 ? valorArray[1].trim() : criterio.pivot.valor;
+        }
+        if (criterio.criterio === "Idioma") {
+            const valorArray = criterio.pivot.valor.split(",");
+            return valorArray.length > 1 ? valorArray[1].trim() : criterio.pivot.valor;
+        }
+        if (criterio.criterio === "Estado Civil") {
+            if (criterio.pivot.valor === "Casado") {
+                return "Casado/a";
+            } else if (criterio.pivot.valor === "Soltero") {
+                return "Soltero/a";
+            } else {
+                return "Viudo/a";
+            }
         }
         return criterio.pivot.valor;
     };
@@ -195,29 +190,33 @@ function Modal({ oferta, onClose, userId }: ModalProps) {
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white p-4 rounded shadow-lg w-11/12 md:w-1/2 text-center overflow-auto max-h-screen md:max-h-96"
                 style={{ maxHeight: `calc(100vh - 30px)` }}>
-               <button onClick={onClose} className="text-white bg-red-500 rounded-full w-8 h-8 absolute top-4 right-4 z-50 flex items-center justify-center">X</button>
+                <button onClick={onClose} className="text-white bg-red-500 rounded-full w-8 h-8 absolute top-4 right-4 z-50 flex items-center justify-center">X</button>
                 <h2 className="text-xl font-bold mb-4">{oferta.cargo}</h2>
                 <div className="flex justify-center items-center mb-4">
-                <img
-                                    src={oferta.n_mostrar_empresa === 1 ? '/images/anonima.png' : oferta.empresa.logo}
-                                    alt="Logo"
-                                    className="w-20 h-16 rounded-full shadow-lg mr-4"
-                                />
+                    <img
+                        src={oferta.n_mostrar_empresa === 1 ? '/images/anonima.png' : oferta.empresa.logo}
+                        alt="Logo"
+                        className="w-20 h-16 rounded-full shadow-lg mr-4"
+                    />
                 </div>
                 <div className="text-center">
                     <div>
-                        <p className="text-gray-700 mb-1"><strong>Título/s solicitados:</strong></p>
-                        <ul>
-                            {oferta.expe.map((titulo, index) => (
-                                <li key={index}>
-                                    <p>• {titulo.titulo}</p>
-                                </li>
-                            ))}
-                        </ul>
+                        {oferta.expe.length > 0 && (
+                            <>
+                                <p className="text-gray-700 mb-1"><strong>Título/s solicitados:</strong></p>
+                                <ul>
+                                    {oferta.expe.map((titulo, index) => (
+                                        <li key={index}>
+                                            <p>• {titulo.titulo}</p>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </>
+                        )}
                     </div>
                     <p className="text-gray-700 mb-1"><strong>Empresa:</strong> {oferta.n_mostrar_empresa === 1 ? 'Anónima' : oferta.empresa.nombre_comercial}</p>
-                    <p className="text-gray-700 mb-1"><strong>Sueldo:</strong>{oferta.n_mostrar_sueldo === 1 ? 'No descrito' : oferta.sueldo}</p>
-                    <p className="text-gray-700 mb-1"><strong>Experiencia en cargos similares:</strong> {oferta.experiencia} años</p>
+                    <p className="text-gray-700 mb-1"><strong>Sueldo:</strong>{oferta.n_mostrar_sueldo === 1 ? 'No descrito' : `${oferta.sueldo}$`}</p>
+                    <p className="text-gray-700 mb-1"><strong>Experiencia en cargos similares:</strong> {oferta.experiencia === 0 ? 'No requerida' : `${oferta.experiencia} año/s`}</p>
                     <p className="text-gray-700 mb-1"><strong>Carga Horaria:</strong> {oferta.carga_horaria}</p>
                     <p className="text-gray-700 mb-1"><strong>Fecha Máxima De Postulación:</strong> {formatFechaMaxPos(oferta.fecha_max_pos)}</p>
 
@@ -233,26 +232,27 @@ function Modal({ oferta, onClose, userId }: ModalProps) {
                         {renderDetalles()}
                     </div>
                     <div>
-      <p className="text-gray-700 mb-1"><strong>Requisitos adicionales:</strong></p>
-      {oferta.criterios.length > 0 ? (
-        <>
-          <p>La empresa especificó que se requiere los siguientes criterios adicionales:</p>
-          <ul>
-            {oferta.criterios.map((criterio, index) => (
-              <li key={index}>
-                <p><strong>⁃ {criterio.criterio}:</strong> {renderCriterioValor(criterio)}</p>
-              </li>
-            ))}
-          </ul>
-        </>
-      ) : (
-        <p>No se requiere criterios extras.</p>
-      )}
-      
-    </div>
-    {oferta.soli_sueldo === 1 && (
+
+                        {oferta.criterios.length > 0 ? (
+                            <>
+                                <p className="text-gray-700 mb-1"><strong>Requisitos adicionales:</strong></p>
+                                <p>La empresa especificó que se requiere los siguientes criterios adicionales:</p>
+                                <ul>
+                                    {oferta.criterios.map((criterio, index) => (
+                                        <li key={index}>
+                                            <p><strong>⁃ {criterio.criterio}:</strong> {renderCriterioValor(criterio)}</p>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </>
+                        ) : (
+                            <p className="text-gray-700 mb-1" ></p>
+                        )}
+
+                    </div>
+                    {oferta.soli_sueldo === 1 && (
                         <div className="mt-4">
-                            <label htmlFor="sueldoDeseado" className="text-gray-700 block mb-2">Ingrese el sueldo deseado a ganar en el trabajo:</label>
+                            <label htmlFor="sueldoDeseado" className="text-gray-700 block mb-2"><strong>Ingrese el sueldo deseado a ganar en el trabajo:</strong></label>
                             <input
                                 type="number"
                                 id="sueldoDeseado"
@@ -277,16 +277,16 @@ function VerOfertasAll() {
     const [selectedArea, setSelectedArea] = useState('');
     const [selectedOferta, setSelectedOferta] = useState<Oferta | null>(null);
 
-   // Función para formatear fecha
-   const formatFechaMaxPos = (fecha: string) => {
-    const date = new Date(fecha);
-    const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
-    return date.toLocaleDateString('es-ES', options);
-};
+    // Función para formatear fecha
+    const formatFechaMaxPos = (fecha: string) => {
+        const date = new Date(fecha);
+        const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+        return date.toLocaleDateString('es-ES', options);
+    };
     useEffect(() => {
         fetchOfertas();
         fetchAreas();
-        
+
     }, []);
 
     const fetchAreas = async () => {
@@ -307,7 +307,7 @@ function VerOfertasAll() {
         }
     };
 
-   
+
     const filteredOfertas = ofertas.filter((oferta) =>
         oferta.cargo.toLowerCase().includes(searchTerm.toLowerCase()) &&
         (selectedArea === '' || oferta.areas.nombre_area === selectedArea)
@@ -354,27 +354,27 @@ function VerOfertasAll() {
             )}
             <h1 className="text-2xl font-semibold mb-4">OFERTAS PUBLICADAS:</h1>
             <div className="relative overflow-x-auto">
-            <div className="flex flex-wrap gap-4">
-    {filteredOfertas.map((oferta) => (
-        <div key={oferta.id_oferta} className="bg-gray-100 p-4 rounded shadow-md flex-shrink-0 w-full md:w-1/2 lg:w-3/4">
-            <div className="flex items-center justify-center mb-2"> {/* Alineación vertical y horizontal centrada */}
-            <img
+                <div className="flex flex-wrap gap-4">
+                    {filteredOfertas.map((oferta) => (
+                        <div key={oferta.id_oferta} className="bg-gray-100 p-4 rounded shadow-md flex-shrink-0 w-full md:w-1/2 lg:w-3/4">
+                            <div className="flex items-center justify-center mb-2"> {/* Alineación vertical y horizontal centrada */}
+                                <img
                                     src={oferta.n_mostrar_empresa === 1 ? '/images/anonima.png' : oferta.empresa.logo}
                                     alt="Logo"
                                     className="w-20 h-16 rounded-full shadow-lg mr-4"
                                 />
-                <div className="text-center"> {/* Contenedor para centrar el título */}
-                    <h2 className="text-xl font-bold">{oferta.cargo}</h2>
+                                <div className="text-center"> {/* Contenedor para centrar el título */}
+                                    <h2 className="text-xl font-bold">{oferta.cargo}</h2>
+                                </div>
+                            </div>
+                            <p className="text-gray-700 mb-1"><strong>Empresa:</strong> {oferta.n_mostrar_empresa === 1 ? 'Anónima' : oferta.empresa.nombre_comercial}</p>
+                            <p className="text-gray-700 mb-1"><strong>Área:</strong> {oferta.areas.nombre_area.charAt(0).toUpperCase() + oferta.areas.nombre_area.slice(1).toLowerCase()}</p>
+                            <p className="text-gray-700 mb-1"><strong>Carga Horaria:</strong> {oferta.carga_horaria}</p>
+                            <p className="text-gray-700 mb-1"><strong>Fecha Máxima De Postulación:</strong> {formatFechaMaxPos(oferta.fecha_max_pos)}</p>
+                            <button onClick={() => setSelectedOferta(oferta)} className="text-blue-600 hover:underline">Ver Oferta</button>
+                        </div>
+                    ))}
                 </div>
-            </div>
-            <p className="text-gray-700 mb-1"><strong>Empresa:</strong> {oferta.n_mostrar_empresa === 1 ? 'Anónima' : oferta.empresa.nombre_comercial}</p>
-            <p className="text-gray-700 mb-1"><strong>Área:</strong> {oferta.areas.nombre_area.charAt(0).toUpperCase() + oferta.areas.nombre_area.slice(1).toLowerCase()}</p>
-            <p className="text-gray-700 mb-1"><strong>Carga Horaria:</strong> {oferta.carga_horaria}</p>
-            <p className="text-gray-700 mb-1"><strong>Fecha Máxima De Postulación:</strong> {formatFechaMaxPos(oferta.fecha_max_pos)}</p>
-            <button onClick={() => setSelectedOferta(oferta)} className="text-blue-600 hover:underline">Ver Oferta</button>
-        </div>
-    ))}
-</div>
 
 
             </div>
