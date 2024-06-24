@@ -26,48 +26,51 @@ const Profile: React.FC = () => {
     const [redes, setRedes] = useState<any[]>([]); // Estado para las redes sociales
 
     useEffect(() => {
-        const fetchProfileData = async () => {
-            try {
-                if (user) {
-                    const response = await axios.get(`/perfil/${user.id}`);
-                    const data = response.data;
-                    if (!data.cursos) {
-                        data.cursos = [];
-                    }
-                    setProfileData(data);
-                    if (!isCedulaValid(data.postulante.cedula)) {
-                        setCedulaError('Cédula inválida');
-                    } else {
-                        setCedulaError(null);
-                    }
+    const fetchProfileData = async () => {
+        try {
+            if (user) {
+                
+                const response = await axios.get(`/perfil/${user.id}`);
+                const data = response.data;
+                if (!data.cursos) {
+                    data.cursos = [];
                 }
-            } catch (error) {
-                console.error('Error fetching profile data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        const fetchRedes = async () => {
-            try {
-                if (profileData && profileData.postulante) {
-                    const response = await axios.get(`/postulante-red/${profileData.postulante.id_postulante}`);
-                    console.log('Redes response data:', response.data); // Log para depuración
-                    setRedes(response.data);
+                setProfileData(data);
+                if (!isCedulaValid(data.postulante.cedula)) {
+                    setCedulaError('Cédula inválida');
+                } else {
+                    setCedulaError(null);
                 }
-            } catch (error) {
-                console.error('Error fetching redes data:', error);
             }
-        };
+        } catch (error) {
+            console.error('Error fetching profile data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    const fetchRedes = async () => {
+        try {
+            if (profileData && profileData.postulante) {
+                const response = await axios.get(`/postulante-red/${profileData.postulante.id_postulante}`);
+                
+                setRedes(response.data);
+            }
+        } catch (error) {
+            console.error('Error fetching redes data:', error);
+        }
+    };
+
+    const fetchData = async () => {
         if (user) {
-            fetchProfileData();
+            await fetchProfileData();
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Delay between requests
+            await fetchRedes();
         }
+    };
 
-        if (profileData) {
-            fetchRedes();
-        }
-    }, [user, profileData]);
+    fetchData();
+}, [user, profileData]);
 
     const reloadProfile = async () => {
         try {
@@ -179,7 +182,7 @@ const Profile: React.FC = () => {
         return <div className="flex justify-center items-center h-screen">No profile data found</div>;
     }
 
-    console.log('Redes state:', redes); // Log para depuración
+    
 
     return (
         <div className="max-w-4xl mx-auto mt-10 p-6 bg-[#111827] rounded-lg shadow-md text-white pb-6">

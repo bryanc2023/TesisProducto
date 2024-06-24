@@ -5,6 +5,8 @@ import LanguagesTab from './LanguagesTab';
 import CoursesTab from './CoursesTab';
 import CurriTab from './CurriTab';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 
 interface TabsProps {
   profileData: ProfileData;
@@ -90,20 +92,11 @@ const Tabs: React.FC<TabsProps> = ({
   handleDownloadCV,
 }) => {
   const [activeTab, setActiveTab] = useState('education');
+ 
+ 
 
-  useEffect(() => {
-    // Cargar datos del perfil si es necesario
-    const fetchProfileData = async () => {
-      try {
-        const response = await axios.get(`/api/postulante/${user.id}`);
-        setProfileData(response.data);
-      } catch (error) {
-        console.error('Error fetching profile data:', error);
-      }
-    };
 
-    fetchProfileData();
-  }, []);
+
 
   const renderContent = () => {
     switch (activeTab) {
