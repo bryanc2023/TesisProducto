@@ -23,6 +23,7 @@ class FormacionPro extends Model
         'contacto',
         'anios_e',
         'area',
+        'mes_e',
         
     ];
 

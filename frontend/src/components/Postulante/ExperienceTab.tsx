@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import ExperienceModal from './ExperienceModal';
-
+import axios from '../../services/axios';
+import { useForm } from 'react-hook-form';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 interface ExperienceTabProps {
   experiencias: Experiencia[];
 }
@@ -24,6 +27,8 @@ interface Experiencia {
 
 
 const ExperienceTab: React.FC<ExperienceTabProps> = ({ experiencias }) => {
+  const { user } = useSelector((state: RootState) => state.auth);
+  const {  reset } = useForm<Experiencia>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedExperiencia, setSelectedExperiencia] = useState<Experiencia | null>(null);
 
@@ -36,9 +41,25 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experiencias }) => {
     setIsModalOpen(false);
   };
 
-  const handleAddExperiencia = (data: Experiencia) => {
-    // Aquí iría la lógica para agregar la experiencia al estado o enviar la solicitud al servidor
-    console.log('Experiencia agregada:', data);
+  const handleAddExperiencia = async (data: Experiencia) => {
+    if (user) {
+    try {
+      const dataToSend = {
+        ...data,
+        id_usuario:`${user.id}`, // Añades el id_usuario al objeto data
+      };
+    
+      const response = await axios.post('exp', dataToSend);
+      console.log('Experiencia agregada:', response.data);  // Manejar la respuesta del servidor
+      
+      reset();
+     
+    } catch (error: any) {
+      console.error('Error enviando los datos:', error);
+      
+    }
+  }
+    
     closeModal();
   };
 
