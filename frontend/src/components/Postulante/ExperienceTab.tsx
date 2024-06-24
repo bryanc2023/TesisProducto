@@ -1,13 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import ExperienceModal from './ExperienceModal';
 import axios from '../../services/axios';
 import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
-interface ExperienceTabProps {
-  experiencias: Experiencia[];
-}
 
 interface Area {
   id: number;
@@ -17,7 +14,7 @@ interface Area {
 interface Experiencia {
   empresa: string;
   puesto: string;
-  area:Area;
+  area: Area;
   fechaini: string;
   fechafin: string;
   descripcion: string;
@@ -25,15 +22,35 @@ interface Experiencia {
   contacto: string;
 }
 
-
-const ExperienceTab: React.FC<ExperienceTabProps> = ({ experiencias }) => {
+const ExperienceTab: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
-  const {  reset } = useForm<Experiencia>();
+  const { reset } = useForm<Experiencia>();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedExperiencia, setSelectedExperiencia] = useState<Experiencia | null>(null);
+  const [experiencias, setExperiencias] = useState<Experiencia[]>([]);
+
+  useEffect(() => {
+    fetchExperiencia();
+  }, [user]);
+
+  const fetchExperiencia = async () => {
+    try {
+      if (!user || !user.id) {
+        console.error('User ID is missing');
+        return;
+      }
+      const response = await axios.get(`/experiencia/${user.id}`);
+      if (response.data && Array.isArray(response.data.experiencias)) {
+        setExperiencias(response.data.experiencias);
+      } else {
+        setExperiencias([]);
+      }
+    } catch (error) {
+      console.error('Error fetching experiencia:', error);
+      setExperiencias([]);
+    }
+  };
 
   const openModal = () => {
-    setSelectedExperiencia(null);
     setIsModalOpen(true);
   };
 
@@ -43,23 +60,23 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ experiencias }) => {
 
   const handleAddExperiencia = async (data: Experiencia) => {
     if (user) {
-    try {
-      const dataToSend = {
-        ...data,
-        id_usuario:`${user.id}`, // Añades el id_usuario al objeto data
-      };
-    
-      const response = await axios.post('exp', dataToSend);
-      console.log('Experiencia agregada:', response.data);  // Manejar la respuesta del servidor
-      
-      reset();
-     
-    } catch (error: any) {
-      console.error('Error enviando los datos:', error);
-      
+      try {
+        const dataToSend = {
+          ...data,
+          id_usuario: `${user.id}`,
+        };
+
+        const response = await axios.post('exp', dataToSend);
+        console.log('Experiencia agregada:', response.data);
+
+        reset();
+        fetchExperiencia(); // Refrescar las experiencias después de agregar una nueva
+
+      } catch (error: any) {
+        console.error('Error enviando los datos:', error);
+      }
     }
-  }
-    
+
     closeModal();
   };
 

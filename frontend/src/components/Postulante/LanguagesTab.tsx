@@ -3,7 +3,7 @@ import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import AddIdiomaModal from './AddIdiomaModal';
 import EditIdiomaModal from './EditIdiomaModal';
 import axios from '../../services/axios';
-
+import { useForm } from 'react-hook-form';
 
 interface LanguagesTabProps {
   idiomas: Idioma[];
@@ -20,27 +20,28 @@ interface Idioma {
 
 const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const { reset } = useForm<Idioma>();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedIdioma, setSelectedIdioma] = useState<Idioma | null>(null);
   const [languages, setLanguages] = useState<Idioma[]>([]);
 
   useEffect(() => {
-    const fetchIdiomas = async () => {
-      try {
-        const response = await axios.get('/idioma');
-        if (response.data && Array.isArray(response.data.idiomas)) {
-          setLanguages(response.data.idiomas);
-        } else {
-          setLanguages([]);
-        }
-      } catch (error) {
-        console.error('Error fetching idiomas:', error);
-        setLanguages([]);
-      }
-    };
-
     fetchIdiomas();
   }, []);
+
+  const fetchIdiomas = async () => {
+    try {
+      const response = await axios.get('/idioma');
+      if (response.data && Array.isArray(response.data.idiomas)) {
+        setLanguages(response.data.idiomas);
+      } else {
+        setLanguages([]);
+      }
+    } catch (error) {
+      console.error('Error fetching idiomas:', error);
+      setLanguages([]);
+    }
+  };
 
   const handleOpenAddModal = () => {
     setIsAddModalOpen(true);
@@ -53,13 +54,13 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
 
   const handleIdiomaAdded = () => {
     setIsAddModalOpen(false);
-    
-    // Aquí puedes agregar lógica para actualizar la lista de idiomas después de agregar uno nuevo
+    fetchIdiomas(); // Actualiza la lista de idiomas
   };
 
   const handleIdiomaUpdated = () => {
+    reset();
     setIsEditModalOpen(false);
-    // Aquí puedes agregar lógica para actualizar la lista de idiomas después de actualizar uno existente
+    fetchIdiomas(); // Actualiza la lista de idiomas
   };
 
   return (
