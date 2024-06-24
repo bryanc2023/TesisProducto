@@ -24,6 +24,7 @@ class CreateFormacionProsTable extends Migration
             $table->string('persona_referencia', 250)->nullable();
             $table->string('contacto', 250)->nullable();
             $table->integer('anios_e')->nullable();
+            $table->integer('mes_e')->nullable();
             $table->string('area', 250)->nullable();
 
             $table->foreign('id_postulante')->references('id_postulante')->on('postulante')->onDelete('cascade');

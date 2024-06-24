@@ -3,14 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Postulante\PostulanteRequest;
+use App\Models\FormacionPro;
 use App\Models\PersonaFormacionPro;
 use App\Models\Postulante;
 use App\Models\PostulanteIdioma;
 use App\Models\User;
 use App\Models\Titulo;
+use App\Models\Ubicacion;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use PhpParser\Node\Stmt\TryCatch;
 
 class PostulanteController extends Controller
 {
@@ -331,6 +335,56 @@ class PostulanteController extends Controller
 
 }   
 
+    public function agregarExperiencia(Request $request){
+        
+        $request->validate([
+            'id_usuario' => 'required|integer',
+            'empresa' => 'required|string|max:100',
+            'puesto' => 'required|string|max:100',
+            'fechaini' => 'nullable|date',
+            'fechafin' => 'nullable|date',
+            'descripcion' => 'required|string|max:500',
+            'referencia' => 'required|string|max:250',
+            'area'=> 'required|string|max:250',
+            'contacto'=> 'required|string|max:250'
+        ]);
+
+
+        $postulante = Postulante::where('id_usuario', $request->id_usuario)->first();
+        if (!$postulante) {
+            return response()->json(['error' => 'Postulante no encontrado'], 404);
+        }
+
+        $idp = $postulante->id_postulante;
+        $postulantexp = new FormacionPro();
+        $postulantexp->id_postulante = $idp;
+        $postulantexp->empresa= $request->empresa;
+        $postulantexp->puesto= $request->puesto;
+        $postulantexp->fecha_ini= $request->fechaini;
+        $postulantexp->fecha_fin= $request->fechafin;
+        $postulantexp->descripcion_responsabilidades= $request->descripcion;
+        $postulantexp->persona_referencia= $request->referencia;
+        $postulantexp->area= $request->area;
+        $postulantexp->contacto= $request->contacto;
+        $fecha1= new DateTime($request->fechaini);
+        $fecha2 = new DateTime($request->fechafin);
+
+       // Calcular la diferencia en años entre las dos fechas
+       
+        $diferencia = $fecha1->diff($fecha2);
+        
+        $aniosc = $diferencia->y;
+        $mesesc = $diferencia->m;
+        $postulantexp->mes_e= $mesesc;
+        $postulantexp->anios_e= $aniosc;
+        
+ 
+       
+    
+        $postulantexp->save();
+        return response()->json(['message' => 'Experiencia agregada exitosamente',$postulantexp], 201);
+
+    }
 
 }
 

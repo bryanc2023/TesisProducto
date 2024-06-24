@@ -1,6 +1,8 @@
 import axios from '../../services/axios';
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 
 interface ExperienceModalProps {
   isOpen: boolean;
@@ -26,9 +28,11 @@ interface Experiencia {
 
 
 const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClose, onSubmit }) => {
-  const { register, handleSubmit, formState: { errors } } = useForm<Experiencia>();
+  const { user } = useSelector((state: RootState) => state.auth);
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<Experiencia>();
   const [areas, setAreas] = useState<Area[]>([]);
 
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -44,6 +48,8 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
   }, []);
 
   if (!isOpen) return null;
+
+
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 overflow-auto">
@@ -64,7 +70,7 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
             <select className="w-full px-4 py-2 border rounded-md text-gray-700" id="id_area" {...register('area', { required: 'Área es requerida' })}>
               <option value="">Seleccione</option>
               {areas.map(area => (
-                <option key={area.id} value={area.id}>
+                <option key={area.id+','+area.nombre_area} value={area.id+','+area.nombre_area}>
                   {area.nombre_area}
                 </option>
               ))}
@@ -98,7 +104,7 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
             </div>
             <div>
               <label className="block text-gray-700">Contacto:</label>
-              <input type="email" {...register('contacto', { required: 'Este campo es obligatorio' })} className="w-full px-4 py-2 border rounded-md text-gray-700" placeholder='Número o Correo de contacto de la persona de referencia'/>
+              <input type="text" {...register('contacto', { required: 'Este campo es obligatorio' })} className="w-full px-4 py-2 border rounded-md text-gray-700" placeholder='Número o Correo de contacto de la persona de referencia'/>
               {errors.contacto && <p className="text-red-500">{errors.contacto.message}</p>}
             </div>
            
