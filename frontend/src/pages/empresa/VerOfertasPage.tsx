@@ -16,7 +16,7 @@ interface Oferta {
     fecha_publi: string;
     modalidad: string;
     carga_horaria: string;
-    experiencia: string;
+    experiencia: number;
     mostrar_empresa: number;
     criterios: Criterio[];
     expe: Experiencia[];
@@ -93,7 +93,7 @@ const handleCloseModal = () => {
                             <td className="py-4 px-6">{oferta.fecha_publi}</td>
                             <td className="py-4 px-6">{oferta.areas.nombre_area}</td>
                             <td className="py-4 px-6">{oferta.carga_horaria}</td>
-                            <td className="py-4 px-6">{oferta.experiencia} año/s</td>
+                            <td className="py-4 px-6">{oferta.experiencia === 0 ? 'No requerida' : `${oferta.experiencia} año/s`}</td>
                             <td className="py-4 px-6">
                                 <button
                                     onClick={() => handleVerDetalles(oferta)}
