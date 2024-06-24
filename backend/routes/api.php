@@ -14,6 +14,8 @@ use App\Http\Controllers\PostulanteController;
 use App\Http\Controllers\SectorController;
 use App\Http\Controllers\TituloController;
 use App\Http\Controllers\UbicacionController;
+use App\Http\Controllers\PostulanteRedController;
+use App\Http\Controllers\EmpresaRedController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -61,6 +63,8 @@ Route::post('empresaC',[EmpresaController::class,'registerEmp']);
 Route::post('completo',[EmpresaController::class,'completo']);
 Route::get('empresaById/{id}', [EmpresaController::class, 'getEmpresaByIdUser']);
 Route::put('updateEmpresaById/{id}', [EmpresaController::class, 'updateEmpresaByIdUser']);
+Route::post('/empresa-red', [EmpresaRedController::class, 'redEmpresa']);
+Route::get('/empresa-red/{id_empresa}', [EmpresaRedController::class, 'getRedEmpresa']);
 
 //Rutas para Idioma
 Route::get('idioma', [IdiomaController::class, 'getIdiomas']);
@@ -81,6 +85,9 @@ Route::post('add-oferta', [OfertaController::class, 'registerOferta']);
 Route::put('/updatePostulanteById/{id}', [PostulanteController::class, 'updatePostulanteByIdUser']);
 Route::put('/updateIdioma/{id_postulante}/{id_idioma}', [IdiomaController::class, 'updateIdioma']);
 Route::put('/updatePostulanteById/{id}', [PostulanteController::class, 'updatePostulanteByIdUser']);
+Route::get('postulante/{id}/cv', [PostulanteController::class, 'getCV']);
+Route::post('postulante-red', [PostulanteRedController::class, 'redPostulante']);
+Route::get('postulante-red/{id_postulante}', [PostulanteRedController::class, 'getPostulanteReds']);
 
 Route::put('/formacion_academica/update', [PostulanteController::class, 'updateFormacionAcademica']);
 

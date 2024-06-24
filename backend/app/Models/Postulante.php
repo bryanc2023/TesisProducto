@@ -71,7 +71,7 @@ public static function getIdPostulantePorIdUsuario($idUsuario)
 
 public function red()
 {
-    return $this->hasMany(PostulanteRed::class);
+    return $this->hasMany(PostulanteRed::class, 'id_postulante', 'id_postulante');
 }
 
 public function postulacion()
