@@ -111,3 +111,6 @@ Route::post('postular', [PostulacionController::class, 'registroPostulacion']);
 Route::get('postulaciones/{id}', [PostulacionController::class, 'getPostulacionPostulante']);
 Route::get('postulacionesE/{id}', [PostulacionController::class, 'getPostulacionEmpresa']);
 Route::get('estadistica/{id}', [PostulacionController::class, 'getPostulacionEsta']);
+
+
+Route::get('perfildet/{id}', [PostulanteController::class, 'getPerfilEmpresa']);

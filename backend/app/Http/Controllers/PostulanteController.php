@@ -398,5 +398,25 @@ class PostulanteController extends Controller
 
     }
 
+
+    public function getPerfilEmpresa($id)
+    {
+        try {
+            $postulante = Postulante::with(['ubicacion', 'formaciones.titulo', 'idiomas.idioma'])->where('id_postulante', $id)->first();
+            if (!$postulante) {
+                return response()->json(['message' => 'User not found'], 404);
+            }
+
+            $response = [
+                'postulante' => $postulante,
+                
+            ];
+
+            return response()->json($response);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error retrieving user profile'], 500);
+        }
+    }
+
 }
 
