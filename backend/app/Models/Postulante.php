@@ -83,4 +83,9 @@ public function formapro()
 {
     return $this->hasMany(FormacionPro::class, 'id_formacion_pro');
 }
+
+public function certificado()
+{
+    return $this->hasMany(Certificado::class, 'id_certificado');
+}
 }
