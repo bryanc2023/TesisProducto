@@ -2,6 +2,8 @@ import React from 'react';
 import Modal from 'react-modal';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import axios from '../../services/axios';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 
 interface AddIdiomaModalProps {
   isOpen: boolean;
@@ -19,17 +21,20 @@ interface FormValues {
 
 const AddIdiomaModal: React.FC<AddIdiomaModalProps> = ({ isOpen, onRequestClose, onIdiomaAdded, languages, userId }) => {
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>();
+  const { user } = useSelector((state: RootState) => state.auth);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
+      if(user){
       await axios.post('nuevoidioma', {
-        userId, // Usa el userId pasado como propiedad
+        userId:user.id, // Usa el userId pasado como propiedad
         idiomaId: data.idiomaId,
-        nivel_oral: data.nivelOral,
-        nivel_escrito: data.nivelEscrito,
+        nivelOral: data.nivelOral,
+        nivelEscrito: data.nivelEscrito,
       });
       onIdiomaAdded();
       onRequestClose();
+    }
     } catch (error) {
       console.error('Error adding idioma:', error);
     }

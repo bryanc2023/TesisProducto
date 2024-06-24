@@ -53,6 +53,7 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
 
   const handleIdiomaAdded = () => {
     setIsAddModalOpen(false);
+    
     // Aquí puedes agregar lógica para actualizar la lista de idiomas después de agregar uno nuevo
   };
 
