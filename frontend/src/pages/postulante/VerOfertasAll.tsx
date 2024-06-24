@@ -19,7 +19,7 @@ interface Oferta {
         logo: string;
     };
     fecha_max_pos: string;
-    mostrar_empresa: number;
+    n_mostrar_empresa: number;
     modalidad: string;
     carga_horaria: string;
     experiencia: string;
@@ -32,7 +32,8 @@ interface Oferta {
         nivel_educacion: string;
     }[];
     sueldo:string;
-    mostrar_sueldo: number;
+    n_mostrar_sueldo: number;
+    soli_sueldo:number;
     // Define otros campos de la oferta según sea necesario
 }
 interface Idioma {
@@ -58,8 +59,16 @@ interface Area {
     nombre_area: string;
 }
 
+interface PostData {
+    id_postulante: number | undefined;
+    id_oferta: number;
+    sueldo?: number | null; // Hacer sueldo opcional en la interfaz
+  }
+  
+
 function Modal({ oferta, onClose, userId }: ModalProps) {
     const [idiomas, setIdiomas] = useState<{ [key: number]: string }>({});
+    const [sueldoDeseado, setSueldoDeseado] = useState(null);
    
     useEffect(() => {
         const fetchIdiomas = async () => {
@@ -87,23 +96,37 @@ function Modal({ oferta, onClose, userId }: ModalProps) {
     };
     if (!oferta) return null;
     const handlePostular = async () => {
-        console.log(`id_usuario: ${userId}, id_oferta: ${oferta.id_oferta}`);
+        console.log(`id_usuario: ${userId}, id_oferta: ${oferta.id_oferta}, sueldo: ${sueldoDeseado}`);
         try {
-            await axios.post('postular', {
+
+            const postData: PostData = {
                 id_postulante: userId,
                 id_oferta: oferta.id_oferta,
-            });
+              };
+        
+              // Agregar sueldoDeseado al postData solo si está definido y no es null
+              if (sueldoDeseado !== null && sueldoDeseado !== undefined) {
+                postData.sueldo = sueldoDeseado;
+              }
+            await axios.post('postular', postData);
             Swal.fire({
                 title: '¡Hecho!',
                 text: 'Te has postulado a la oferta seleccionado, verifica el estado de tu postulación en los resultados',
                 icon: 'success',
                 confirmButtonText: 'Ok'
               }).then(() => {
-                navigate("/inicio");
+                navigate("/verOfertasAll");
               });
         } catch (error) {
             console.error('Error postulando:', error);
-            alert('Hubo un error al postular. Intenta nuevamente.');
+    Swal.fire({
+        title: '¡Ha ocurrido un error!',
+        text:  'Ya  has postulado para esta oferta, consulta su estado en la pestaña de "Consultar postulación" ',
+        icon: 'error',
+        confirmButtonText: 'Ok'
+    }).then(() => {
+        navigate("/verOfertasAll");
+    });
         }
     };
 
@@ -176,7 +199,7 @@ function Modal({ oferta, onClose, userId }: ModalProps) {
                 <h2 className="text-xl font-bold mb-4">{oferta.cargo}</h2>
                 <div className="flex justify-center items-center mb-4">
                 <img
-                                    src={oferta.mostrar_empresa === 1 ? '/images/anonima.png' : oferta.empresa.logo}
+                                    src={oferta.n_mostrar_empresa === 1 ? '/images/anonima.png' : oferta.empresa.logo}
                                     alt="Logo"
                                     className="w-20 h-16 rounded-full shadow-lg mr-4"
                                 />
@@ -192,8 +215,8 @@ function Modal({ oferta, onClose, userId }: ModalProps) {
                             ))}
                         </ul>
                     </div>
-                    <p className="text-gray-700 mb-1"><strong>Empresa:</strong> {oferta.mostrar_empresa === 1 ? 'Anónima' : oferta.empresa.nombre_comercial}</p>
-                    <p className="text-gray-700 mb-1"><strong>Sueldo:</strong>{oferta.mostrar_sueldo === 1 ? 'No descrito' : oferta.sueldo}</p>
+                    <p className="text-gray-700 mb-1"><strong>Empresa:</strong> {oferta.n_mostrar_empresa === 1 ? 'Anónima' : oferta.empresa.nombre_comercial}</p>
+                    <p className="text-gray-700 mb-1"><strong>Sueldo:</strong>{oferta.n_mostrar_sueldo === 1 ? 'No descrito' : oferta.sueldo}</p>
                     <p className="text-gray-700 mb-1"><strong>Experiencia en cargos similares:</strong> {oferta.experiencia} años</p>
                     <p className="text-gray-700 mb-1"><strong>Carga Horaria:</strong> {oferta.carga_horaria}</p>
                     <p className="text-gray-700 mb-1"><strong>Fecha Máxima De Postulación:</strong> {formatFechaMaxPos(oferta.fecha_max_pos)}</p>
@@ -225,7 +248,20 @@ function Modal({ oferta, onClose, userId }: ModalProps) {
       ) : (
         <p>No se requiere criterios extras.</p>
       )}
+      
     </div>
+    {oferta.soli_sueldo === 1 && (
+                        <div className="mt-4">
+                            <label htmlFor="sueldoDeseado" className="text-gray-700 block mb-2">Ingrese el sueldo deseado a ganar en el trabajo:</label>
+                            <input
+                                type="number"
+                                id="sueldoDeseado"
+                                className="w-1/2 p-2 border rounded mr-2"
+                                value={sueldoDeseado}
+                                onChange={(e) => setSueldoDeseado(e.target.value)}
+                            />
+                        </div>
+                    )}
                 </div>
                 <button onClick={handlePostular} className="mt-4 bg-blue-500 text-white p-2 rounded">Postular</button>
             </div>
@@ -323,7 +359,7 @@ function VerOfertasAll() {
         <div key={oferta.id_oferta} className="bg-gray-100 p-4 rounded shadow-md flex-shrink-0 w-full md:w-1/2 lg:w-3/4">
             <div className="flex items-center justify-center mb-2"> {/* Alineación vertical y horizontal centrada */}
             <img
-                                    src={oferta.mostrar_empresa === 1 ? '/images/anonima.png' : oferta.empresa.logo}
+                                    src={oferta.n_mostrar_empresa === 1 ? '/images/anonima.png' : oferta.empresa.logo}
                                     alt="Logo"
                                     className="w-20 h-16 rounded-full shadow-lg mr-4"
                                 />
@@ -331,7 +367,7 @@ function VerOfertasAll() {
                     <h2 className="text-xl font-bold">{oferta.cargo}</h2>
                 </div>
             </div>
-            <p className="text-gray-700 mb-1"><strong>Empresa:</strong> {oferta.mostrar_empresa === 1 ? 'Anónima' : oferta.empresa.nombre_comercial}</p>
+            <p className="text-gray-700 mb-1"><strong>Empresa:</strong> {oferta.n_mostrar_empresa === 1 ? 'Anónima' : oferta.empresa.nombre_comercial}</p>
             <p className="text-gray-700 mb-1"><strong>Área:</strong> {oferta.areas.nombre_area.charAt(0).toUpperCase() + oferta.areas.nombre_area.slice(1).toLowerCase()}</p>
             <p className="text-gray-700 mb-1"><strong>Carga Horaria:</strong> {oferta.carga_horaria}</p>
             <p className="text-gray-700 mb-1"><strong>Fecha Máxima De Postulación:</strong> {formatFechaMaxPos(oferta.fecha_max_pos)}</p>

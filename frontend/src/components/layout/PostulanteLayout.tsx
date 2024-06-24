@@ -83,12 +83,14 @@ function PostulanteLayout() {
                     <span className="mt-2">{user ? `${user.name} ` : 'Nombre del Usuario'}</span>
                 </div>
                 <ul>
+                     {/*
                     <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
                         <Link to="/inicio" className="flex items-center w-full" onClick={closeSidebar}>
                             <FontAwesomeIcon icon={faEnvelope} className="mr-2" />
                             <span>Inicio</span>
                         </Link>
                     </li>
+                    */}
                     <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
                         <Link to="/verOfertasAll" className="flex items-center w-full" onClick={closeSidebar}>
                             <FontAwesomeIcon icon={faEnvelope} className="mr-2" />

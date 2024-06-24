@@ -21,6 +21,7 @@ class Postulacion extends Model
         'fecha_revision',
         'estado_postulacion',
         'total_evaluacion',
+        'sueldo_deseado',
         // Puedes agregar más campos si es necesario
     ];
 

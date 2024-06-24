@@ -27,6 +27,7 @@ class OfertaController extends Controller
             'detalles_adicionales' => 'nullable|string',
             'mostrar_sueldo' => 'required|boolean',
             'mostrar_empresa' => 'required|boolean',
+            'solicitar_sueldo' =>'required|boolean',
             'fecha_max_pos' => 'required|date',
             'funciones' => 'required|string',
             'modalidad' => 'required|string',
@@ -61,8 +62,9 @@ class OfertaController extends Controller
         $oferta->correo_contacto = $validatedData['correo_contacto'];
         $oferta->numero_contacto = $validatedData['numero_contacto'];
         $oferta->detalles_adicionales = $validatedData['detalles_adicionales'];
-        $oferta->mostrar_sueldo = $validatedData['mostrar_sueldo'];
-        $oferta->mostrar_empresa = $validatedData['mostrar_empresa'];
+        $oferta->n_mostrar_sueldo = $validatedData['mostrar_sueldo'];
+        $oferta->n_mostrar_empresa = $validatedData['mostrar_empresa'];
+        $oferta->soli_sueldo = $validatedData['solicitar_sueldo'];
         $oferta->fecha_publi = Carbon::now();
         $oferta->carga_horaria =$validatedData['carga_horaria'];
         $oferta->modalidad =$validatedData['modalidad'];
