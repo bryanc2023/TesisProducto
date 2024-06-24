@@ -7,7 +7,8 @@ import Tabs from './../../components/Postulante/Tabs';
 import EditPostulanteModal from '../../components/EditPostulante';
 import FormacionPEditar from '../../components/FormacionPEditar';
 import EditCurso from '../../components/Postulante/EditCurso';
-import AddRedModal from '../../components/Postulante/AddRedModal'; // Importa el modal
+import AddRedModal from '../../components/Postulante/AddRedModal';
+import AddIdiomaModal from '../../components/Postulante/AddIdiomaModal'; // Importa el modal
 import { FaLinkedin, FaFacebook, FaInstagram, FaXTwitter, FaGlobe } from 'react-icons/fa6'; // Importar íconos
 
 Modal.setAppElement('#root');
@@ -23,45 +24,43 @@ const Profile: React.FC = () => {
     const [selectedCurso, setSelectedCurso] = useState<Curso | null>(null);
     const [cedulaError, setCedulaError] = useState<string | null>(null);
     const [isAddRedModalOpen, setIsAddRedModalOpen] = useState<boolean>(false); // Estado para el modal de agregar red
+    const [isAddIdiomaModalOpen, setIsAddIdiomaModalOpen] = useState<boolean>(false); // Estado para el modal de agregar idioma
     const [redes, setRedes] = useState<any[]>([]); // Estado para las redes sociales
+    const [languages, setLanguages] = useState<{ id: number; nombre: string }[]>([]); // Estado para los idiomas
 
     useEffect(() => {
-    const fetchProfileData = async () => {
-        try {
-            if (user) {
-                const response = await axios.get(`/perfil/${user.id}`);
-                const data = response.data;
-                if (!data.cursos) {
-                    data.cursos = [];
-                }
-                setProfileData(data);
-                if (!isCedulaValid(data.postulante.cedula)) {
-                    setCedulaError('Cédula inválida');
-                } else {
-                    setCedulaError(null);
-                }
+        const fetchProfileData = async () => {
+            try {
                 if (user) {
-                    const response = await axios.get(`/postulante-red/${user.id}`);
-                    
-                    setRedes(response.data);
+                    const response = await axios.get(`/perfil/${user.id}`);
+                    const data = response.data;
+                    if (!data.cursos) {
+                        data.cursos = [];
+                    }
+                    setProfileData(data);
+                    if (!isCedulaValid(data.postulante.cedula)) {
+                        setCedulaError('Cédula inválida');
+                    } else {
+                        setCedulaError(null);
+                    }
+                    if (user) {
+                        const response = await axios.get(`/postulante-red/${user.id}`);
+                        setRedes(response.data);
+                    }
                 }
+            } catch (error) {
+                console.error('Error fetching profile data:', error);
+            } finally {
+                setLoading(false);
             }
-        } catch (error) {
-            console.error('Error fetching profile data:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
- 
-
-        const fetchData = async () => {
-                await fetchProfileData();
-               
         };
 
-    fetchData();
-}, []);
+        const fetchData = async () => {
+            await fetchProfileData();
+        };
+
+        fetchData();
+    }, [user]);
 
     const reloadProfile = async () => {
         try {
@@ -73,7 +72,6 @@ const Profile: React.FC = () => {
                 }
                 setProfileData(data);
                 const redesResponse = await axios.get(`/postulante-red/${data.postulante.id_postulante}`);
-                console.log('Redes reload response data:', redesResponse.data); // Log para depuración
                 setRedes(redesResponse.data);
             }
         } catch (error) {
@@ -149,21 +147,28 @@ const Profile: React.FC = () => {
         setIsAddRedModalOpen(false);
     };
 
+    const openAddIdiomaModal = () => {
+        setIsAddIdiomaModalOpen(true);
+    };
+
+    const closeAddIdiomaModal = () => {
+        setIsAddIdiomaModalOpen(false);
+    };
+
     const renderIcon = (nombreRed: string) => {
-      switch (nombreRed.toLowerCase()) {
-          case 'linkedin':
-              return <FaLinkedin className="text-blue-700" />;
-          case 'facebook':
-              return <FaFacebook className="text-blue-600" />;
-          case 'x':
-              return <FaXTwitter className="text-blue-400" />;
-          case 'instagram':
-              return <FaInstagram className="text-pink-600" />;
-         
-          default:
-              return <FaGlobe className="text-gray-400" />;
-      }
-  };
+        switch (nombreRed.toLowerCase()) {
+            case 'linkedin':
+                return <FaLinkedin className="text-blue-700" />;
+            case 'facebook':
+                return <FaFacebook className="text-blue-600" />;
+            case 'x':
+                return <FaXTwitter className="text-blue-400" />;
+            case 'instagram':
+                return <FaInstagram className="text-pink-600" />;
+            default:
+                return <FaGlobe className="text-gray-400" />;
+        }
+    };
 
     if (loading) {
         return <div className="flex justify-center items-center h-screen">Loading...</div>;
@@ -172,8 +177,6 @@ const Profile: React.FC = () => {
     if (!profileData) {
         return <div className="flex justify-center items-center h-screen">No profile data found</div>;
     }
-
-    
 
     return (
         <div className="max-w-4xl mx-auto mt-10 p-6 bg-[#111827] rounded-lg shadow-md text-white pb-6">
@@ -209,7 +212,7 @@ const Profile: React.FC = () => {
             <div className="mt-6 bg-gray-800 p-4 rounded-lg pb-6 shadow-inner text-gray-200">
                 <div className="flex justify-between items-center">
                     <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Redes</h2>
-                    <button onClick={() => openAddRedModal(null)} className="text-orange-400 hover:underline">
+                    <button onClick={openAddRedModal} className="text-orange-400 hover:underline">
                         + Agregar red
                     </button>
                 </div>
@@ -237,6 +240,8 @@ const Profile: React.FC = () => {
                 openEditLanguageModal={openEditLanguageModal}
                 openEditCursoModal={openEditCursoModal}
                 handleDeleteCurso={reloadProfile}
+                handleViewCV={(id: number) => { }} // Implementa según tu lógica
+                handleDownloadCV={(url: string) => { }} // Implementa según tu lógica
             />
 
             <Modal
@@ -280,6 +285,14 @@ const Profile: React.FC = () => {
                 onRequestClose={closeAddRedModal}
                 reloadProfile={reloadProfile}
                 idPostulante={profileData.postulante.id_postulante}
+            />
+
+            <AddIdiomaModal
+                isOpen={isAddIdiomaModalOpen}
+                onRequestClose={closeAddIdiomaModal}
+                onIdiomaAdded={reloadProfile} // Llama a reloadProfile después de agregar un idioma
+                languages={languages}
+                userId={profileData.postulante.id_postulante}
             />
         </div>
     );

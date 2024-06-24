@@ -4,9 +4,7 @@ import ExperienceTab from './ExperienceTab';
 import LanguagesTab from './LanguagesTab';
 import CoursesTab from './CoursesTab';
 import CurriTab from './CurriTab';
-import axios from 'axios';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../store';
+
 
 interface TabsProps {
   profileData: ProfileData;

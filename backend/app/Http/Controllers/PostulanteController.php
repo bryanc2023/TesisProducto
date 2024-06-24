@@ -397,6 +397,27 @@ class PostulanteController extends Controller
         return response()->json(['message' => 'Experiencia agregada exitosamente',$postulantexp], 201);
 
     }
+    public function getExperiencia($id_usuario)
+    {
+        // Validar que el ID de usuario sea un número entero
+        if (!is_numeric($id_usuario) || intval($id_usuario) <= 0) {
+            return response()->json(['message' => 'ID de usuario inválido'], 400);
+        }
+    
+        try {
+            $postulante = Postulante::where('id_usuario', $id_usuario)->first();
+            if (!$postulante) {
+                return response()->json(['message' => 'Postulante no encontrado'], 404);
+            }
+    
+            $experiencias = FormacionPro::where('id_postulante', $postulante->id_postulante)->get();
+            return response()->json(['experiencias' => $experiencias], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al recuperar la experiencia'], 500);
+        }
+    }
+    
+
 
 
     public function getPerfilEmpresa($id)
