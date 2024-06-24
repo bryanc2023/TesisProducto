@@ -3,7 +3,7 @@ import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import AddIdiomaModal from './AddIdiomaModal';
 import EditIdiomaModal from './EditIdiomaModal';
 import axios from '../../services/axios';
-import { Idioma } from '../../types';
+
 
 interface LanguagesTabProps {
   idiomas: Idioma[];
@@ -64,7 +64,7 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
   return (
     <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
       <div className="flex justify-between items-center">
-        <h3 className="text-xl font-semibold mb-4">Idiomas</h3>
+        <h3 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Idiomas</h3>
         <button onClick={handleOpenAddModal} className="text-orange-400 hover:underline">
           + Agregar idioma
         </button>
@@ -72,15 +72,15 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
       {idiomas.length > 0 ? (
         idiomas.map((idioma, index) => (
           <div key={index} className="mb-4 p-4 border rounded-lg bg-gray-700 relative">
-            <div className="absolute top-2 right-2 flex space-x-2">
+            <div className="flex justify-end space-x-2 mb-2">
               <button
                 onClick={() => handleOpenEditModal(idioma)}
-                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 mr-2"
+                className="px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
               >
                 <FaPencilAlt className="w-4 h-4" />
               </button>
               <button
-                className="px-4 py-2 bg-rose-500 text-white rounded-md hover:bg-rose-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-rose-300 mr-2"
+                className="px-2 py-1 bg-rose-500 text-white rounded-md hover:bg-rose-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-rose-300"
               >
                 <FaTrash className="w-4 h-4" />
               </button>

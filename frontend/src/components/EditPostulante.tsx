@@ -9,7 +9,6 @@ interface EditPostulanteModalProps {
   onProfileUpdate: (updatedProfile: Postulante) => void;
 }
 
-
 const validarCedulaEcuatoriana = (cedula: string): boolean => {
   if (cedula.length !== 10) return false;
 
@@ -103,7 +102,6 @@ const EditPostulanteModal: React.FC<EditPostulanteModalProps> = ({ isOpen, close
     if (validarCedulaEcuatoriana(cedula)) {
       try {
         const updatedProfile = {
-          
           nombres,
           apellidos,
           fecha_nac,
@@ -170,26 +168,26 @@ const EditPostulanteModal: React.FC<EditPostulanteModalProps> = ({ isOpen, close
       isOpen={isOpen}
       onRequestClose={closeModal}
       contentLabel="Editar Datos del Postulante"
-      className="bg-white p-6 rounded-lg shadow-md w-full max-w-lg mx-auto my-4 relative"
-      overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+      className="bg-white p-4 rounded-lg shadow-md w-full max-w-md mx-auto my-4 relative overflow-y-auto max-h-[85vh] mt-[2rem]"
+      overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-start pt-[2rem]"
     >
       <button onClick={closeModal} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl font-bold">
         &times;
       </button>
-      <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Editar Datos</h2>
-      <div className="space-y-4">
+      <h2 className="text-xl text-center font-semibold mb-2 text-blue-500">Editar Datos</h2>
+      <div className="space-y-2">
         {successMessage && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded relative" role="alert">
             <strong className="font-bold">Éxito! </strong>
             <span className="block sm:inline">{successMessage}</span>
           </div>
         )}
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-2">
           <div className="flex-1">
             <label className="block text-gray-700">Nombres</label>
             <input
               type="text"
-              className="w-full px-4 py-2 border rounded-md"
+              className="w-full px-2 py-1 border rounded-md"
               name="nombres"
               value={nombres}
               onChange={handleInputChange}
@@ -199,19 +197,19 @@ const EditPostulanteModal: React.FC<EditPostulanteModalProps> = ({ isOpen, close
             <label className="block text-gray-700">Apellidos</label>
             <input
               type="text"
-              className="w-full px-4 py-2 border rounded-md"
+              className="w-full px-2 py-1 border rounded-md"
               name="apellidos"
               value={apellidos}
               onChange={handleInputChange}
             />
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-2">
           <div className="flex-1">
             <label className="block text-gray-700">Fecha de Nacimiento</label>
             <input
               type="date"
-              className="w-full px-4 py-2 border rounded-md"
+              className="w-full px-2 py-1 border rounded-md"
               name="fecha_nac"
               value={fecha_nac}
               onChange={handleInputChange}
@@ -220,7 +218,7 @@ const EditPostulanteModal: React.FC<EditPostulanteModalProps> = ({ isOpen, close
           <div className="flex-1">
             <label className="block text-gray-700">Estado Civil</label>
             <select
-              className="w-full px-4 py-2 border rounded-md"
+              className="w-full px-2 py-1 border rounded-md"
               name="estado_civil"
               value={estado_civil}
               onChange={handleInputChange}
@@ -232,11 +230,11 @@ const EditPostulanteModal: React.FC<EditPostulanteModalProps> = ({ isOpen, close
             </select>
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-2">
           <div className="flex-1">
             <label className="block text-gray-700">Género</label>
             <select
-              className="w-full px-4 py-2 border rounded-md"
+              className="w-full px-2 py-1 border rounded-md"
               name="genero"
               value={genero}
               onChange={handleInputChange}
@@ -250,7 +248,7 @@ const EditPostulanteModal: React.FC<EditPostulanteModalProps> = ({ isOpen, close
             <label className="block text-gray-700">Cédula</label>
             <input
               type="text"
-              className="w-full px-4 py-2 border rounded-md"
+              className="w-full px-2 py-1 border rounded-md"
               name="cedula"
               value={cedula}
               onChange={handleInputChange}
@@ -258,9 +256,9 @@ const EditPostulanteModal: React.FC<EditPostulanteModalProps> = ({ isOpen, close
             {errorCedula && <p className="text-red-500 text-sm mt-1">{errorCedula}</p>}
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="provincia">
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex-1 mb-2">
+            <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="provincia">
               Provincia
             </label>
             <select
@@ -282,8 +280,8 @@ const EditPostulanteModal: React.FC<EditPostulanteModalProps> = ({ isOpen, close
               ))}
             </select>
           </div>
-          <div className="flex-1 mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="canton">
+          <div className="flex-1 mb-2">
+            <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="canton">
               Cantón
             </label>
             <select
@@ -305,16 +303,16 @@ const EditPostulanteModal: React.FC<EditPostulanteModalProps> = ({ isOpen, close
         <div>
           <label className="block text-gray-700">Información Extra</label>
           <textarea
-            className="w-full px-4 py-2 border rounded-md"
-            rows={3}
+            className="w-full px-2 py-1 border rounded-md"
+            rows={2}
             name="informacion_extra"
             value={informacion_extra}
             onChange={handleInputChange}
           ></textarea>
         </div>
         <div className="flex justify-between">
-          <button type="button" onClick={closeModal} className="px-4 py-2 text-red-500 border border-red-500 rounded-md hover:bg-red-500 hover:text-white">Cancelar</button>
-          <button type="button" onClick={handleSave} className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-700">Guardar</button>
+          <button type="button" onClick={closeModal} className="px-3 py-1 text-red-500 border border-red-500 rounded-md hover:bg-red-500 hover:text-white">Cancelar</button>
+          <button type="button" onClick={handleSave} className="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-700">Guardar</button>
         </div>
       </div>
     </Modal>

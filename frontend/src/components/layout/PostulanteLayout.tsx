@@ -11,6 +11,7 @@ function PostulanteLayout() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const sidebarRef = useRef<HTMLDivElement>(null);
     const dispatch = useDispatch();
     const { user } = useSelector((state: RootState) => state.auth);
     const [profileData, setProfileData] = useState<any>(null);
@@ -20,13 +21,16 @@ function PostulanteLayout() {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 setDropdownOpen(false);
             }
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node) && sidebarOpen) {
+                setSidebarOpen(false);
+            }
         };
 
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [dropdownRef]);
+    }, [dropdownRef, sidebarOpen]);
 
     useEffect(() => {
         const fetchProfileData = async () => {
@@ -56,7 +60,7 @@ function PostulanteLayout() {
     return (
         <div className="flex h-screen overflow-hidden">
             {/* Lateral Nav */}
-            <nav className={`bg-gray-900 text-white p-4 fixed top-16 bottom-0 lg:relative lg:translate-x-0 transition-transform transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:w-64 z-20`}>
+            <nav ref={sidebarRef} className={`bg-gray-900 text-white p-4 fixed top-16 bottom-0 lg:relative lg:translate-x-0 transition-transform transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:w-64 z-20`}>
                 <div className="flex flex-col items-center mb-4">
                     <img
                         src={profileData ? profileData.postulante.foto : 'https://via.placeholder.com/100'}
