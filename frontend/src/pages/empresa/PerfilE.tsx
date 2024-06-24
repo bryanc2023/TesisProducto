@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from '../../services/axios';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
+import Modal from 'react-modal';
+import { FaLinkedin, FaFacebook, FaTwitter, FaInstagram, FaGlobe, FaXing, FaXTwitter } from 'react-icons/fa6'; // Importar íconos
+import AddRedModal from '../../components/Postulante/AddRedModal'; // Importa el modal
 
 interface Empresa {
     id?: number;
@@ -39,6 +42,7 @@ const EmpresaDetails: React.FC = () => {
     const [selectedSector, setSelectedSector] = useState<string>('');
     const [selectedDivision, setSelectedDivision] = useState<string>('');
     const [isDivisionEnabled, setIsDivisionEnabled] = useState<boolean>(false);
+    const [isAddRedModalOpen, setIsAddRedModalOpen] = useState<boolean>(false); // Estado para el modal de agregar red
 
     useEffect(() => {
         const fetchProfileData = async () => {
@@ -127,6 +131,14 @@ const EmpresaDetails: React.FC = () => {
         setModalIsOpen(false);
     };
 
+    const openAddRedModal = () => {
+        setIsAddRedModalOpen(true);
+    };
+
+    const closeAddRedModal = () => {
+        setIsAddRedModalOpen(false);
+    };
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         if (editedEmpresa) {
             const { name, value } = e.target;
@@ -182,6 +194,25 @@ const EmpresaDetails: React.FC = () => {
         }
     };
 
+    const renderIcon = (nombreRed: string) => {
+        switch (nombreRed.toLowerCase()) {
+            case 'linkedin':
+                return <FaLinkedin className="text-blue-700" />;
+            case 'facebook':
+                return <FaFacebook className="text-blue-600" />;
+            case 'twitter':
+                return <FaTwitter className="text-blue-400" />;
+            case 'instagram':
+                return <FaInstagram className="text-pink-600" />;
+            case 'xing':
+                return <FaXing className="text-green-600" />;
+            case 'x':
+                return <FaXTwitter className="text-blue-400" />;
+            default:
+                return <FaGlobe className="text-gray-400" />;
+        }
+    };
+
     if (loading) {
         return <div className="flex justify-center items-center h-screen">Loading...</div>;
     }
@@ -229,16 +260,22 @@ const EmpresaDetails: React.FC = () => {
                         <p className="text-black">{empresa?.descripcion || 'N/A'}</p>
                     </div>
                     <div className="bg-gray-100 p-4 rounded-lg">
-                        <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 inline-block pb-2 w-40 text-black">Redes Sociales</h2>
-                        <ul className="list-disc list-inside">
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 inline-block pb-2 w-40 text-black">Redes Sociales</h2>
+                            <button onClick={openAddRedModal} className="text-orange-400 hover:underline">
+                                + Agregar red
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-6">
                             {empresa?.red?.map((red) => (
-                                <li key={red.id_empresa_red}>
-                                    <a href={red.enlace} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-d1552a">
-                                        {red.nombre_red}
+                                <div key={red.id_empresa_red} className="flex items-center space-x-2">
+                                    <span>{red.nombre_red}</span>
+                                    <a href={red.enlace} target="_blank" rel="noopener noreferrer" className="text-2xl hover:underline">
+                                        {renderIcon(red.nombre_red)}
                                     </a>
-                                </li>
+                                </div>
                             ))}
-                        </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -398,6 +435,12 @@ const EmpresaDetails: React.FC = () => {
                     </div>
                 </div>
             )}
+            <AddRedModal
+                isOpen={isAddRedModalOpen}
+                onRequestClose={closeAddRedModal}
+                reloadProfile={reloadProfile}
+                idEmpresa={empresa?.id || 0}
+            />
         </div>
     );
 };
