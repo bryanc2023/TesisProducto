@@ -200,7 +200,7 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
           await axios.post('postulante/forma2', formData);
         }
         closeModal();
-        reloadProfile();
+        await reloadProfile();
       } catch (error) {
         console.error('Error saving formacion:', error);
         setErrorMessage('Error al guardar la formación.');
