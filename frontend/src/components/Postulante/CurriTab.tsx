@@ -54,7 +54,7 @@ const CurriTab: React.FC = () => {
   return (
     <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Currículos</h2>
+        <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Currículo</h2>
       </div>
       {loading ? (
         <p>Cargando...</p>

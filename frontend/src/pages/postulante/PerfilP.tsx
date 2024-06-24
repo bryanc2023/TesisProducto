@@ -29,7 +29,6 @@ const Profile: React.FC = () => {
     const fetchProfileData = async () => {
         try {
             if (user) {
-                
                 const response = await axios.get(`/perfil/${user.id}`);
                 const data = response.data;
                 if (!data.cursos) {
@@ -41,6 +40,11 @@ const Profile: React.FC = () => {
                 } else {
                     setCedulaError(null);
                 }
+                if (user) {
+                    const response = await axios.get(`/postulante-red/${user.id}`);
+                    
+                    setRedes(response.data);
+                }
             }
         } catch (error) {
             console.error('Error fetching profile data:', error);
@@ -49,28 +53,15 @@ const Profile: React.FC = () => {
         }
     };
 
-    const fetchRedes = async () => {
-        try {
-            if (profileData && profileData.postulante) {
-                const response = await axios.get(`/postulante-red/${profileData.postulante.id_postulante}`);
-                
-                setRedes(response.data);
-            }
-        } catch (error) {
-            console.error('Error fetching redes data:', error);
-        }
-    };
+ 
 
-    const fetchData = async () => {
-        if (user) {
-            await fetchProfileData();
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Delay between requests
-            await fetchRedes();
-        }
-    };
+        const fetchData = async () => {
+                await fetchProfileData();
+               
+        };
 
     fetchData();
-}, [user, profileData]);
+}, []);
 
     const reloadProfile = async () => {
         try {
