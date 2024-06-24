@@ -30,8 +30,8 @@ interface Resultado {
         correo_contacto: string | null;
         numero_contacto: string | null;
         estado: string;
-        mostrar_sueldo: number;
-        mostrar_empresa: number;
+        n_mostrar_sueldo: number;
+        n_mostrar_empresa: number;
         empresa:{
             nombre_comercial:string;
         };
@@ -105,7 +105,7 @@ function ResultadosP() {
                         {resultados.map((resultado) => (
                             <tr key={resultado.postulacion.id_oferta}>
                                 <td className="py-3 px-6">{resultado.postulacion.oferta.cargo}</td>
-                                <td className="py-3 px-6">{resultado.postulacion.oferta.empresa.nombre_comercial}</td>
+                                <td className="py-3 px-6">{resultado.postulacion.oferta.n_mostrar_empresa === 1 ? 'Anónima' : resultado.postulacion.oferta.empresa.nombre_comercial}</td>
                                 <td className="py-3 px-6">{resultado.ubicacion.provincia}, {resultado.ubicacion.canton}</td>
                                 <td className="py-3 px-6">{renderEstadoPostulacion(resultado.postulacion.estado_postulacion)}</td>
                                 <td className="py-3 px-6">
