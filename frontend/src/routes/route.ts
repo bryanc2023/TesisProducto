@@ -29,6 +29,7 @@ import AgregarOferG from "../pages/empresaG/AgregarOferG"
 import MonitoreoG from "../pages/empresaG/MonitoreoG"
 import PerfilG from "../pages/empresaG/PerfilG"
 import ReportesG from "../pages/empresaG/ReportesG"
+import PostulanteDetallePage from "../pages/empresa/PostulanteDetallePage"
 
 
 
@@ -210,10 +211,17 @@ export const routes: TypeRoute[] = [
                 path: 'ConsPost',
                 element: ConsultoPostu,
                 allowedRoles: ['empresa_oferente'],
+             
+            },
+            {
+                path: 'perfildet/:id_postulante',
+                element: PostulanteDetallePage,
+                allowedRoles: ['empresa_oferente'],
             },
             
         ],
     },
+    
     {
         path: '/',
         element: EmpresaLayout,
@@ -225,6 +233,7 @@ export const routes: TypeRoute[] = [
                 element: MoniR,
                 allowedRoles: ['empresa_oferente'],
             },
+           
             
         ],
     },

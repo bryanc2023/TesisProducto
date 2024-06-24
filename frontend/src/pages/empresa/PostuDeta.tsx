@@ -1,8 +1,9 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 
 interface PostulanteDetailProps {
     postulante: {
+        id_postulante:number;
         nombres: string;
         apellidos: string;
         fecha_nac: string;
@@ -19,6 +20,11 @@ interface PostulanteDetailProps {
 }
 
 const PostulanteDetail: React.FC<PostulanteDetailProps> = ({ postulante, onClose }) => {
+    const navigate = useNavigate();
+    const verPerfil = () => {
+        navigate(`/perfildet/${postulante.id_postulante}`); // Navega a la ruta con el id_postulante
+    };
+
     return (
         <div className="p-4 bg-white text-gray-900 rounded-lg">
             <h1 className="text-2xl font-bold mb-4 text-gray-900">Detalles del Postulante</h1>
@@ -41,6 +47,12 @@ const PostulanteDetail: React.FC<PostulanteDetailProps> = ({ postulante, onClose
                 </div>
             )}
             <div className="flex justify-end mt-4">
+            <button
+                    onClick={verPerfil} // Aquí llamas a la función que manejará la redirección
+                    className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 mr-2"
+                >
+                    Todos los detalles
+                </button>
                 <button
                     onClick={onClose}
                     className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
@@ -52,21 +64,6 @@ const PostulanteDetail: React.FC<PostulanteDetailProps> = ({ postulante, onClose
     );
 };
 
-PostulanteDetail.propTypes = {
-    postulante: PropTypes.shape({
-        nombres: PropTypes.string.isRequired,
-        apellidos: PropTypes.string.isRequired,
-        fecha_nac: PropTypes.string.isRequired,
-        edad: PropTypes.number.isRequired,
-        estado_civil: PropTypes.string.isRequired,
-        cedula: PropTypes.string.isRequired,
-        genero: PropTypes.string.isRequired,
-        informacion_extra: PropTypes.string.isRequired,
-        foto: PropTypes.string.isRequired,
-        cv: PropTypes.string,
-        total_evaluacion: PropTypes.number.isRequired,
-    }).isRequired,
-    onClose: PropTypes.func.isRequired,
-};
+
 
 export default PostulanteDetail;
