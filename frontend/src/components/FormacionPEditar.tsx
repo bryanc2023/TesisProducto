@@ -70,7 +70,7 @@ interface EditFormacionModalProps {
 }
 
 const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeModal, formacion, reloadProfile }) => {
-  const { user } = useSelector((state: RootState) => state.auth);
+  const user = useSelector((state: RootState) => state.auth.user);
   const { register, handleSubmit, formState: { errors }, setValue, reset, watch } = useForm<IFormInput>();
   const [niveles, setNiveles] = useState<string[]>([]);
   const [campos, setCampos] = useState<string[]>([]);
@@ -80,6 +80,7 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
   const [selectedTitulo, setSelectedTitulo] = useState('');
   const [selectedTituloId, setSelectedTituloId] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const fechaini = watch('fechaini');
   const fechafin = watch('fechafin');
@@ -180,6 +181,7 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
     if (user && selectedNivel && selectedCampo && selectedTitulo) {
       if (new Date(fechaini) > new Date(fechafin)) {
         setErrorMessage('La fecha de inicio no puede ser mayor que la fecha de finalización.');
+        setSuccessMessage(null);
         return;
       }
 
@@ -193,20 +195,25 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
           fechafin: data.fechafin,
         };
 
-        console.log(formData);
+       
         if (formacion) {
-          await axios.put(`formacion/${formacion.id}`, formData);
+          await axios.put(`/formacion_academica/update`, formData);
+          setSuccessMessage('Formación académica actualizada exitosamente.');
         } else {
           await axios.post('postulante/forma2', formData);
+          setSuccessMessage('Formación académica añadida exitosamente.');
         }
+        setErrorMessage(null);
         closeModal();
         await reloadProfile();
       } catch (error) {
         console.error('Error saving formacion:', error);
         setErrorMessage('Error al guardar la formación.');
+        setSuccessMessage(null);
       }
     } else {
       setErrorMessage('Por favor complete todos los campos.');
+      setSuccessMessage(null);
     }
   };
 
@@ -226,7 +233,14 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
         <strong className="font-bold">Error: </strong>
         <span className="block sm:inline">{errorMessage}</span>
         <span onClick={() => setErrorMessage(null)} className="absolute top-0 bottom-0 right-0 px-4 py-3">
-          <svg className="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 5.652a.5.5 0 00-.707 0L10 9.293 6.36 5.652a.5.5 0 10-.707.707L9.293 10l-3.64 3.64a.5.5 0 10.707.707L10 10.707l3.64 3.64a.5.5 0 10.707-.707L10.707 10l3.64-3.64a.5.5 0 000-.707z"/></svg>
+          <svg className="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 5.652a.5.5 0 00-.707 0L10 9.293 6.36 5.652a.5.5 0 10-.707.707L9.293 10l-3.64 3.64a.5.5 0 10.707.707L10 10.707l3.64-3.64a.5.5 0 000-.707z"/></svg>
+        </span>
+      </div>}
+      {successMessage && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+        <strong className="font-bold">Éxito: </strong>
+        <span className="block sm:inline">{successMessage}</span>
+        <span onClick={() => setSuccessMessage(null)} className="absolute top-0 bottom-0 right-0 px-4 py-3">
+          <svg className="fill-current h-6 w-6 text-green-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 5.652a.5.5 0 00-.707 0L10 9.293 6.36 5.652a.5.5 0 10-.707.707L9.293 10l-3.64 3.64a.5.5 0 10.707.707L10 10.707l3.64-3.64a.5.5 0 000-.707z"/></svg>
         </span>
       </div>}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 overflow-auto max-h-96">

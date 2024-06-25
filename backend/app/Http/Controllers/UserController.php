@@ -12,4 +12,7 @@ class UserController extends Controller
         $users = User::all();
         return response()->json(compact('users'),200);
     }
+
+   
+
 }

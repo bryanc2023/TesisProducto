@@ -439,5 +439,23 @@ class PostulanteController extends Controller
         }
     }
 
+    public function deleteExperiencia($id)
+{
+    try {
+        $experiencia = FormacionPro::find($id);
+
+        if (!$experiencia) {
+            return response()->json(['message' => 'Experiencia no encontrada'], 404);
+        }
+
+        $experiencia->delete();
+
+        return response()->json(['message' => 'Experiencia eliminada exitosamente'], 200);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Error al eliminar la experiencia'], 500);
+    }
+}
+
+   
 }
 
