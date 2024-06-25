@@ -44,7 +44,7 @@ const Profile: React.FC = () => {
                         setCedulaError(null);
                     }
                     if (user) {
-                        const response = await axios.get(`/postulante-red/${user.id}`);
+                        const response = await axios.get(`/postulante-red/${data.postulante.id_postulante}`);
                         setRedes(response.data);
                     }
                 }

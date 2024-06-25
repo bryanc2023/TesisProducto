@@ -16,6 +16,7 @@ use App\Http\Controllers\TituloController;
 use App\Http\Controllers\UbicacionController;
 use App\Http\Controllers\PostulanteRedController;
 use App\Http\Controllers\EmpresaRedController;
+use App\Http\Controllers\CursoController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -38,6 +39,14 @@ Route::middleware(['jwt.verify'])->get('users',[UserController::class,'index']);
 //Rutas para usuario
 Route::get('userById/{id}', [UserController::class, 'getUserById']);
 
+//Rutas para certificados
+Route::post('certificadoC',[CursoController::class,'newCertificado']);
+Route::get('certificadoId/{id}', [CursoController::class, 'getCertificado']);
+Route::get('certificados', [CursoController::class, 'getCertificados']);
+Route::put('certificadoU/{id}', [CursoController::class, 'updateCertificado']);
+Route::delete('certificadoD/{id}', [CursoController::class, 'deleteCertificado']);
+
+
 Route::post('uploadUbi',[UploadController::class,'uploadUbicacion']);
 Route::post('uploadTit',[UploadController::class,'uploadTitulo']);
 Route::post('uploadSec',[UploadController::class,'uploadSector']);
@@ -57,6 +66,7 @@ Route::get('/titulos', [TituloController::class, 'getTitulosNivelesCampos']);
 Route::get('/titulos/{nivel}', [TituloController::class, 'getCamposNivel']);
 Route::get('/titulos/{nivel}/{campo}', [TituloController::class, 'getTitulosCamposNivel']);
 Route::get('/titulos/{nivel}/{campo}/{titulo}', [TituloController::class, 'getTituloId']);
+
 
 //Rutas para Empresa
 Route::post('empresaC',[EmpresaController::class,'registerEmp']);
@@ -89,6 +99,7 @@ Route::put('/updatePostulanteById/{id}', [PostulanteController::class, 'updatePo
 Route::get('postulante/{id}/cv', [PostulanteController::class, 'getCV']);
 Route::post('postulante-red', [PostulanteRedController::class, 'redPostulante']);
 Route::get('postulante-red/{id_postulante}', [PostulanteRedController::class, 'getPostulanteReds']);
+Route::delete('/experiencia/{id}', [PostulanteController::class, 'deleteExperiencia']);
 
 Route::put('/formacion_academica/update', [PostulanteController::class, 'updateFormacionAcademica']);
 
