@@ -3,6 +3,7 @@ export interface Formacion {
     id_postulante: number;
     id_titulo: number;
     institucion: string;
+    titulo_acreditado: string;
     estado: string;
     fechaini: string;
     fechafin: string;

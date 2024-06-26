@@ -10,6 +10,7 @@ import EditCurso from '../../components/Postulante/EditCurso';
 import AddRedModal from '../../components/Postulante/AddRedModal';
 import AddIdiomaModal from '../../components/Postulante/AddIdiomaModal'; // Importa el modal
 import { FaLinkedin, FaFacebook, FaInstagram, FaXTwitter, FaGlobe } from 'react-icons/fa6'; // Importar íconos
+import jsPDF from 'jspdf';
 
 Modal.setAppElement('#root');
 
@@ -36,6 +37,12 @@ const Profile: React.FC = () => {
                     const data = response.data;
                     if (!data.cursos) {
                         data.cursos = [];
+                    }
+                    if (!data.experiencia) {
+                        data.experiencia = [];
+                    }
+                    if (!data.idiomas) {
+                        data.idiomas = [];
                     }
                     setProfileData(data);
                     if (!isCedulaValid(data.postulante.cedula)) {
@@ -69,6 +76,12 @@ const Profile: React.FC = () => {
                 const data = response.data;
                 if (!data.cursos) {
                     data.cursos = [];
+                }
+                if (!data.experiencia) {
+                    data.experiencia = [];
+                }
+                if (!data.idiomas) {
+                    data.idiomas = [];
                 }
                 setProfileData(data);
                 const redesResponse = await axios.get(`/postulante-red/${data.postulante.id_postulante}`);
@@ -170,6 +183,95 @@ const Profile: React.FC = () => {
         }
     };
 
+    const generatePDF = () => {
+        const doc = new jsPDF();
+        let yOffset = 10; // Offset para manejar el espacio vertical en el PDF
+
+        const addSection = (title: string) => {
+            doc.setFontSize(16);
+            doc.setTextColor(40, 116, 240);
+            doc.text(title, 10, yOffset);
+            yOffset += 10;
+            doc.setFontSize(12);
+            doc.setTextColor(0);
+        };
+
+        const addText = (text: string) => {
+            doc.text(text, 10, yOffset);
+            yOffset += 10;
+
+            // Verificar si es necesario agregar una nueva página
+            if (yOffset > 270) {
+                doc.addPage();
+                yOffset = 10; // Reiniciar el offset en la nueva página
+            }
+        };
+
+        if (profileData) {
+            // Datos del perfil
+            doc.setFontSize(18);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`${profileData.postulante.nombres} ${profileData.postulante.apellidos}`, 10, yOffset);
+            yOffset += 10;
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            addText(`Fecha de Nacimiento: ${profileData.postulante.fecha_nac}`);
+            addText(`Edad: ${profileData.postulante.edad}`);
+            addText(`Estado Civil: ${profileData.postulante.estado_civil}`);
+            addText(`Cédula: ${profileData.postulante.cedula}`);
+            addText(`Género: ${profileData.postulante.genero}`);
+
+            // Información extra
+            addSection('Presentación');
+            addText(profileData.postulante.informacion_extra || '');
+
+            // Redes
+            addSection('Redes');
+            redes.forEach((red) => {
+                addText(`${red.nombre_red}: ${red.enlace}`);
+            });
+
+            // Formación académica
+            addSection('Formación Académica');
+            profileData.formaciones?.forEach((formacion) => {
+                addText(`Institución: ${formacion.institucion}`);
+                addText(`Título: ${formacion.titulo.titulo}`);
+                addText(`Fecha de Inicio: ${formacion.fechaini}`);
+                addText(`Fecha de Fin: ${formacion.fechafin}`);
+                yOffset += 5; // Espacio adicional entre formaciones
+            });
+
+            // Cursos
+            addSection('Cursos');
+            profileData.cursos?.forEach((curso) => {
+                addText(`Nombre del Curso: ${curso.titulo}`);
+                addText(`Certificado: ${curso.certificado}`);
+                yOffset += 5; // Espacio adicional entre cursos
+            });
+
+            // Experiencia
+            addSection('Experiencia');
+            profileData.experiencia?.forEach((exp) => {
+                addText(`Empresa: ${exp.empresa}`);
+                addText(`Puesto: ${exp.puesto}`);
+                addText(`Fecha de Inicio: ${exp.fechaini}`);
+                addText(`Fecha de Fin: ${exp.fechafin}`);
+                yOffset += 5; // Espacio adicional entre experiencias
+            });
+
+            // Idiomas
+            addSection('Idiomas');
+            profileData.idiomas?.forEach((idioma) => {
+                addText(`Idioma: ${idioma.nombre}`);
+                addText(`Nivel Oral: ${idioma.nivel_oral}`);
+                addText(`Nivel Escrito: ${idioma.nivel_escrito}`);
+                yOffset += 5; // Espacio adicional entre idiomas
+            });
+
+            doc.save('perfil.pdf');
+        }
+    };
+
     if (loading) {
         return <div className="flex justify-center items-center h-screen">Loading...</div>;
     }
@@ -179,7 +281,7 @@ const Profile: React.FC = () => {
     }
 
     return (
-        <div className="max-w-4xl mx-auto mt-10 p-6 bg-[#111827] rounded-lg shadow-md text-white pb-6">
+        <div className="max-w-4xl mx-auto mt-10 p-6 bg-[#111827] rounded-lg shadow-md text-white pb-6" id="profile-content">
             <div className="flex items-center space-x-4">
                 <img
                     src={profileData.postulante.foto}
@@ -192,6 +294,7 @@ const Profile: React.FC = () => {
                     </h1>
                     <p className="text-gray-400">{profileData.ubicacion.provincia}, {profileData.ubicacion.canton}</p>
                     <button onClick={openEditModal} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700">Editar Datos</button>
+                    <button onClick={generatePDF} className="mt-2 ml-2 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-700">Descargar PDF</button>
                 </div>
             </div>
 

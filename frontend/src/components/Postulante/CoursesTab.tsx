@@ -27,7 +27,6 @@ const CoursesTab: React.FC<CoursesTabProps> = ({ openEditCursoModal }) => {
       try {
         if (user) {
           const response = await axios.get(`/perfil/${user.id}`);
-       
           setProfileData(response.data);
         }
       } catch (error) {
@@ -47,7 +46,6 @@ const CoursesTab: React.FC<CoursesTabProps> = ({ openEditCursoModal }) => {
           titulo: certificado.titulo,
           certificado: certificado.certificado
         }));
-      
         setCursos(certificados);
       } catch (error) {
         console.error('Error fetching cursos:', error);
@@ -60,8 +58,6 @@ const CoursesTab: React.FC<CoursesTabProps> = ({ openEditCursoModal }) => {
   }, []);
 
   const handleDeleteCurso = async () => {
-    
-
     if (!cursoToDelete || !profileData || typeof profileData.postulante.id_postulante === 'undefined') {
       console.error("Missing data: ", { cursoToDelete, profileData });
       setDeleteMessage('Error al eliminar el curso: Datos incompletos');
@@ -70,12 +66,11 @@ const CoursesTab: React.FC<CoursesTabProps> = ({ openEditCursoModal }) => {
     }
 
     try {
-      const response = await axios.delete(`/certificadoD/${cursoToDelete.id_certificado}`, {
+      await axios.delete(`/certificadoD/${cursoToDelete.id_certificado}`, {
         data: {
           id_postulante: profileData.postulante.id_postulante
         }
       });
-     
       setCursos(prevCursos => prevCursos.filter(curso => curso.id_certificado !== cursoToDelete.id_certificado));
       setDeleteMessage('Curso eliminado exitosamente');
       setTimeout(() => setDeleteMessage(null), 3000);
@@ -88,7 +83,6 @@ const CoursesTab: React.FC<CoursesTabProps> = ({ openEditCursoModal }) => {
   };
 
   const openConfirmationModal = (curso: Curso) => {
-
     setCursoToDelete(curso);
     setIsConfirmationModalOpen(true);
   };
@@ -133,7 +127,7 @@ const CoursesTab: React.FC<CoursesTabProps> = ({ openEditCursoModal }) => {
               </button>
             </div>
             <p><strong>Nombre del Curso:</strong> {curso.titulo}</p>
-            <p><strong>Certificado:</strong> <a href={curso.certificado} className="text-blue-400 hover:underline">Ver certificado</a></p>
+            <p><strong>Certificado:</strong> <a href={curso.certificado} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Ver certificado</a></p>
           </div>
         ))
       ) : (
