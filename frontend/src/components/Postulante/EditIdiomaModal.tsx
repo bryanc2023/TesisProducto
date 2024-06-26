@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import axios from '../../services/axios';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 
 interface EditIdiomaModalProps {
   isOpen: boolean;
@@ -16,6 +18,8 @@ interface FormValues {
 }
 
 const EditIdiomaModal: React.FC<EditIdiomaModalProps> = ({ isOpen, onRequestClose, idioma, onIdiomaUpdated }) => {
+  const { user } = useSelector((state: RootState) => state.auth);
+  const [profileData, setProfileData] = useState<any>(null);
   const { register, handleSubmit, formState: { errors }, reset } = useForm<FormValues>({
     defaultValues: {
       nivel_oral: idioma.nivel_oral,
@@ -23,7 +27,22 @@ const EditIdiomaModal: React.FC<EditIdiomaModalProps> = ({ isOpen, onRequestClos
     }
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        if (user) {
+          const response = await axios.get(`/perfil/${user.id}`);
+          setProfileData(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+      }
+    };
+
+    fetchProfileData();
+  }, [user]);
+
+  useEffect(() => {
     reset({
       nivel_oral: idioma.nivel_oral,
       nivel_escrito: idioma.nivel_escrito,
@@ -31,8 +50,20 @@ const EditIdiomaModal: React.FC<EditIdiomaModalProps> = ({ isOpen, onRequestClos
   }, [idioma, reset]);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    console.log('Datos enviados:', {
+      id_postulante: profileData?.postulante?.id_postulante,
+      id_idioma: idioma.idioma?.id,
+      nivel_oral: data.nivel_oral,
+      nivel_escrito: data.nivel_escrito
+    });
+
     try {
-      await axios.put(`/updateIdioma/${idioma.idioma?.id}`, data);
+      await axios.put('/postulante_idioma/update', {
+        id_postulante: profileData?.postulante?.id_postulante,
+        id_idioma: idioma.idioma?.id,
+        nivel_oral: data.nivel_oral,
+        nivel_escrito: data.nivel_escrito
+      });
       onIdiomaUpdated();
       onRequestClose();
     } catch (error) {
@@ -48,6 +79,15 @@ const EditIdiomaModal: React.FC<EditIdiomaModalProps> = ({ isOpen, onRequestClos
       <h2 className="text-2xl font-semibold mb-4 text-gray-800">Editar Idioma</h2>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 gap-4">
+          <div className="mb-4">
+            <label className="block text-gray-700">Idioma</label>
+            <input 
+              type="text"
+              value={idioma.idioma?.nombre}
+              className="w-full px-4 py-2 border rounded-md bg-gray-100 cursor-not-allowed"
+              readOnly
+            />
+          </div>
           <div className="mb-4">
             <label className="block text-gray-700">Nivel Oral <span className="text-red-500">*</span></label>
             <select className="w-full px-4 py-2 border rounded-md" required

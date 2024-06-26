@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../../services/axios';
 import { useSelector } from 'react-redux';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface EditCursoProps {
   isOpen: boolean;
@@ -10,7 +12,7 @@ interface EditCursoProps {
 }
 
 interface Curso {
-  id: number;
+  id_certificado: number;
   nombre: string;
   institucion: string;
   fechaini: string;
@@ -71,15 +73,18 @@ const EditCurso: React.FC<EditCursoProps> = ({ isOpen, closeModal, reloadProfile
     };
 
     try {
-      if (curso) {
-        await axios.put(`/certificadoU/${curso.id}`, updatedCurso);
+      if (curso && curso.id_certificado) {
+        await axios.put(`/certificadoU/${curso.id_certificado}`, updatedCurso);
+        toast.success('Curso actualizado correctamente');
       } else {
         await axios.post('/certificadoC', updatedCurso);
+        toast.success('Curso agregado correctamente');
       }
       reloadProfile();
       closeModal();
     } catch (error) {
       console.error('Error updating course:', error);
+      toast.error('Hubo un error al guardar el curso');
     }
   };
 
@@ -89,6 +94,7 @@ const EditCurso: React.FC<EditCursoProps> = ({ isOpen, closeModal, reloadProfile
 
   return (
     <div className={`modal ${isOpen ? 'block' : 'hidden'}`}>
+      <ToastContainer />
       <div className="modal-content bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-2xl font-semibold mb-4">{curso ? 'Editar Curso' : 'Agregar Curso'}</h2>
         <form onSubmit={handleSubmit}>
@@ -102,7 +108,6 @@ const EditCurso: React.FC<EditCursoProps> = ({ isOpen, closeModal, reloadProfile
               required
             />
           </div>
-          
           <div className="mb-4">
             <label className="block text-gray-700">Certificado (URL)</label>
             <input
@@ -113,6 +118,13 @@ const EditCurso: React.FC<EditCursoProps> = ({ isOpen, closeModal, reloadProfile
               required
             />
           </div>
+          {certificado && (
+            <div className="mb-4">
+              <a href={certificado} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                Ver Certificado
+              </a>
+            </div>
+          )}
           <div className="flex justify-between">
             <button
               type="button"

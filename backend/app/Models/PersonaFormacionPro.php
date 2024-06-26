@@ -20,6 +20,7 @@ class PersonaFormacionPro extends Model
         'estado',
         'fecha_ini',
         'fecha_fin',
+        'titulo_acreditado',
         // Puedes agregar más campos si es necesario
     ];
 

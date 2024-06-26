@@ -117,6 +117,7 @@ const EducationTab: React.FC<EducationTabProps> = ({ formaciones, openEditFormac
               <p><strong>Título:</strong> {formacion.titulo.titulo}</p>
               <p><strong>Nivel de Educación:</strong> {formacion.titulo.nivel_educacion}</p>
               <p><strong>Campo Amplio:</strong> {formacion.titulo.campo_amplio}</p>
+              <p><strong>Título Acreditado:</strong> {formacion.titulo_acreditado}</p>
             </div>
           );
         })
