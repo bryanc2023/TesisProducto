@@ -100,6 +100,9 @@ Route::get('postulante/{id}/cv', [PostulanteController::class, 'getCV']);
 Route::post('postulante-red', [PostulanteRedController::class, 'redPostulante']);
 Route::get('postulante-red/{id_postulante}', [PostulanteRedController::class, 'getPostulanteReds']);
 Route::delete('/experiencia/{id}', [PostulanteController::class, 'deleteExperiencia']);
+Route::put('/experiencia/{id}', [PostulanteController::class, 'updateExperiencia']);
+
+
 
 Route::put('/formacion_academica/update', [PostulanteController::class, 'updateFormacionAcademica']);
 

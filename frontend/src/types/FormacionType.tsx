@@ -8,6 +8,7 @@ export interface Formacion {
     fechaini: string;
     fechafin: string;
     titulo: {
+      id_titulo: number;
       titulo: string;
       nivel_educacion: string;
       campo_amplio: string;
@@ -30,6 +31,6 @@ export interface Formacion {
       provincia: string;
       canton: string;
     };
-    cursos: any[]; // Ajustar según la definición correcta
+    cursos: Curso[]; // Replace 'any[]' with the correct type definition
   }
   

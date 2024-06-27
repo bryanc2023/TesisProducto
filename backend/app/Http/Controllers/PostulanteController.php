@@ -346,10 +346,9 @@ class PostulanteController extends Controller
         }
     }
 
-    public function agregarExperiencia(Request $request){
-        
+    public function agregarExperiencia(Request $request) {
         $request->validate([
-            'id_usuario' => 'required|integer',
+            'id_postulante' => 'required|integer',
             'empresa' => 'required|string|max:100',
             'puesto' => 'required|string|max:100',
             'fechaini' => 'nullable|date',
@@ -359,43 +358,39 @@ class PostulanteController extends Controller
             'area'=> 'required|string|max:250',
             'contacto'=> 'required|string|max:250'
         ]);
-
-
-        $postulante = Postulante::where('id_usuario', $request->id_usuario)->first();
+    
+        $postulante = Postulante::find($request->id_postulante);
         if (!$postulante) {
             return response()->json(['error' => 'Postulante no encontrado'], 404);
         }
-
-        $idp = $postulante->id_postulante;
+    
         $postulantexp = new FormacionPro();
-        $postulantexp->id_postulante = $idp;
-        $postulantexp->empresa= $request->empresa;
-        $postulantexp->puesto= $request->puesto;
-        $postulantexp->fecha_ini= $request->fechaini;
-        $postulantexp->fecha_fin= $request->fechafin;
-        $postulantexp->descripcion_responsabilidades= $request->descripcion;
-        $postulantexp->persona_referencia= $request->referencia;
-        $postulantexp->area= $request->area;
-        $postulantexp->contacto= $request->contacto;
-        $fecha1= new DateTime($request->fechaini);
-        $fecha2 = new DateTime($request->fechafin);
-
-       // Calcular la diferencia en años entre las dos fechas
-       
-        $diferencia = $fecha1->diff($fecha2);
-        
-        $aniosc = $diferencia->y;
-        $mesesc = $diferencia->m;
-        $postulantexp->mes_e= $mesesc;
-        $postulantexp->anios_e= $aniosc;
-        
- 
-       
+        $postulantexp->id_postulante = $request->id_postulante;
+        $postulantexp->empresa = $request->empresa;
+        $postulantexp->puesto = $request->puesto;
+        $postulantexp->fecha_ini = $request->fechaini;
+        $postulantexp->fecha_fin = $request->fechafin;
+        $postulantexp->descripcion_responsabilidades = $request->descripcion;
+        $postulantexp->persona_referencia = $request->referencia;
+        $postulantexp->area = $request->area;
+        $postulantexp->contacto = $request->contacto;
+    
+        if ($request->fechaini && $request->fechafin) {
+            $fecha1 = new DateTime($request->fechaini);
+            $fecha2 = new DateTime($request->fechafin);
+            $diferencia = $fecha1->diff($fecha2);
+            $postulantexp->mes_e = $diferencia->m;
+            $postulantexp->anios_e = $diferencia->y;
+        } else {
+            $postulantexp->mes_e = 0;
+            $postulantexp->anios_e = 0;
+        }
     
         $postulantexp->save();
-        return response()->json(['message' => 'Experiencia agregada exitosamente',$postulantexp], 201);
-
+        return response()->json(['message' => 'Experiencia agregada exitosamente', $postulantexp], 201);
     }
+    
+    
     public function getExperiencia($id_usuario)
     {
         // Validar que el ID de usuario sea un número entero
@@ -435,6 +430,45 @@ class PostulanteController extends Controller
             return response()->json($response);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error retrieving user profile'], 500);
+        }
+    }
+
+    public function updateExperiencia(Request $request){
+        try {
+            DB::beginTransaction();
+    
+            $idPostulante = $request->input('id_postulante');
+            $idExperiencia = $request->input('id_experiencia');
+            $empresa = $request->input('empresa');
+            $puesto = $request->input('puesto');
+            $fechaini = $request->input('fechaini');
+            $fechafin = $request->input('fechafin');
+            $descripcion = $request->input('descripcion');
+            $referencia = $request->input('referencia');
+            $area = $request->input('area');
+            $contacto = $request->input('contacto');
+    
+            // Actualizar los datos de la experiencia
+            DB::table('formacion_profesional')
+                ->where('id_postulante', $idPostulante)
+                ->where('id_formacion_pro', $idExperiencia)
+                ->update([
+                    'empresa' => $empresa,
+                    'puesto' => $puesto,
+                    'fecha_ini' => $fechaini,
+                    'fecha_fin' => $fechafin,
+                    'descripcion_responsabilidades' => $descripcion,
+                    'persona_referencia' => $referencia,
+                    'area' => $area,
+                    'contacto' => $contacto,
+                ]);
+    
+            DB::commit();
+    
+            return response()->json(['message' => 'Experiencia actualizada exitosamente.']);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json(['message' => 'No se pudo actualizar la experiencia', 'error' => $th->getMessage()], 500);
         }
     }
 

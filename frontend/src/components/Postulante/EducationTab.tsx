@@ -17,14 +17,13 @@ const EducationTab: React.FC<EducationTabProps> = ({ formaciones, openEditFormac
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [deleteInfo, setDeleteInfo] = useState<{ id_postulante: number, id_titulo: number } | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [profileData, setProfileData] = useState<any>(null);
+  const [profileData, setProfileData] = useState<Postulante | null>(null);
 
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
         if (user) {
-          const response = await axios.get(`/perfil/${user.id}`);
-          const data = response.data;
+          const data = await axios.get(`/perfil/${user.id}`).then(response => response.data);
           setProfileData(data);
         }
       } catch (error) {
@@ -50,16 +49,16 @@ const EducationTab: React.FC<EducationTabProps> = ({ formaciones, openEditFormac
   const handleDeleteFormacion = async () => {
     if (deleteInfo) {
       try {
-        const response = await axios.delete('/formacion_academica/delete', {
+        await axios.delete('/formacion_academica/delete', {
           data: { id_postulante: deleteInfo.id_postulante, id_titulo: deleteInfo.id_titulo },
           headers: {
             'Content-Type': 'application/json',
           },
         });
-        setFormaciones(prevFormaciones => prevFormaciones.filter(f => !(f.id_postulante === deleteInfo.id_postulante && f.titulo.id === deleteInfo.id_titulo)));
+        setFormaciones(prevFormaciones => prevFormaciones.filter(f => !(f.id_postulante === deleteInfo.id_postulante && f.titulo.id_titulo === deleteInfo.id_titulo)));
         setMessage({ type: 'success', text: 'Formación académica eliminada exitosamente' });
         setShowConfirmModal(false);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error al eliminar la formación académica', error.response ? error.response.data : error.message);
         setMessage({ type: 'error', text: 'Hubo un error al eliminar la formación académica' });
       }
@@ -67,8 +66,8 @@ const EducationTab: React.FC<EducationTabProps> = ({ formaciones, openEditFormac
   };
 
   const openConfirmModal = (id_titulo: number) => {
-    if (profileData && profileData.postulante) {
-      setDeleteInfo({ id_postulante: profileData.postulante.id_postulante, id_titulo });
+    if (profileData) {
+      setDeleteInfo({ id_postulante: profileData.id_postulante, id_titulo });
       setShowConfirmModal(true);
     }
   };
@@ -104,7 +103,7 @@ const EducationTab: React.FC<EducationTabProps> = ({ formaciones, openEditFormac
                   <FaPencilAlt className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => openConfirmModal(formacion.titulo.id)}
+                  onClick={() => openConfirmModal(formacion.titulo.id_titulo)}
                   className="px-2 py-1 bg-rose-500 text-white rounded-md hover:bg-rose-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-rose-300"
                 >
                   <FaTrash className="w-4 h-4" />

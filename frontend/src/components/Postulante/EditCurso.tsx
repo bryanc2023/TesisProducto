@@ -7,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 interface EditCursoProps {
   isOpen: boolean;
   closeModal: () => void;
-  reloadProfile: () => void;
+  reloadCursos: () => void;
   curso: Curso | null;
 }
 
@@ -20,7 +20,7 @@ interface Curso {
   certificado: string;
 }
 
-const EditCurso: React.FC<EditCursoProps> = ({ isOpen, closeModal, reloadProfile, curso }) => {
+const EditCurso: React.FC<EditCursoProps> = ({ isOpen, closeModal, reloadCursos, curso }) => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -80,7 +80,7 @@ const EditCurso: React.FC<EditCursoProps> = ({ isOpen, closeModal, reloadProfile
         await axios.post('/certificadoC', updatedCurso);
         toast.success('Curso agregado correctamente');
       }
-      reloadProfile();
+      reloadCursos(); // Llama a fetchCursos después de agregar o editar
       closeModal();
     } catch (error) {
       console.error('Error updating course:', error);
@@ -93,16 +93,17 @@ const EditCurso: React.FC<EditCursoProps> = ({ isOpen, closeModal, reloadProfile
   }
 
   return (
-    <div className={`modal ${isOpen ? 'block' : 'hidden'}`}>
+    <div className={`${isOpen ? 'fixed' : 'hidden'} inset-0 flex items-center justify-center bg-black bg-opacity-50`}>
       <ToastContainer />
-      <div className="modal-content bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold mb-4">{curso ? 'Editar Curso' : 'Agregar Curso'}</h2>
+      <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-lg">
+        <h2 className="text-2xl font-semibold mb-4 text-gray-900">{curso ? 'Editar Curso' : 'Agregar Curso'}</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700">Nombre del Curso</label>
             <input
               type="text"
-              className="w-full px-4 py-2 border rounded-md"
+              className="w-full px-4 py-2 border rounded-md text-gray-900"
+              placeholder="Nombre del Curso"
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
               required
@@ -112,7 +113,8 @@ const EditCurso: React.FC<EditCursoProps> = ({ isOpen, closeModal, reloadProfile
             <label className="block text-gray-700">Certificado (URL)</label>
             <input
               type="url"
-              className="w-full px-4 py-2 border rounded-md"
+              className="w-full px-4 py-2 border rounded-md text-gray-900"
+              placeholder="URL del Certificado"
               value={certificado}
               onChange={(e) => setCertificado(e.target.value)}
               required
