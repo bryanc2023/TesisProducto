@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import axios from '../../services/axios';
 import { useSelector } from 'react-redux';
+import EditCurso from './EditCurso';
 
 interface CoursesTabProps {
   openEditCursoModal: (curso: Curso | null) => void;
@@ -13,66 +14,48 @@ interface Curso {
   certificado: string;
 }
 
-const CoursesTab: React.FC<CoursesTabProps> = ({ openEditCursoModal }) => {
+const CoursesTab: React.FC<CoursesTabProps> = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState<boolean>(false);
   const [cursoToDelete, setCursoToDelete] = useState<Curso | null>(null);
-  const [profileData, setProfileData] = useState<any>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [cursoToEdit, setCursoToEdit] = useState<Curso | null>(null);
+
+  const fetchCursos = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('/certificados');
+      const certificados = response.data.map((certificado: any) => ({
+        id_certificado: certificado.id_certificado,
+        titulo: certificado.titulo,
+        certificado: certificado.certificado
+      }));
+      setCursos(certificados);
+    } catch (error) {
+      console.error('Error fetching cursos:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProfileData = async () => {
-      try {
-        if (user) {
-          const response = await axios.get(`/perfil/${user.id}`);
-          setProfileData(response.data);
-        }
-      } catch (error) {
-        console.error('Error fetching profile data:', error);
-      }
-    };
-
-    fetchProfileData();
-  }, [user]);
-
-  useEffect(() => {
-    const fetchCursos = async () => {
-      try {
-        const response = await axios.get('/certificados');
-        const certificados = response.data.map((certificado: any) => ({
-          id_certificado: certificado.id_certificado,
-          titulo: certificado.titulo,
-          certificado: certificado.certificado
-        }));
-        setCursos(certificados);
-      } catch (error) {
-        console.error('Error fetching cursos:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchCursos();
   }, []);
 
   const handleDeleteCurso = async () => {
-    if (!cursoToDelete || !profileData || typeof profileData.postulante.id_postulante === 'undefined') {
-      console.error("Missing data: ", { cursoToDelete, profileData });
+    if (!cursoToDelete) {
       setDeleteMessage('Error al eliminar el curso: Datos incompletos');
       setTimeout(() => setDeleteMessage(null), 3000);
       return;
     }
 
     try {
-      await axios.delete(`/certificadoD/${cursoToDelete.id_certificado}`, {
-        data: {
-          id_postulante: profileData.postulante.id_postulante
-        }
-      });
-      setCursos(prevCursos => prevCursos.filter(curso => curso.id_certificado !== cursoToDelete.id_certificado));
+      await axios.delete(`/certificadoD/${cursoToDelete.id_certificado}`);
       setDeleteMessage('Curso eliminado exitosamente');
+      fetchCursos(); // Actualiza la lista de cursos después de eliminar
       setTimeout(() => setDeleteMessage(null), 3000);
     } catch (error) {
       console.error('Error deleting curso:', error.response ? error.response.data : error);
@@ -92,6 +75,16 @@ const CoursesTab: React.FC<CoursesTabProps> = ({ openEditCursoModal }) => {
     setCursoToDelete(null);
   };
 
+  const openEditModal = (curso: Curso | null) => {
+    setCursoToEdit(curso);
+    setIsEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setCursoToEdit(null);
+  };
+
   if (loading) {
     return <p className="text-gray-400">Cargando...</p>;
   }
@@ -100,7 +93,7 @@ const CoursesTab: React.FC<CoursesTabProps> = ({ openEditCursoModal }) => {
     <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Cursos y Capacitaciones</h2>
-        <button onClick={() => openEditCursoModal(null)} className="text-orange-400 hover:underline">
+        <button onClick={() => openEditModal(null)} className="text-orange-400 hover:underline">
           + Agregar curso
         </button>
       </div>
@@ -114,7 +107,7 @@ const CoursesTab: React.FC<CoursesTabProps> = ({ openEditCursoModal }) => {
           <div key={`${curso.id_certificado}-${index}`} className="mb-4 p-4 border rounded-lg bg-gray-700 relative">
             <div className="flex justify-end space-x-2 mb-2">
               <button
-                onClick={() => openEditCursoModal(curso)}
+                onClick={() => openEditModal(curso)}
                 className="px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
               >
                 <FaPencilAlt className="w-4 h-4" />
@@ -133,7 +126,7 @@ const CoursesTab: React.FC<CoursesTabProps> = ({ openEditCursoModal }) => {
       ) : (
         <p className="text-gray-400">No hay cursos ni capacitaciones disponibles en este momento.</p>
       )}
-      <div className="border border-dashed border-gray-600 rounded-lg p-4 text-center cursor-pointer" onClick={() => openEditCursoModal(null)}>
+      <div className="border border-dashed border-gray-600 rounded-lg p-4 text-center cursor-pointer" onClick={() => openEditModal(null)}>
         <span className="text-gray-400">Agrega tu curso</span>
       </div>
 
@@ -158,6 +151,15 @@ const CoursesTab: React.FC<CoursesTabProps> = ({ openEditCursoModal }) => {
             </div>
           </div>
         </div>
+      )}
+
+      {isEditModalOpen && (
+        <EditCurso
+          isOpen={isEditModalOpen}
+          closeModal={closeEditModal}
+          reloadCursos={fetchCursos} // Pasar la función fetchCursos directamente
+          curso={cursoToEdit}
+        />
       )}
     </div>
   );

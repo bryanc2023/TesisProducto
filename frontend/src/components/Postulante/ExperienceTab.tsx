@@ -1,18 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import ExperienceModal from './ExperienceModal';
 import axios from '../../services/axios';
-import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 
 interface Experiencia {
-  id_formacion_pro: number; // Asegúrate de incluir el ID para eliminar correctamente
+  id_formacion_pro: number; 
   empresa: string;
   puesto: string;
   area: string;
-  fecha_ini: string;
-  fecha_fin: string;
+  fechaini: string;
+  fechafin: string;
   descripcion_responsabilidades: string;
   persona_referencia: string;
   contacto: string;
@@ -20,18 +19,14 @@ interface Experiencia {
 
 const ExperienceTab: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
-  const { reset } = useForm<Experiencia>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [experiencias, setExperiencias] = useState<Experiencia[]>([]);
   const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
-  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false); // Estado para el modal de confirmación
-  const [experienceToDelete, setExperienceToDelete] = useState<number | null>(null); // Estado para almacenar el ID de la experiencia a eliminar
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false); 
+  const [experienceToDelete, setExperienceToDelete] = useState<number | null>(null);
+  const [selectedExperience, setSelectedExperience] = useState<Experiencia | null>(null);
 
-  useEffect(() => {
-    fetchExperiencia();
-  }, [user]);
-
-  const fetchExperiencia = async () => {
+  const fetchExperiencia = useCallback(async () => {
     try {
       if (!user || !user.id) {
         console.error('User ID is missing');
@@ -47,34 +42,24 @@ const ExperienceTab: React.FC = () => {
       console.error('Error fetching experiencia:', error);
       setExperiencias([]);
     }
-  };
+  }, [user]);
+  
+  useEffect(() => {
+    fetchExperiencia();
+  }, [fetchExperiencia, user]);
 
-  const openModal = () => {
+  const openModal = (experience: Experiencia | null = null) => {
+    setSelectedExperience(experience);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
+    setSelectedExperience(null);
   };
 
-  const handleAddExperiencia = async (data: Experiencia) => {
-    if (user) {
-      try {
-        const dataToSend = {
-          ...data,
-          id_usuario: `${user.id}`,
-        };
-
-        const response = await axios.post('exp', dataToSend);
-        console.log('Experiencia agregada:', response.data);
-
-        reset();
-        fetchExperiencia(); // Refrescar las experiencias después de agregar una nueva
-      } catch (error: any) {
-        console.error('Error enviando los datos:', error);
-      }
-    }
-
+  const handleAddOrEditExperiencia = () => {
+    fetchExperiencia(); // Refresh experience list after adding or editing
     closeModal();
   };
 
@@ -112,7 +97,7 @@ const ExperienceTab: React.FC = () => {
     <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
       <div className="flex justify-between items-center">
         <h3 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Experiencia</h3>
-        <button onClick={openModal} className="text-orange-400 hover:underline">
+        <button onClick={() => openModal()} className="text-orange-400 hover:underline">
           + Agregar experiencia
         </button>
       </div>
@@ -126,7 +111,7 @@ const ExperienceTab: React.FC = () => {
           <div key={index} className="mb-4 p-4 border rounded-lg bg-gray-700 relative">
             <div className="flex justify-end space-x-2 mb-2">
               <button
-                onClick={() => openModal()}
+                onClick={() => openModal(experiencia)}
                 className="px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
               >
                 <FaPencilAlt className="w-4 h-4" />
@@ -140,9 +125,9 @@ const ExperienceTab: React.FC = () => {
             </div>
             <p><strong>Empresa:</strong> {experiencia.empresa}</p>
             <p><strong>Puesto:</strong> {experiencia.puesto}</p>
-            <p><strong>Area:</strong> {experiencia.area}</p>
-            <p><strong>Fecha de Inicio:</strong> {experiencia.fecha_ini}</p>
-            <p><strong>Fecha de Fin:</strong> {experiencia.fecha_fin}</p>
+            <p><strong>Área:</strong> {experiencia.area}</p>
+            <p><strong>Fecha de Inicio:</strong> {experiencia.fechaini}</p>
+            <p><strong>Fecha de Fin:</strong> {experiencia.fechafin}</p>
             <p><strong>Descripción:</strong> {experiencia.descripcion_responsabilidades}</p>
             <p><strong>Referencia:</strong> {experiencia.persona_referencia}</p>
             <p><strong>Contacto:</strong> {experiencia.contacto}</p>
@@ -151,14 +136,15 @@ const ExperienceTab: React.FC = () => {
       ) : (
         <p className="text-gray-400">No hay experiencia disponible en este momento.</p>
       )}
-      <div className="border border-dashed border-gray-600 rounded-lg p-4 text-center cursor-pointer" onClick={openModal}>
+      <div className="border border-dashed border-gray-600 rounded-lg p-4 text-center cursor-pointer" onClick={() => openModal()}>
         <span className="text-gray-400">Agrega tu experiencia</span>
       </div>
 
       <ExperienceModal
         isOpen={isModalOpen}
         onRequestClose={closeModal}
-        onSubmit={handleAddExperiencia}
+        onSubmit={handleAddOrEditExperiencia}
+        experiencia={selectedExperience}
       />
 
       {isConfirmationModalOpen && (
