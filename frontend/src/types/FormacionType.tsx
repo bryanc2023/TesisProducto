@@ -8,7 +8,7 @@ export interface Formacion {
     fechaini: string;
     fechafin: string;
     titulo: {
-      id_titulo: number;
+      id: number;
       titulo: string;
       nivel_educacion: string;
       campo_amplio: string;

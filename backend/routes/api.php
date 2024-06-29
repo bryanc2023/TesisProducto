@@ -77,7 +77,8 @@ Route::post('/empresa-red', [EmpresaRedController::class, 'redEmpresa']);
 Route::get('/empresa-red/{id_empresa}', [EmpresaRedController::class, 'getRedEmpresa']);
 
 //Rutas para Idioma
-Route::get('idioma', [IdiomaController::class, 'getIdiomas']);
+Route::get('/idioma', [IdiomaController::class, 'getIdiomasAll']);
+Route::get('/idiomas', [IdiomaController::class, 'getIdiomas']);
 Route::post('nuevoidioma', [PostulanteController::class, 'registroIdioma']);
 Route::put('postulante_idioma/update', [IdiomaController::class, 'updateidiomas']);
 Route::delete('postulante_idioma/delete', [IdiomaController::class, 'deleteidiomaPostulante']);
@@ -89,6 +90,7 @@ Route::post('postulante/forma',[PostulanteController::class,'registroFormaAca'])
 Route::get('/perfil/{id}', [PostulanteController::class, 'getPerfil']);
 Route::post('/exp', [PostulanteController::class, 'agregarExperiencia']);
 Route::get('/experiencia/{id}', [PostulanteController::class, 'getExperiencia']);
+Route::get('/experienciaById/{id}', [PostulanteController::class, 'getExperienciaById']);
 Route::post('postulante/forma2',[PostulanteController::class,'registroFormaAcaPlus']);
 Route::get('/areas', [AreaController::class, 'getAreas']);
 Route::get('/criterios', [CriterioController::class, 'getCriterios']);

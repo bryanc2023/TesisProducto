@@ -13,19 +13,23 @@ interface LanguagesTabProps {
 interface Idioma {
   nivel_oral: string;
   nivel_escrito: string;
-  idioma: {
-    id: number;
-    nombre: string;
-  } | null;
+  id: number;  
+  nombre: string;
+  pivot?: {
+    id_postulante: number;
+    id_idioma: number;
+    nivel_oral: string;
+    nivel_escrito: string;
+  };
 }
-
 const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const { reset } = useForm<Idioma>();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedIdioma, setSelectedIdioma] = useState<Idioma | null>(null);
-  const [languages, setLanguages] = useState<Idioma[]>([]);
+  const [generalLanguages, setGeneralLanguages] = useState<Idioma[]>([]);
+  const [userLanguages, setUserLanguages] = useState<Idioma[]>([]);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [idiomaToDelete, setIdiomaToDelete] = useState<Idioma | null>(null);
   const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
@@ -38,6 +42,7 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
         if (user) {
           const response = await axios.get(`/perfil/${user.id}`);
           setProfileData(response.data);
+          fetchUserLanguages(response.data.postulante.id_postulante);
         }
       } catch (error) {
         console.error('Error fetching profile data:', error);
@@ -50,20 +55,35 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
   }, [user]);
 
   useEffect(() => {
-    fetchIdiomas();
+    fetchGeneralLanguages();
   }, []);
 
-  const fetchIdiomas = async () => {
+  const fetchGeneralLanguages = async () => {
     try {
       const response = await axios.get('/idioma');
       if (response.data && Array.isArray(response.data.idiomas)) {
-        setLanguages(response.data.idiomas);
+        setGeneralLanguages(response.data.idiomas);
       } else {
-        setLanguages([]);
+        setGeneralLanguages([]);
       }
     } catch (error) {
       console.error('Error fetching idiomas:', error);
-      setLanguages([]);
+      setGeneralLanguages([]);
+    }
+  };
+
+  const fetchUserLanguages = async (userId: number) => {
+    try {
+      const response = await axios.get('/idiomas', { params: { userId } });
+      if (response.data && Array.isArray(response.data.idiomas)) {
+       
+        setUserLanguages(response.data.idiomas);
+      } else {
+        setUserLanguages([]);
+      }
+    } catch (error) {
+      console.error('Error fetching user idiomas:', error);
+      setUserLanguages([]);
     }
   };
 
@@ -76,35 +96,46 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
     setIsEditModalOpen(true);
   };
 
-  const handleIdiomaAdded = () => {
+  const handleIdiomaAdded = async () => {
     setIsAddModalOpen(false);
-    fetchIdiomas(); // Actualiza la lista de idiomas después de agregar
+    if (profileData) {
+      await fetchUserLanguages(profileData.postulante.id_postulante);
+      fetchGeneralLanguages();
+    }
   };
 
-  const handleIdiomaUpdated = () => {
+  const handleIdiomaUpdated = async () => {
     reset();
     setIsEditModalOpen(false);
-    fetchIdiomas(); // Actualiza la lista de idiomas después de editar
+    if (profileData) {
+      await fetchUserLanguages(profileData.postulante.id_postulante);
+      fetchGeneralLanguages();
+    }
   };
 
   const handleDeleteIdioma = async () => {
     if (!idiomaToDelete || !profileData || typeof profileData.postulante.id_postulante === 'undefined') {
-      console.error("Missing data: ", { idiomaToDelete, profileData });
+      console.error('Missing data: ', { idiomaToDelete, profileData });
       setDeleteMessage('Error al eliminar el idioma: Datos incompletos');
       setTimeout(() => setDeleteMessage(null), 3000);
       return;
     }
 
     try {
-      const response = await axios.delete('/postulante_idioma/delete', {
+      
+
+      await axios.delete('/postulante_idioma/delete', {
         data: {
           id_postulante: profileData.postulante.id_postulante,
-          id_idioma: idiomaToDelete.idioma?.id,
+          id_idioma: idiomaToDelete.id, // Usar la propiedad id directamente
         }
       });
+
       setDeleteMessage('Idioma eliminado exitosamente');
-      fetchIdiomas(); // Actualiza la lista de idiomas después de eliminar
       setTimeout(() => setDeleteMessage(null), 3000);
+      if (profileData) {
+        await fetchUserLanguages(profileData.postulante.id_postulante);
+      }
     } catch (error) {
       console.error('Error eliminando el idioma:', error.response ? error.response.data : error);
       setDeleteMessage('Error al eliminar el idioma');
@@ -127,7 +158,6 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
   if (loading) {
     return <p className="text-gray-400">Cargando...</p>;
   }
-
   return (
     <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
       <div className="flex justify-between items-center">
@@ -141,8 +171,8 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
           {deleteMessage}
         </div>
       )}
-      {idiomas.length > 0 ? (
-        idiomas.map((idioma, index) => (
+      {userLanguages.length > 0 ? (
+        userLanguages.map((idioma, index) => (
           <div key={index} className="mb-4 p-4 border rounded-lg bg-gray-700 relative">
             <div className="flex justify-end space-x-2 mb-2">
               <button
@@ -158,9 +188,9 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
                 <FaTrash className="w-4 h-4" />
               </button>
             </div>
-            <p><strong>Idioma:</strong> {idioma.idioma?.nombre}</p>
-            <p><strong>Nivel Oral:</strong> {idioma.nivel_oral}</p>
-            <p><strong>Nivel Escrito:</strong> {idioma.nivel_escrito}</p>
+            <p><strong>Idioma:</strong> {idioma.nombre}</p>
+            <p><strong>Nivel Oral:</strong> {idioma.pivot?.nivel_oral}</p>
+            <p><strong>Nivel Escrito:</strong> {idioma.pivot?.nivel_escrito}</p>
           </div>
         ))
       ) : (
@@ -173,7 +203,7 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
         isOpen={isAddModalOpen}
         onRequestClose={() => setIsAddModalOpen(false)}
         onIdiomaAdded={handleIdiomaAdded}
-        languages={languages}
+        languages={generalLanguages}
       />
       {selectedIdioma && (
         <EditIdiomaModal

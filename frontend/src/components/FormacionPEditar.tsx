@@ -14,6 +14,7 @@ interface IFormInput {
   nivel_educacion: string;
   campo_amplio: string;
   titulo_acreditado: string;
+  
 }
 
 interface Titulo {
@@ -29,7 +30,7 @@ interface TituloDetalle {
   titulo: string;
   nivel_educacion: string;
   campo_amplio: string;
-  titulo_acreditado: string;
+
 }
 
 interface Postulante {
@@ -52,6 +53,7 @@ interface Formacion {
   fechafin: string;
   titulo: TituloDetalle;
   id_postulante: number;
+  titulo_acreditado: string;
 }
 
 interface Ubicacion {
@@ -132,7 +134,7 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
       setSelectedCampo(formacion.titulo.campo_amplio);
       setSelectedTitulo(formacion.titulo.id.toString());
       setSelectedTituloId(formacion.titulo.id.toString());
-      setValue('titulo_acreditado', formacion.titulo.titulo_acreditado);
+      setValue('titulo_acreditado', formacion.titulo_acreditado);
     } else {
       reset({
         institucion: '',

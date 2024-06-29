@@ -410,6 +410,21 @@ class PostulanteController extends Controller
             return response()->json(['message' => 'Error al recuperar la experiencia'], 500);
         }
     }
+
+    public function getExperienciaById($id)
+    {
+        try {
+            $experiencia = FormacionPro::find($id);
+
+            if (!$experiencia) {
+                return response()->json(['message' => 'Experiencia no encontrada'], 404);
+            }
+
+            return response()->json(['experiencia' => $experiencia], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al recuperar la experiencia'], 500);
+        }
+    }
     
 
 

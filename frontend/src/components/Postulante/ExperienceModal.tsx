@@ -21,8 +21,8 @@ interface Experiencia {
   empresa: string;
   puesto: string;
   area: string;
-  fechaini: string;
-  fechafin: string;
+  fecha_ini: string;
+  fecha_fin: string;
   descripcion: string;
   referencia: string;
   contacto: string;
@@ -53,10 +53,10 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
       setValue('empresa', experiencia.empresa);
       setValue('puesto', experiencia.puesto);
       setValue('area', experiencia.area);
-      setValue('fechaini', experiencia.fechaini);
-      setValue('fechafin', experiencia.fechafin);
-      setValue('descripcion', experiencia.descripcion);
-      setValue('referencia', experiencia.referencia);
+      setValue('fecha_ini', experiencia.fecha_ini);
+      setValue('fecha_fin', experiencia.fecha_fin);
+      setValue('descripcion', experiencia.descripcion_responsabilidades);
+      setValue('referencia', experiencia.persona_referencia);
       setValue('contacto', experiencia.contacto);
     } else {
       reset();
@@ -173,23 +173,23 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
               <label className="block text-gray-700">Fecha de inicio labores:</label>
               <input 
                 type="date" 
-                {...register('fechaini', { 
+                {...register('fecha_ini', { 
                   required: 'Este campo es obligatorio' 
                 })} 
                 className="w-full px-4 py-2 border rounded-md text-gray-700" 
               />
-              {errors.fechaini && <p className="text-red-500">{errors.fechaini.message}</p>}
+              {errors.fecha_ini && <p className="text-red-500">{errors.fecha_ini.message}</p>}
             </div>
             <div>
               <label className="block text-gray-700">Fecha de fin de labores:</label>
               <input 
                 type="date" 
-                {...register('fechafin', { 
+                {...register('fecha_fin', { 
                   required: 'Este campo es obligatorio' 
                 })} 
                 className="w-full px-4 py-2 border rounded-md text-gray-700" 
               />
-              {errors.fechafin && <p className="text-red-500">{errors.fechafin.message}</p>}
+              {errors.fecha_fin && <p className="text-red-500">{errors.fecha_fin.message}</p>}
             </div>
             <div>
               <label className="block text-gray-700">Descripción de responsabilidades en la empresa:</label>

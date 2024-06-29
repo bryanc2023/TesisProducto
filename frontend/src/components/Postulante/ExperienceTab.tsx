@@ -10,8 +10,8 @@ interface Experiencia {
   empresa: string;
   puesto: string;
   area: string;
-  fechaini: string;
-  fechafin: string;
+  fecha_ini: string;
+  fecha_fin: string;
   descripcion_responsabilidades: string;
   persona_referencia: string;
   contacto: string;
@@ -126,8 +126,8 @@ const ExperienceTab: React.FC = () => {
             <p><strong>Empresa:</strong> {experiencia.empresa}</p>
             <p><strong>Puesto:</strong> {experiencia.puesto}</p>
             <p><strong>Área:</strong> {experiencia.area}</p>
-            <p><strong>Fecha de Inicio:</strong> {experiencia.fechaini}</p>
-            <p><strong>Fecha de Fin:</strong> {experiencia.fechafin}</p>
+            <p><strong>Fecha de Inicio:</strong> {experiencia.fecha_ini}</p>
+            <p><strong>Fecha de Fin:</strong> {experiencia.fecha_fin}</p>
             <p><strong>Descripción:</strong> {experiencia.descripcion_responsabilidades}</p>
             <p><strong>Referencia:</strong> {experiencia.persona_referencia}</p>
             <p><strong>Contacto:</strong> {experiencia.contacto}</p>

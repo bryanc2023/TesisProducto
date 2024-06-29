@@ -13,7 +13,7 @@ interface EditCursoProps {
 
 interface Curso {
   id_certificado: number;
-  nombre: string;
+  titulo: string;
   institucion: string;
   fechaini: string;
   fechafin: string;
@@ -50,7 +50,7 @@ const EditCurso: React.FC<EditCursoProps> = ({ isOpen, closeModal, reloadCursos,
 
   useEffect(() => {
     if (curso) {
-      setNombre(curso.nombre || '');
+      setNombre(curso.titulo || '');
       setInstitucion(curso.institucion || '');
       setFechaini(curso.fechaini || '');
       setFechafin(curso.fechafin || '');

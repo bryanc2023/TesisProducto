@@ -22,8 +22,8 @@ const EditIdiomaModal: React.FC<EditIdiomaModalProps> = ({ isOpen, onRequestClos
   const [profileData, setProfileData] = useState<any>(null);
   const { register, handleSubmit, formState: { errors }, reset } = useForm<FormValues>({
     defaultValues: {
-      nivel_oral: idioma.nivel_oral,
-      nivel_escrito: idioma.nivel_escrito,
+      nivel_oral: idioma.pivot?.nivel_oral,
+      nivel_escrito: idioma.pivot?.nivel_escrito,
     }
   });
 
@@ -44,15 +44,15 @@ const EditIdiomaModal: React.FC<EditIdiomaModalProps> = ({ isOpen, onRequestClos
 
   useEffect(() => {
     reset({
-      nivel_oral: idioma.nivel_oral,
-      nivel_escrito: idioma.nivel_escrito,
+      nivel_oral: idioma.pivot?.nivel_oral,
+      nivel_escrito: idioma.pivot?.nivel_escrito,
     });
   }, [idioma, reset]);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     console.log('Datos enviados:', {
       id_postulante: profileData?.postulante?.id_postulante,
-      id_idioma: idioma.idioma?.id,
+      id_idioma: idioma.id,
       nivel_oral: data.nivel_oral,
       nivel_escrito: data.nivel_escrito
     });
@@ -60,7 +60,7 @@ const EditIdiomaModal: React.FC<EditIdiomaModalProps> = ({ isOpen, onRequestClos
     try {
       await axios.put('/postulante_idioma/update', {
         id_postulante: profileData?.postulante?.id_postulante,
-        id_idioma: idioma.idioma?.id,
+        id_idioma: idioma.id,
         nivel_oral: data.nivel_oral,
         nivel_escrito: data.nivel_escrito
       });
@@ -83,7 +83,7 @@ const EditIdiomaModal: React.FC<EditIdiomaModalProps> = ({ isOpen, onRequestClos
             <label className="block text-gray-700">Idioma</label>
             <input 
               type="text"
-              value={idioma.idioma?.nombre}
+              value={idioma.nombre}
               className="w-full px-4 py-2 border rounded-md bg-gray-100 cursor-not-allowed"
               readOnly
             />
