@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronDown, faBars, faTimes, faClipboardList, faUsers, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown, faBars, faTimes,  faUsers, faUser, faFileAlt, faChartLine, faCog } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import axios from '../../services/axios';
@@ -84,7 +84,7 @@ function EmpresaLayout() {
                 <ul>
                     <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
                         <Link to="CatalogoRegistro" className="flex items-center w-full">
-                            <FontAwesomeIcon icon={faClipboardList} className="mr-2" />
+                            <FontAwesomeIcon icon={faFileAlt} className="mr-2" />
                             <span className="lg:inline">Registro de catálogos</span>
                         </Link>
                     </li>
@@ -96,7 +96,7 @@ function EmpresaLayout() {
                     </li>
                     <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
                         <Link to="ReportesG" className="flex items-center w-full">
-                            <FontAwesomeIcon icon={faUsers} className="mr-2" />
+                            <FontAwesomeIcon icon={faChartLine} className="mr-2" />
                             <span className="lg:inline">Reportes</span>
                         </Link>
                     </li>
@@ -106,6 +106,7 @@ function EmpresaLayout() {
                             <span className="lg:inline">Mi perfil</span>
                         </Link>
                     </li>
+                   
                 </ul>
             </nav>
 

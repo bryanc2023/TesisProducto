@@ -2,9 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from '../../services/axios';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import Modal from 'react-modal';
 import { FaLinkedin, FaFacebook, FaTwitter, FaInstagram, FaGlobe, FaXing, FaXTwitter } from 'react-icons/fa6'; // Importar íconos
-import AddRedModal from '../../components/Postulante/AddRedModal'; // Importa el modal
+import AddRedModal from '../../components/Empresa/AddRedEModal'; // Importa el modal
 
 interface Empresa {
     id?: number;
@@ -44,20 +43,47 @@ const EmpresaDetails: React.FC = () => {
     const [isDivisionEnabled, setIsDivisionEnabled] = useState<boolean>(false);
     const [isAddRedModalOpen, setIsAddRedModalOpen] = useState<boolean>(false); // Estado para el modal de agregar red
 
+    const fetchRedes = async (empresaId: number) => {
+        try {
+            const response = await axios.get(`/empresa-red/${empresaId}`);
+            if (response.data && Array.isArray(response.data)) {
+                setEmpresa((prevState) => ({
+                    ...prevState!,
+                    red: response.data
+                }));
+            } else {
+                setEmpresa((prevState) => ({
+                    ...prevState!,
+                    red: []
+                }));
+            }
+        } catch (error) {
+            console.error('Error fetching redes:', error);
+            setEmpresa((prevState) => ({
+                ...prevState!,
+                red: []
+            }));
+        }
+    };
     useEffect(() => {
         const fetchProfileData = async () => {
             try {
                 if (user) {
-                    console.log(user.id);
                     const response = await axios.get(`/empresaById/${user.id}`);
-                    setEmpresa(response.data);
-                    if (response.data.ubicacion) {
-                        setSelectedProvince(response.data.ubicacion.provincia || '');
-                        setSelectedCanton(response.data.ubicacion.canton || '');
+                    const empresaData = response.data;
+
+                    const redesResponse = await axios.get(`/empresa-red/${empresaData.id_empresa}`);
+                    empresaData.red = redesResponse.data;
+
+                    setEmpresa(empresaData);
+
+                    if (empresaData.ubicacion) {
+                        setSelectedProvince(empresaData.ubicacion.provincia || '');
+                        setSelectedCanton(empresaData.ubicacion.canton || '');
                     }
-                    if (response.data.sector) {
-                        setSelectedSector(response.data.sector.sector || '');
-                        setSelectedDivision(response.data.sector.division || '');
+                    if (empresaData.sector) {
+                        setSelectedSector(empresaData.sector.sector || '');
+                        setSelectedDivision(empresaData.sector.division || '');
                     }
                 }
             } catch (error) {
@@ -133,10 +159,12 @@ const EmpresaDetails: React.FC = () => {
 
     const openAddRedModal = () => {
         setIsAddRedModalOpen(true);
+        
     };
 
     const closeAddRedModal = () => {
         setIsAddRedModalOpen(false);
+        fetchRedes();
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -163,7 +191,12 @@ const EmpresaDetails: React.FC = () => {
     const reloadProfile = async () => {
         try {
             const response = await axios.get(`/empresaById/${user.id}`);
-            setEmpresa(response.data);
+            const empresaData = response.data;
+
+            const redesResponse = await axios.get(`/empresa-red/${empresaData.id}`);
+            empresaData.red = redesResponse.data;
+
+            setEmpresa(empresaData);
         } catch (error) {
             console.error('Error fetching profile data:', error);
             setError('Error fetching profile data');
@@ -271,8 +304,8 @@ const EmpresaDetails: React.FC = () => {
                                 <div key={red.id_empresa_red} className="flex items-center space-x-2">
                                     <span>{red.nombre_red}</span>
                                     <a href={red.enlace} target="_blank" rel="noopener noreferrer" className="text-2xl hover:underline">
-                                        {renderIcon(red.nombre_red)}
-                                    </a>
+                                    {renderIcon(red.nombre_red)}
+                                </a>
                                 </div>
                             ))}
                         </div>

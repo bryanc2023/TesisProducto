@@ -17,6 +17,7 @@ use App\Http\Controllers\UbicacionController;
 use App\Http\Controllers\PostulanteRedController;
 use App\Http\Controllers\EmpresaRedController;
 use App\Http\Controllers\CursoController;
+use App\Models\Controllers\EmpresaGestoraController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -107,9 +108,11 @@ Route::put('/experiencia/{id}', [PostulanteController::class, 'updateExperiencia
 
 
 Route::put('/formacion_academica/update', [PostulanteController::class, 'updateFormacionAcademica']);
-
 Route::delete('/formacion_academica/delete', [PostulanteController::class, 'deleteFormacionAcademica']);
 
+//Rutas para la Empresa Gestora
+Route::get('usuarios/postulantes', [EmpresaGestoraController::class, 'getPostulantes']);
+Route::get('usuarios/empresas', [EmpresaGestoraController::class, 'getEmpresas']);
 
 
 Route::middleware('auth:api')->group(function () {
