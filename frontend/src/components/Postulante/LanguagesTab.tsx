@@ -13,7 +13,7 @@ interface LanguagesTabProps {
 interface Idioma {
   nivel_oral: string;
   nivel_escrito: string;
-  id: number;  
+  id: number;
   nombre: string;
   pivot?: {
     id_postulante: number;
@@ -22,6 +22,7 @@ interface Idioma {
     nivel_escrito: string;
   };
 }
+
 const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -40,7 +41,9 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
     const fetchProfileData = async () => {
       try {
         if (user) {
+         
           const response = await axios.get(`/perfil/${user.id}`);
+        
           setProfileData(response.data);
           fetchUserLanguages(response.data.postulante.id_postulante);
         }
@@ -72,13 +75,15 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
     }
   };
 
-  const fetchUserLanguages = async (userId: number) => {
+  const fetchUserLanguages = async (id_postulante: number) => {
     try {
-      const response = await axios.get('/idiomas', { params: { userId } });
+     
+      const response = await axios.get('/idiomas', { params: { id_postulante } });
+     
       if (response.data && Array.isArray(response.data.idiomas)) {
-       
         setUserLanguages(response.data.idiomas);
       } else {
+        console.error('Unexpected response format:', response.data);
         setUserLanguages([]);
       }
     } catch (error) {
@@ -122,12 +127,10 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
     }
 
     try {
-      
-
       await axios.delete('/postulante_idioma/delete', {
         data: {
           id_postulante: profileData.postulante.id_postulante,
-          id_idioma: idiomaToDelete.id, // Usar la propiedad id directamente
+          id_idioma: idiomaToDelete.id,
         }
       });
 

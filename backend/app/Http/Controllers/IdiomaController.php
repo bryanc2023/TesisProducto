@@ -22,24 +22,25 @@ class IdiomaController extends Controller
 
 
     public function getIdiomas(Request $request)
-    {
-  
-        $request->validate([
-            'userId' => 'required|integer'
-        ]);
+{
+    // Validar la solicitud para asegurarse de que 'id_postulante' está presente y es un entero
+    $request->validate([
+        'id_postulante' => 'required|integer'
+    ]);
 
-        // Obtener el postulante por el id de usuario
-        $postulante = Postulante::where('id_usuario', $request->userId)->first();
+    // Obtener el postulante por el id de postulante
+    $postulante = Postulante::find($request->id_postulante);
 
-        if (!$postulante) {
-            return response()->json(['error' => 'Postulante no encontrado'], 404);
-        }
-
-        // Obtener los idiomas del postulante
-        $idiomas = $postulante->idiomasp()->withPivot('nivel_oral', 'nivel_escrito')->get();
-
-        return response()->json(['idiomas' => $idiomas]);
+    if (!$postulante) {
+        return response()->json(['error' => 'Postulante no encontrado'], 404);
     }
+
+    // Obtener los idiomas del postulante con los datos pivote
+    $idiomas = $postulante->idiomasp()->withPivot('nivel_oral', 'nivel_escrito')->get();
+
+    return response()->json(['idiomas' => $idiomas]);
+}
+
     
 
    //Update 
