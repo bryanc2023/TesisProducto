@@ -1,18 +1,7 @@
-interface Postulante {
-  id_postulante: number;
-  foto: string;
-  nombres: string;
-  apellidos: string;
-  fecha_nac: string;
-  edad: number;
-  estado_civil: string;
-  cedula: string;
-  genero: string;
-  informacion_extra?: string;
-}
 
   interface ProfileData {
     postulante: {
+      id_postulante: number;
       foto: string;
       nombres: string;
       apellidos: string;

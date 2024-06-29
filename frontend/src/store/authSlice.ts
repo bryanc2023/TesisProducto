@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { Api } from "../services/api";
 
 interface IUser {
+  id_postulante: any;
   id: number;
   name: string;
   email: string;

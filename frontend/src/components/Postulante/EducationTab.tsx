@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import axios from '../../services/axios';
 import { Formacion } from '../../types/FormacionType';
@@ -17,58 +17,75 @@ const EducationTab: React.FC<EducationTabProps> = ({ formaciones, openEditFormac
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [deleteInfo, setDeleteInfo] = useState<{ id_postulante: number, id_titulo: number } | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [profileData, setProfileData] = useState<Postulante | null>(null);
+  const [profileData, setProfileData] = useState<any>(null);
+
+  const fetchProfileData = useCallback(async () => {
+    try {
+      if (user) {
+        const data = await axios.get(`/perfil/${user.id}`).then(response => response.data);
+        setProfileData(data);
+
+        if (data.postulante && data.postulante.formaciones) {
+          setFormaciones(data.postulante.formaciones);
+         
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching profile data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
 
   useEffect(() => {
-    const fetchProfileData = async () => {
-      try {
-        if (user) {
-          const data = await axios.get(`/perfil/${user.id}`).then(response => response.data);
-          setProfileData(data);
-        }
-      } catch (error) {
-        console.error('Error fetching profile data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProfileData();
-  }, [user]);
+  }, [fetchProfileData, user]);
 
   useEffect(() => {
     if (message) {
       const timer = setTimeout(() => {
         setMessage(null);
       }, 3000);
-
       return () => clearTimeout(timer);
     }
   }, [message]);
 
-  const handleDeleteFormacion = async () => {
-    if (deleteInfo) {
-      try {
-        await axios.delete('/formacion_academica/delete', {
-          data: { id_postulante: deleteInfo.id_postulante, id_titulo: deleteInfo.id_titulo },
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        setFormaciones(prevFormaciones => prevFormaciones.filter(f => !(f.id_postulante === deleteInfo.id_postulante && f.titulo.id_titulo === deleteInfo.id_titulo)));
-        setMessage({ type: 'success', text: 'Formación académica eliminada exitosamente' });
-        setShowConfirmModal(false);
-      } catch (error: any) {
-        console.error('Error al eliminar la formación académica', error.response ? error.response.data : error.message);
-        setMessage({ type: 'error', text: 'Hubo un error al eliminar la formación académica' });
-      }
+  const handleDeleteFormacion = async (id_postulante: number, id_titulo: number) => {
+    try {
+     
+      await axios.delete('/formacion_academica/delete', {
+        data: { id_postulante, id_titulo },
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      setFormaciones(prevFormaciones => prevFormaciones.filter(f => !(f.id_postulante === id_postulante && f.titulo.id_titulo === id_titulo)));
+      setMessage({ type: 'success', text: 'Formación académica eliminada exitosamente' });
+    } catch (error: any) {
+      console.error('Error al eliminar la formación académica', error.response ? error.response.data : error.message);
+      setMessage({ type: 'error', text: 'Hubo un error al eliminar la formación académica' });
+    } finally {
+      setShowConfirmModal(false); // Cerrar el modal de confirmación
     }
   };
+  const openConfirmModal = (formacion: Formacion) => {
+    if (profileData && profileData.postulante) {
+        
+        setDeleteInfo({ id_postulante: profileData.postulante.id_postulante, id_titulo: formacion?.titulo?.id }); // Cambiar a formacion?.titulo?.id
+        setShowConfirmModal(true);
+    }
+};
 
-  const openConfirmModal = (id_titulo: number) => {
-    if (profileData) {
-      setDeleteInfo({ id_postulante: profileData.id_postulante, id_titulo });
-      setShowConfirmModal(true);
+
+
+
+  const closeConfirmModal = () => {
+    setShowConfirmModal(false);
+    setDeleteInfo(null); // Restablecer `deleteInfo` después de cerrar el modal
+  };
+
+  const confirmDelete = () => {
+    if (deleteInfo) {
+      handleDeleteFormacion(deleteInfo.id_postulante, deleteInfo.id_titulo);
     }
   };
 
@@ -92,34 +109,32 @@ const EducationTab: React.FC<EducationTabProps> = ({ formaciones, openEditFormac
       )}
 
       {formaciones.length > 0 ? (
-        formaciones.map((formacion, index) => {
-          return (
-            <div key={index} className="mb-4 p-4 border rounded-lg bg-gray-700 relative">
-              <div className="flex justify-end space-x-2 mb-2">
-                <button
-                  onClick={() => openEditFormacionModal(formacion)}
-                  className="px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                >
-                  <FaPencilAlt className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => openConfirmModal(formacion.titulo.id_titulo)}
-                  className="px-2 py-1 bg-rose-500 text-white rounded-md hover:bg-rose-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-rose-300"
-                >
-                  <FaTrash className="w-4 h-4" />
-                </button>
-              </div>
-              <p><strong>Institución:</strong> {formacion.institucion}</p>
-              <p><strong>Estado:</strong> {formacion.estado}</p>
-              <p><strong>Fecha de Inicio:</strong> {formacion.fechaini}</p>
-              <p><strong>Fecha de Fin:</strong> {formacion.fechafin}</p>
-              <p><strong>Título:</strong> {formacion.titulo.titulo}</p>
-              <p><strong>Nivel de Educación:</strong> {formacion.titulo.nivel_educacion}</p>
-              <p><strong>Campo Amplio:</strong> {formacion.titulo.campo_amplio}</p>
-              <p><strong>Título Acreditado:</strong> {formacion.titulo_acreditado}</p>
+        formaciones.map((formacion, index) => (
+          <div key={index} className="mb-4 p-4 border rounded-lg bg-gray-700 relative">
+            <div className="flex justify-end space-x-2 mb-2">
+              <button
+                onClick={() => openEditFormacionModal(formacion)}
+                className="px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              >
+                <FaPencilAlt className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => openConfirmModal(formacion)}
+                className="px-2 py-1 bg-rose-500 text-white rounded-md hover:bg-rose-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-rose-300"
+              >
+                <FaTrash className="w-4 h-4" />
+              </button>
             </div>
-          );
-        })
+            <p><strong>Institución:</strong> {formacion.institucion}</p>
+            <p><strong>Estado:</strong> {formacion.estado}</p>
+            <p><strong>Fecha de Inicio:</strong> {formacion.fechaini}</p>
+            <p><strong>Fecha de Fin:</strong> {formacion.fechafin}</p>
+            <p><strong>Título:</strong> {formacion.titulo.titulo}</p>
+            <p><strong>Nivel de Educación:</strong> {formacion.titulo.nivel_educacion}</p>
+            <p><strong>Campo Amplio:</strong> {formacion.titulo.campo_amplio}</p>
+            <p><strong>Título Acreditado:</strong> {formacion.titulo_acreditado}</p>
+          </div>
+        ))
       ) : (
         <p className="text-gray-400">No hay formación académica disponible en este momento.</p>
       )}
@@ -130,17 +145,17 @@ const EducationTab: React.FC<EducationTabProps> = ({ formaciones, openEditFormac
       {showConfirmModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-gray-800 p-6 rounded-lg shadow-lg text-white">
-            <h2 className="text-lg font-semibold mb-4">Confirmar Eliminación</h2>
-            <p className="mb-4">¿Está seguro que desea eliminar esta formación académica?</p>
+            <h2 className="text-lg font-semibold mb-4">Confirmar Acción</h2>
+            <p className="mb-4">¿Estás seguro de que deseas eliminar esta formación académica?</p>
             <div className="flex justify-end space-x-2">
               <button
-                onClick={handleDeleteFormacion}
+                onClick={confirmDelete}
                 className="px-4 py-2 bg-red-500 rounded-md hover:bg-red-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-red-300"
               >
                 Eliminar
               </button>
               <button
-                onClick={() => setShowConfirmModal(false)}
+                onClick={closeConfirmModal}
                 className="px-4 py-2 bg-gray-500 rounded-md hover:bg-gray-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-gray-300"
               >
                 Cancelar

@@ -21,7 +21,7 @@ const Profile: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [modalContent, setModalContent] = useState<string>('');
     const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
-    const [selectedFormacion, setSelectedFormacion] = useState<Formacion | null>(null);
+    const [selectedFormacion, setSelectedFormacion] = useState<Formacion | Idioma | null>(null);
     const [selectedCurso, setSelectedCurso] = useState<Curso | null>(null);
     const [cedulaError, setCedulaError] = useState<string | null>(null);
     const [isAddRedModalOpen, setIsAddRedModalOpen] = useState<boolean>(false); // Estado para el modal de agregar red
