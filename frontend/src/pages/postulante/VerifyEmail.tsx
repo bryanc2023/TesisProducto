@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Api } from '../../services/api'; // Asegúrate de que Api esté configurado correctamente
@@ -50,27 +50,25 @@ const VerifyEmail = () => {
 
     return (
         <>
-        <header className="bg-gray-800 p-4 flex justify-between items-center fixed w-full z-10">
-        <h1 className="text-white text-2xl font-bold">
-          ProaJob
-        </h1>
-       
-      </header>
-      
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+            <header className="bg-gray-800 p-4 flex justify-between items-center fixed w-full z-10">
+                <h1 className="text-white text-2xl font-bold">
+                    ProaJob
+                </h1>
+            </header>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', position: 'relative', overflow: 'hidden' }}>
                 <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: 'url(/public/images/verifi.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', filter: 'brightness(50%)' }}></div>
-                <div style={{ position: 'relative', textAlign: 'center', backgroundColor: bgColor, padding: '20px', borderRadius: '10px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)' }}>
-                    <h1 style={{ color: '#ffffff', marginBottom: '20px', fontWeight: 'bold' }}>
+                <div style={{ position: 'relative', textAlign: 'center', backgroundColor: bgColor, padding: '40px', borderRadius: '15px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)', maxWidth: '500px', width: '80%' }}>
+                    <h1 style={{ color: '#ffffff', marginBottom: '20px', fontWeight: 'bold', fontSize: '24px' }}>
                         <FontAwesomeIcon icon={faEnvelope} size="lg" style={{ marginRight: '10px' }} />
                         VERIFICACIÓN DE CORREO
                     </h1>
-                    <p style={{ color: '#ffffff' }}>{message}</p>
-                    <button onClick={handleBackToHome} style={{ marginTop: '20px', padding: '10px 20px', fontSize: '16px', cursor: 'pointer', borderRadius: '5px', backgroundColor: '#ffffff', color: '#000000', border: 'none', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)', fontWeight: 'bold' }}>
+                    <p style={{ color: '#ffffff', fontSize: '18px', lineHeight: '1.5' }}>{message}</p>
+                    <button onClick={handleBackToHome} style={{ marginTop: '30px', padding: '15px 30px', fontSize: '16px', cursor: 'pointer', borderRadius: '5px', backgroundColor: '#ffffff', color: '#000000', border: 'none', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)', fontWeight: 'bold' }}>
                         Regresar a la página principal
                     </button>
                 </div>
             </div>
-    </>
+        </>
     );
 };
 

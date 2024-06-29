@@ -7,73 +7,66 @@ import { useAppDispatch ,RootState} from '../store';
 import { loginUser } from '../store/authSlice';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-
 import Swal from 'sweetalert2';
 import Navbar from '../components/layout/Navbar';
-
 
 const Login = () => {
 
     const [idEmpresa, setIdEmpresa] = useState(null); 
     const dispatch = useAppDispatch();
-    const initialValues={
+    const initialValues = {
         email: '',
         password: ''
     };
 
-    //para navegar si esta logeado
     const navigate = useNavigate();
-    const {isLogged, role }= useSelector((state:RootState) => state.auth)
-    //para evitar que vuelva al login
+    const { isLogged, role } = useSelector((state: RootState) => state.auth);
   
-   useEffect(() => {
-       if (isLogged && role ) {
-         // Redireccionar al dashboard o a iniciow dependiendo del rol
-         if (role === 'postulante') {
-            navigate('/inicio');
-        } else if (role === 'empresa_oferente') {
-            navigate('/iniciow');
-        }
+    useEffect(() => {
+        if (isLogged && role) {
+            if (role === 'postulante') {
+                navigate('/inicio');
+            } else if (role === 'empresa_oferente') {
+                navigate('/inicio-e');
+            } else if (role === 'admin') {
+                navigate('/inicioAdmin');
+            } else if (role === 'empresa_gestora') {
+                navigate('/inicioG');
+            }
         }
     }, [isLogged, role, navigate]);
     
-    const onSubmit = (values:typeof initialValues)=>{
-       // Mostrar el mensaje de "cargando"
-    Swal.fire({
-        title: 'Cargando...',
-        text: 'Por favor, espera mientras se procesa tu login.',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        didOpen: () => {
-            Swal.showLoading(Swal.getConfirmButton());
-        }
-    });
-    
+    const onSubmit = (values: typeof initialValues) => {
+        Swal.fire({
+            title: 'Cargando...',
+            text: 'Por favor, espera mientras se procesa tu login.',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading(Swal.getConfirmButton());
+            }
+        });
 
-    dispatch(loginUser(values)).then((response) => {
-        Swal.close(); // Cerrar el mensaje de "cargando"
-        
-        if(response.payload === "403"){
-            Swal.fire({
-                icon: 'error',
-                title: 'Error de verificación',
-                text: 'Este usuario no ha sido verificado todavía, por favor verifica el enlace en tu correo para continuar con el login',
-            });
-        } else if(response.payload === "401"){
-            Swal.fire({
-                icon: 'error',
-                title: 'Credenciales inválidas',
-                text: 'El usuario o contraseña ingresado no es correcto',
-            });
-        } else if(response.type === 'auth/loginUser/fulfilled'){
-            console.log(response.payload);
+        dispatch(loginUser(values)).then((response) => {
+            Swal.close();
             
-            const { user, token, role } = response.payload;
+            if (response.payload === "403") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de verificación',
+                    text: 'Este usuario no ha sido verificado todavía, por favor verifica el enlace en tu correo para continuar con el login',
+                });
+            } else if (response.payload === "401") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Credenciales inválidas',
+                    text: 'El usuario o contraseña ingresado no es correcto',
+                });
+            } else if (response.type === 'auth/loginUser/fulfilled') {
+                const { user, token, role } = response.payload;
 
-          
-                // Redirigir a la página correspondiente después de que el usuario haga clic en OK
                 if (role === 'admin') {
-                    navigate("/administrador");
+                    navigate("/inicioAdmin");
                 } else if (role === 'postulante') {
                     if (user.first_login_at === null) {
                         navigate("/completar");
@@ -81,8 +74,7 @@ const Login = () => {
                         navigate("/inicio");
                     }
                 } else if (role === 'empresa_oferente') {
-                    console.log(JSON.stringify(user, null, 2));
-                    setIdEmpresa(user.id); // Guardar en el estado
+                    setIdEmpresa(user.id);
                     localStorage.setItem("idEmpresa", user.id); 
                     
                     if (user.first_login_at === null) {
@@ -90,30 +82,27 @@ const Login = () => {
                     } else {
                         navigate("/inicio-e");
                     }
-                }else if (role === 'empresa_gestora') {
-                    console.log(JSON.stringify(user, null, 4));
+                } else if (role === 'empresa_gestora') {
                     setIdEmpresa(user.id);
                     localStorage.setItem("idEmpresa", user.id); 
                     navigate("/inicioG");
-                    /*if (user.first_login_at === null) {
-                        navigate("/completare");
-                    } else {
-                        navigate("/inicio-e");
-                    }*/
                 }
-           
-        }
-    });
-};
+            }
+        });
+    };
 
     const validationSchema = Yup.object({
-       email:Yup.string().email('El correo no es válido')
-       .matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(es|ec|com)$/, 'El correo debe ser de un dominio que termine en .es , ec o .com').required('El correo es requerido'),
-       password:Yup.string().min(6,'La contraseña debe ser minímo de 6 letras y números').required('La contraseña es requerida'),
+       email: Yup.string()
+       .email('El correo no es válido')
+       .matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(es|ec|com)$/, 'El correo debe ser de un dominio que termine en .es, .ec o .com')
+       .required('El correo es requerido'),
+       password: Yup.string()
+       .min(6, 'La contraseña debe ser minímo de 6 letras y números')
+       .required('La contraseña es requerida'),
     });
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row space-y-2" >
+        <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row space-y-2">
             <Navbar />
             <div className="lg:w-7/12 xl:w-2/3 flex items-center justify-center">
                 <div className="max-w-md w-full space-y-8">
@@ -121,40 +110,34 @@ const Login = () => {
                         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Inicio de sesión</h2>
                     </div>
                     <h2 className="text-center italic">Ingrese sus credenciales a continuación:</h2>
-                   
-                        <div className="rounded-md shadow-sm -space-y-px">
-                            <Formik
+                    <div className="rounded-md shadow-sm -space-y-px">
+                        <Formik
                             initialValues={initialValues}
                             onSubmit={onSubmit}
-                            validationSchema={validationSchema}>
-                                {({
-                                    values,
-                                    errors,
-                                    handleChange,
-                                    handleSubmit,
-                                }) => (
-                            <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-                                <InputLabel label="Correo" name="email" id="email" placeholder="Correo Electrónico" type="email"error={errors.email} onChange={handleChange} value={values.email}/>
-                                <InputLabel label="Contraseña" name="password" id="password" placeholder="Contraseña" type="password"error={errors.password} onChange={handleChange} value={values.password}/>
-                                <Button value="Iniciar Sesión" type="submit" />
-                            </form>
-                           )}
-                            </Formik>
-                          
-                           
-                        </div>
-                        </div>
-                        </div>
-                       
-                    
-                   
+                            validationSchema={validationSchema}
+                        >
+                            {({
+                                values,
+                                errors,
+                                handleChange,
+                                handleSubmit,
+                            }) => (
+                                <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+                                    <InputLabel label="Correo" name="email" id="email" placeholder="Correo Electrónico" type="email" error={errors.email} onChange={handleChange} value={values.email} />
+                                    <InputLabel label="Contraseña" name="password" id="password" placeholder="Contraseña" type="password" error={errors.password} onChange={handleChange} value={values.password} />
+                                    <Button value="Iniciar Sesión" type="submit" />
+                                </form>
+                            )}
+                        </Formik>
+                    </div>
+                </div>
+            </div>
             <div className="relative lg:w-5/12 xl:w-1/2 flex items-center justify-center overflow-hidden">
-                <img className="object-cover h-screen w-full" src="/images/login.jpg" alt="Imagen"/>
+                <img className="object-cover h-screen w-full" src="/images/login.jpg" alt="Imagen" />
                 <div className="absolute inset-0 bg-gradient-to-r from-black to-transparent"></div>
-
             </div>
         </div>
     );
 }
 
-export default Login
+export default Login;

@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { storage } from '../../config/firebaseConfig';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaPlusCircle, FaTrashAlt } from 'react-icons/fa';
 
 interface IFormInput {
   logo: FileList;
@@ -73,6 +74,7 @@ const CompletarE: React.FC = () => {
     setSelectedProvince(event.target.value);
     setSelectedCanton('');
   };
+
   const handleCantonChange = (event: any) => {
     setSelectedCanton(event.target.value);
   };
@@ -112,10 +114,10 @@ const CompletarE: React.FC = () => {
   };
 
   const socialPlatforms = [
-    { value: 'facebook', label: 'Facebook', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg' },
-    { value: 'x', label: 'X', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e7/X_logo.svg' },
-    { value: 'instagram', label: 'Instagram', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png' },
-    { value: 'linkedin', label: 'LinkedIn', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/01/LinkedIn_Logo.svg' },
+    { value: 'facebook', label: 'Facebook', icon: <FaFacebook className="text-blue-600" /> },
+    { value: 'x', label: 'X', icon: <FaTwitter className="text-blue-400" /> },
+    { value: 'instagram', label: 'Instagram', icon: <FaInstagram className="text-pink-600" /> },
+    { value: 'linkedin', label: 'LinkedIn', icon: <FaLinkedin className="text-blue-700" /> },
   ];
 
   const handleAddSocialLink = () => {
@@ -126,9 +128,9 @@ const CompletarE: React.FC = () => {
     remove(index);
   };
 
-  const getPlatformLogo = (platform: string) => {
+  const getPlatformIcon = (platform: string) => {
     const platformData = socialPlatforms.find((p) => p.value === platform);
-    return platformData ? platformData.logo : '';
+    return platformData ? platformData.icon : null;
   };
 
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
@@ -337,11 +339,15 @@ const CompletarE: React.FC = () => {
             <label className="block text-gray-700 font-semibold mb-2">Redes Sociales:</label>
             {fields.map((field, index) => (
               <div key={field.id} className="flex items-center mb-4">
-                <button type="button" onClick={() => handleRemoveSocialLink(index)} className="bg-red-500 text-white py-2 px-4 rounded">x</button>
-                <img src={getPlatformLogo(field.platform)} alt={field.platform} className="w-6 h-6 mr-2" />
+                <button type="button" onClick={() => handleRemoveSocialLink(index)} className="bg-red-500 text-white py-2 px-4 rounded mr-2">
+                  <FaTrashAlt />
+                </button>
+                <div className="flex items-center mr-2">
+                  {getPlatformIcon(field.platform)}
+                </div>
                 <select
                   {...register(`socialLinks.${index}.platform`, { required: 'Seleccione una plataforma.' })}
-                  className="form-select mr-2"
+                  className="form-select mr-2 w-48"
                   defaultValue={field.platform}
                   onChange={(e) => setValue(`socialLinks.${index}.platform`, e.target.value)}
                 >
@@ -354,7 +360,7 @@ const CompletarE: React.FC = () => {
                   type="url"
                   {...register(`socialLinks.${index}.url`, { required: 'La URL es requerida.' })}
                   placeholder="URL"
-                  className="form-input mr-2"
+                  className="form-input flex-1"
                   defaultValue={field.url}
                   onChange={(e) => setValue(`socialLinks.${index}.url`, e.target.value)}
                 />
@@ -370,7 +376,9 @@ const CompletarE: React.FC = () => {
                 )}
               </div>
             ))}
-            <button type="button" onClick={handleAddSocialLink} className="bg-green-500 text-white py-2 px-4 rounded">Agregar otra red social</button>
+            <button type="button" onClick={handleAddSocialLink} className="bg-green-500 text-white py-2 px-4 rounded flex items-center">
+              <FaPlusCircle className="mr-2" /> Agregar otra red social
+            </button>
           </div>
         )}
 
