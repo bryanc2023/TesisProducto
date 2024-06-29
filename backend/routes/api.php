@@ -16,6 +16,7 @@ use App\Http\Controllers\TituloController;
 use App\Http\Controllers\UbicacionController;
 use App\Http\Controllers\PostulanteRedController;
 use App\Http\Controllers\EmpresaRedController;
+use App\Http\Controllers\CursoController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -38,6 +39,14 @@ Route::middleware(['jwt.verify'])->get('users',[UserController::class,'index']);
 //Rutas para usuario
 Route::get('userById/{id}', [UserController::class, 'getUserById']);
 
+//Rutas para certificados
+Route::post('certificadoC',[CursoController::class,'newCertificado']);
+Route::get('certificadoId/{id}', [CursoController::class, 'getCertificado']);
+Route::get('certificados', [CursoController::class, 'getCertificados']);
+Route::put('certificadoU/{id}', [CursoController::class, 'updateCertificado']);
+Route::delete('certificadoD/{id}', [CursoController::class, 'deleteCertificado']);
+
+
 Route::post('uploadUbi',[UploadController::class,'uploadUbicacion']);
 Route::post('uploadTit',[UploadController::class,'uploadTitulo']);
 Route::post('uploadSec',[UploadController::class,'uploadSector']);
@@ -58,6 +67,7 @@ Route::get('/titulos/{nivel}', [TituloController::class, 'getCamposNivel']);
 Route::get('/titulos/{nivel}/{campo}', [TituloController::class, 'getTitulosCamposNivel']);
 Route::get('/titulos/{nivel}/{campo}/{titulo}', [TituloController::class, 'getTituloId']);
 
+
 //Rutas para Empresa
 Route::post('empresaC',[EmpresaController::class,'registerEmp']);
 Route::post('completo',[EmpresaController::class,'completo']);
@@ -67,7 +77,8 @@ Route::post('/empresa-red', [EmpresaRedController::class, 'redEmpresa']);
 Route::get('/empresa-red/{id_empresa}', [EmpresaRedController::class, 'getRedEmpresa']);
 
 //Rutas para Idioma
-Route::get('idioma', [IdiomaController::class, 'getIdiomas']);
+Route::get('/idioma', [IdiomaController::class, 'getIdiomasAll']);
+Route::get('/idiomas', [IdiomaController::class, 'getIdiomas']);
 Route::post('nuevoidioma', [PostulanteController::class, 'registroIdioma']);
 Route::put('postulante_idioma/update', [IdiomaController::class, 'updateidiomas']);
 Route::delete('postulante_idioma/delete', [IdiomaController::class, 'deleteidiomaPostulante']);
@@ -78,6 +89,8 @@ Route::get('postulanteId/id',[PostulanteController::class,'obtenerIdPostulante']
 Route::post('postulante/forma',[PostulanteController::class,'registroFormaAca']);
 Route::get('/perfil/{id}', [PostulanteController::class, 'getPerfil']);
 Route::post('/exp', [PostulanteController::class, 'agregarExperiencia']);
+Route::get('/experiencia/{id}', [PostulanteController::class, 'getExperiencia']);
+Route::get('/experienciaById/{id}', [PostulanteController::class, 'getExperienciaById']);
 Route::post('postulante/forma2',[PostulanteController::class,'registroFormaAcaPlus']);
 Route::get('/areas', [AreaController::class, 'getAreas']);
 Route::get('/criterios', [CriterioController::class, 'getCriterios']);
@@ -88,6 +101,10 @@ Route::put('/updatePostulanteById/{id}', [PostulanteController::class, 'updatePo
 Route::get('postulante/{id}/cv', [PostulanteController::class, 'getCV']);
 Route::post('postulante-red', [PostulanteRedController::class, 'redPostulante']);
 Route::get('postulante-red/{id_postulante}', [PostulanteRedController::class, 'getPostulanteReds']);
+Route::delete('/experiencia/{id}', [PostulanteController::class, 'deleteExperiencia']);
+Route::put('/experiencia/{id}', [PostulanteController::class, 'updateExperiencia']);
+
+
 
 Route::put('/formacion_academica/update', [PostulanteController::class, 'updateFormacionAcademica']);
 

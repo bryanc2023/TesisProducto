@@ -86,39 +86,40 @@ class PostulanteController extends Controller
     
 
     public function getPerfil($id)
-    {
-        try {
-            $postulante = Postulante::with(['ubicacion', 'formaciones.titulo', 'idiomas.idioma'])->where('id_usuario', $id)->first();
-            if (!$postulante) {
-                return response()->json(['message' => 'User not found'], 404);
-            }
-
-            $response = [
-                'postulante' => $postulante,
-                'ubicacion' => $postulante->ubicacion,
-                'formaciones' => $postulante->formaciones->map(function ($formacion) {
-                    return [
-                        'institucion' => $formacion->institucion,
-                        'estado' => $formacion->estado,
-                        'fechaini' => $formacion->fecha_ini,
-                        'fechafin' => $formacion->fecha_fin,
-                        'titulo' => $formacion->titulo,
-                    ];
-                }),
-                'idiomas' => $postulante->idiomas->map(function ($idioma) {
-                    return [
-                        'idioma' => $idioma->nombre,
-                        'nivel_oral' => $idioma->nivel_oral,
-                        'nivel_escrito' => $idioma->nivel_escrito,
-                    ];
-                }),
-            ];
-
-            return response()->json($response);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Error retrieving user profile'], 500);
+{
+    try {
+        $postulante = Postulante::with(['ubicacion', 'formaciones.titulo', 'idiomas.idioma'])->where('id_usuario', $id)->first();
+        if (!$postulante) {
+            return response()->json(['message' => 'User not found'], 404);
         }
+
+        $response = [
+            'postulante' => $postulante,
+            'ubicacion' => $postulante->ubicacion,
+            'formaciones' => $postulante->formaciones->map(function ($formacion) {
+                return [
+                    'institucion' => $formacion->institucion,
+                    'estado' => $formacion->estado,
+                    'fechaini' => $formacion->fecha_ini,
+                    'fechafin' => $formacion->fecha_fin,
+                    'titulo' => $formacion->titulo,
+                    'titulo_acreditado' => $formacion->titulo_acreditado,
+                ];
+            }),
+            'idiomas' => $postulante->idiomas->map(function ($idioma) {
+                return [
+                    'idioma' => $idioma->nombre,
+                    'nivel_oral' => $idioma->nivel_oral,
+                    'nivel_escrito' => $idioma->nivel_escrito,
+                ];
+            }),
+        ];
+
+        return response()->json($response);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Error retrieving user profile'], 500);
     }
+}
 
     public function registroFormaAca(Request $request)
     {
@@ -271,14 +272,15 @@ class PostulanteController extends Controller
             'institucion' => 'required|string|max:220',
             'estado' => 'required|string|max:30',
             'fechaini' => 'nullable|date',
-            'fechafin' => 'nullable|date'
+            'fechafin' => 'nullable|date',
+            'titulo_acreditado' => 'required|string|max:220'
         ]);
-
+    
         $postulante = Postulante::where('id_usuario', $request->id_postulante)->first();
         if (!$postulante) {
             return response()->json(['error' => 'Postulante no encontrado'], 404);
         }
-
+    
         $idp = $postulante->id_postulante;
         $postulantefor = new PersonaFormacionPro();
         $postulantefor->id_postulante = $idp;
@@ -287,70 +289,66 @@ class PostulanteController extends Controller
         $postulantefor->estado = $request->estado;
         $postulantefor->fecha_ini = $request->fechaini;
         $postulantefor->fecha_fin = $request->fechafin;
+        $postulantefor->titulo_acreditado = $request->titulo_acreditado;
         $postulantefor->save();
-
+    
         return response()->json(['message' => 'Formación académica registrada exitosamente', 'postulante_formacion' => $postulantefor], 201);
     }
-
     
-    public function updateFormacionAcademica (Request $request ) {
+    public function updateFormacionAcademica(Request $request)
+    {
         try {
-            
-            $idPostulante =  $request->input('id_postulante');
+            DB::beginTransaction();
+    
+            $idPostulante = $request->input('id_postulante');
             $idTitulo = $request->input('id_titulo');
             $institucion = $request->input('institucion');
             $estado = $request->input('estado');
             $fechaini = $request->input('fechaini');
             $fechafin = $request->input('fechafin');
-            $newIdTitulo = $request->input('new_id_titulo') ? $request->input('new_id_titulo') : $request->input('id_titulo');
-
+            $titulo_acreditado = $request->input('titulo_acreditado');
+    
+            // Actualizar los datos de formación académica
             DB::table('formacion_academica')
-            ->where('id_postulante', $idPostulante)
-            ->where('id_titulo', $idTitulo)
-            ->update([
-                'institucion' => $institucion,
-                'estado' => $estado,
-                'fecha_ini' => $fechaini,
-                'fecha_fin' => $fechafin,
-                'id_titulo' => $newIdTitulo
-            ]);
-
-            $postulanteInfo = DB::table('formacion_academica')
-                    ->where('id_postulante', $idPostulante)
-                    ->where('id_titulo', $newIdTitulo)
-                    ->first();
-
-            return response()->json(['postulante_formacion' => $postulanteInfo]);
-
-
+                ->where('id_postulante', $idPostulante)
+                ->where('id_titulo', $idTitulo)
+                ->update([
+                    'institucion' => $institucion,
+                    'estado' => $estado,
+                    'fecha_ini' => $fechaini,
+                    'fecha_fin' => $fechafin,
+                    'titulo_acreditado' => $titulo_acreditado,
+                ]);
+    
+            DB::commit();
+    
+            return response()->json(['message' => 'Formación académica actualizada exitosamente.']);
         } catch (\Throwable $th) {
+            DB::rollBack();
             return response()->json(['message' => 'No se pudo actualizar la información académica', 'error' => $th->getMessage()], 500);
         }
-    }   
-
-    //Eliminar
+    }
+    
     public function deleteFormacionAcademica(Request $request) {
         try {
             $idPostulante = $request->input('id_postulante');
             $idTitulo = $request->input('id_titulo');
-
+    
             DB::table('formacion_academica')
             ->where('id_postulante', $idPostulante)
             ->where('id_titulo', $idTitulo)
             ->delete();
-
+    
             return response()->json(['message' => 'Formación académica eliminada correctamente'], 200);
-
+    
         } catch (\Throwable $th) {
             return response()->json(['message' => 'No se pudo eliminar la formación académica', 'error' => $th->getMessage()], 500);
         }
+    }
 
-}   
-
-    public function agregarExperiencia(Request $request){
-        
+    public function agregarExperiencia(Request $request) {
         $request->validate([
-            'id_usuario' => 'required|integer',
+            'id_postulante' => 'required|integer',
             'empresa' => 'required|string|max:100',
             'puesto' => 'required|string|max:100',
             'fechaini' => 'nullable|date',
@@ -360,43 +358,75 @@ class PostulanteController extends Controller
             'area'=> 'required|string|max:250',
             'contacto'=> 'required|string|max:250'
         ]);
-
-
-        $postulante = Postulante::where('id_usuario', $request->id_usuario)->first();
+    
+        $postulante = Postulante::find($request->id_postulante);
         if (!$postulante) {
             return response()->json(['error' => 'Postulante no encontrado'], 404);
         }
-
-        $idp = $postulante->id_postulante;
+    
         $postulantexp = new FormacionPro();
-        $postulantexp->id_postulante = $idp;
-        $postulantexp->empresa= $request->empresa;
-        $postulantexp->puesto= $request->puesto;
-        $postulantexp->fecha_ini= $request->fechaini;
-        $postulantexp->fecha_fin= $request->fechafin;
-        $postulantexp->descripcion_responsabilidades= $request->descripcion;
-        $postulantexp->persona_referencia= $request->referencia;
-        $postulantexp->area= $request->area;
-        $postulantexp->contacto= $request->contacto;
-        $fecha1= new DateTime($request->fechaini);
-        $fecha2 = new DateTime($request->fechafin);
-
-       // Calcular la diferencia en años entre las dos fechas
-       
-        $diferencia = $fecha1->diff($fecha2);
-        
-        $aniosc = $diferencia->y;
-        $mesesc = $diferencia->m;
-        $postulantexp->mes_e= $mesesc;
-        $postulantexp->anios_e= $aniosc;
-        
- 
-       
+        $postulantexp->id_postulante = $request->id_postulante;
+        $postulantexp->empresa = $request->empresa;
+        $postulantexp->puesto = $request->puesto;
+        $postulantexp->fecha_ini = $request->fechaini;
+        $postulantexp->fecha_fin = $request->fechafin;
+        $postulantexp->descripcion_responsabilidades = $request->descripcion;
+        $postulantexp->persona_referencia = $request->referencia;
+        $postulantexp->area = $request->area;
+        $postulantexp->contacto = $request->contacto;
+    
+        if ($request->fechaini && $request->fechafin) {
+            $fecha1 = new DateTime($request->fechaini);
+            $fecha2 = new DateTime($request->fechafin);
+            $diferencia = $fecha1->diff($fecha2);
+            $postulantexp->mes_e = $diferencia->m;
+            $postulantexp->anios_e = $diferencia->y;
+        } else {
+            $postulantexp->mes_e = 0;
+            $postulantexp->anios_e = 0;
+        }
     
         $postulantexp->save();
-        return response()->json(['message' => 'Experiencia agregada exitosamente',$postulantexp], 201);
-
+        return response()->json(['message' => 'Experiencia agregada exitosamente', $postulantexp], 201);
     }
+    
+    
+    public function getExperiencia($id_usuario)
+    {
+        // Validar que el ID de usuario sea un número entero
+        if (!is_numeric($id_usuario) || intval($id_usuario) <= 0) {
+            return response()->json(['message' => 'ID de usuario inválido'], 400);
+        }
+    
+        try {
+            $postulante = Postulante::where('id_usuario', $id_usuario)->first();
+            if (!$postulante) {
+                return response()->json(['message' => 'Postulante no encontrado'], 404);
+            }
+    
+            $experiencias = FormacionPro::where('id_postulante', $postulante->id_postulante)->get();
+            return response()->json(['experiencias' => $experiencias], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al recuperar la experiencia'], 500);
+        }
+    }
+
+    public function getExperienciaById($id)
+    {
+        try {
+            $experiencia = FormacionPro::find($id);
+
+            if (!$experiencia) {
+                return response()->json(['message' => 'Experiencia no encontrada'], 404);
+            }
+
+            return response()->json(['experiencia' => $experiencia], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al recuperar la experiencia'], 500);
+        }
+    }
+    
+
 
 
     public function getPerfilEmpresa($id)
@@ -418,5 +448,62 @@ class PostulanteController extends Controller
         }
     }
 
+    public function updateExperiencia(Request $request){
+        try {
+            DB::beginTransaction();
+    
+            $idPostulante = $request->input('id_postulante');
+            $idExperiencia = $request->input('id_experiencia');
+            $empresa = $request->input('empresa');
+            $puesto = $request->input('puesto');
+            $fechaini = $request->input('fechaini');
+            $fechafin = $request->input('fechafin');
+            $descripcion = $request->input('descripcion');
+            $referencia = $request->input('referencia');
+            $area = $request->input('area');
+            $contacto = $request->input('contacto');
+    
+            // Actualizar los datos de la experiencia
+            DB::table('formacion_profesional')
+                ->where('id_postulante', $idPostulante)
+                ->where('id_formacion_pro', $idExperiencia)
+                ->update([
+                    'empresa' => $empresa,
+                    'puesto' => $puesto,
+                    'fecha_ini' => $fechaini,
+                    'fecha_fin' => $fechafin,
+                    'descripcion_responsabilidades' => $descripcion,
+                    'persona_referencia' => $referencia,
+                    'area' => $area,
+                    'contacto' => $contacto,
+                ]);
+    
+            DB::commit();
+    
+            return response()->json(['message' => 'Experiencia actualizada exitosamente.']);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json(['message' => 'No se pudo actualizar la experiencia', 'error' => $th->getMessage()], 500);
+        }
+    }
+
+    public function deleteExperiencia($id)
+{
+    try {
+        $experiencia = FormacionPro::find($id);
+
+        if (!$experiencia) {
+            return response()->json(['message' => 'Experiencia no encontrada'], 404);
+        }
+
+        $experiencia->delete();
+
+        return response()->json(['message' => 'Experiencia eliminada exitosamente'], 200);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Error al eliminar la experiencia'], 500);
+    }
+}
+
+   
 }
 

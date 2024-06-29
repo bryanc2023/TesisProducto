@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Idioma;
 use Illuminate\Http\Request;
+use App\Models\Postulante;
 use App\Models\PostulanteIdioma;
 use Illuminate\Support\Facades\DB;
 
 class IdiomaController extends Controller
 {
-    public function getIdiomas()
+    public function getIdiomasAll()
     {
   
       $idiomas = Idioma::select('id', 'nombre')->get();
@@ -18,6 +19,29 @@ class IdiomaController extends Controller
           'idiomas' => $idiomas
       ]);
     }
+
+
+    public function getIdiomas(Request $request)
+{
+    // Validar la solicitud para asegurarse de que 'id_postulante' está presente y es un entero
+    $request->validate([
+        'id_postulante' => 'required|integer'
+    ]);
+
+    // Obtener el postulante por el id de postulante
+    $postulante = Postulante::find($request->id_postulante);
+
+    if (!$postulante) {
+        return response()->json(['error' => 'Postulante no encontrado'], 404);
+    }
+
+    // Obtener los idiomas del postulante con los datos pivote
+    $idiomas = $postulante->idiomasp()->withPivot('nivel_oral', 'nivel_escrito')->get();
+
+    return response()->json(['idiomas' => $idiomas]);
+}
+
+    
 
    //Update 
    public function updateidiomas (Request $request) {

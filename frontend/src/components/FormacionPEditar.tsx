@@ -13,6 +13,8 @@ interface IFormInput {
   titulo: string;
   nivel_educacion: string;
   campo_amplio: string;
+  titulo_acreditado: string;
+  
 }
 
 interface Titulo {
@@ -20,6 +22,7 @@ interface Titulo {
   titulo: string;
   nivel_educacion: string;
   campo_amplio: string;
+  titulo_acreditado: string;
 }
 
 interface TituloDetalle {
@@ -27,6 +30,7 @@ interface TituloDetalle {
   titulo: string;
   nivel_educacion: string;
   campo_amplio: string;
+
 }
 
 interface Postulante {
@@ -49,6 +53,7 @@ interface Formacion {
   fechafin: string;
   titulo: TituloDetalle;
   id_postulante: number;
+  titulo_acreditado: string;
 }
 
 interface Ubicacion {
@@ -70,7 +75,7 @@ interface EditFormacionModalProps {
 }
 
 const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeModal, formacion, reloadProfile }) => {
-  const { user } = useSelector((state: RootState) => state.auth);
+  const user = useSelector((state: RootState) => state.auth.user);
   const { register, handleSubmit, formState: { errors }, setValue, reset, watch } = useForm<IFormInput>();
   const [niveles, setNiveles] = useState<string[]>([]);
   const [campos, setCampos] = useState<string[]>([]);
@@ -80,6 +85,9 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
   const [selectedTitulo, setSelectedTitulo] = useState('');
   const [selectedTituloId, setSelectedTituloId] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const fechaini = watch('fechaini');
   const fechafin = watch('fechafin');
@@ -100,6 +108,23 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
   }, []);
 
   useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        if (user) {
+          const response = await axios.get(`/perfil/${user.id}`);
+          setProfileData(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, [user]);
+
+  useEffect(() => {
     if (formacion) {
       setValue('institucion', formacion.institucion);
       setValue('estado', formacion.estado);
@@ -109,12 +134,14 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
       setSelectedCampo(formacion.titulo.campo_amplio);
       setSelectedTitulo(formacion.titulo.id.toString());
       setSelectedTituloId(formacion.titulo.id.toString());
+      setValue('titulo_acreditado', formacion.titulo_acreditado);
     } else {
       reset({
         institucion: '',
         estado: '',
         fechaini: '',
         fechafin: '',
+        titulo_acreditado: '',
       });
       setSelectedNivel('');
       setSelectedCampo('');
@@ -171,42 +198,55 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
     const selectedTituloObject = titulos.find(titulo => titulo.id.toString() === selectedTituloValue);
     if (selectedTituloObject) {
       setSelectedTituloId(selectedTituloObject.id.toString());
+      setValue('titulo_acreditado', selectedTituloObject.titulo_acreditado);
     } else {
       setSelectedTituloId('');
+      setValue('titulo_acreditado', '');
     }
   };
 
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
-    if (user && selectedNivel && selectedCampo && selectedTitulo) {
+    if (user && profileData && selectedNivel && selectedCampo && selectedTitulo) {
       if (new Date(fechaini) > new Date(fechafin)) {
         setErrorMessage('La fecha de inicio no puede ser mayor que la fecha de finalización.');
+        setSuccessMessage(null);
         return;
       }
 
       try {
+        const selectedTituloObject = titulos.find(titulo => titulo.id.toString() === selectedTitulo);
+
         const formData = {
-          id_postulante: formacion ? formacion.id_postulante : user.id,
+          id_postulante: profileData.postulante.id_postulante,
           id_titulo: selectedTituloId,
           institucion: data.institucion,
           estado: data.estado,
           fechaini: data.fechaini,
           fechafin: data.fechafin,
+          nivel_educacion: selectedNivel,
+          campo_amplio: selectedCampo,
+          titulo: selectedTituloObject ? selectedTituloObject.titulo : '',
+          titulo_acreditado: data.titulo_acreditado,
         };
 
-        console.log(formData);
-        if (formacion) {
-          await axios.put(`formacion/${formacion.id}`, formData);
+        const response = formacion ? await axios.put(`/formacion_academica/update`, formData) : await axios.post('postulante/forma2', formData);
+
+        if (response.status === 200) {
+          setSuccessMessage('Formación académica actualizada exitosamente.');
         } else {
-          await axios.post('postulante/forma2', formData);
+          setErrorMessage('Error al guardar la formación.');
         }
+
         closeModal();
         await reloadProfile();
       } catch (error) {
         console.error('Error saving formacion:', error);
-        setErrorMessage('Error al guardar la formación.');
+        setErrorMessage(`Error al guardar la formación: ${error.message}`);
+        setSuccessMessage(null);
       }
     } else {
       setErrorMessage('Por favor complete todos los campos.');
+      setSuccessMessage(null);
     }
   };
 
@@ -216,7 +256,15 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
       onRequestClose={closeModal}
       contentLabel="Editar Formación Académica"
       className="bg-white p-4 rounded-lg shadow-md w-full max-w-3xl mx-auto my-20 relative"
-      overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+      overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+      style={{
+        overlay: {
+          zIndex: 1000,
+        },
+        content: {
+          zIndex: 1001,
+        },
+      }}
     >
       <button onClick={closeModal} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl font-bold">
         &times;
@@ -226,13 +274,20 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
         <strong className="font-bold">Error: </strong>
         <span className="block sm:inline">{errorMessage}</span>
         <span onClick={() => setErrorMessage(null)} className="absolute top-0 bottom-0 right-0 px-4 py-3">
-          <svg className="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 5.652a.5.5 0 00-.707 0L10 9.293 6.36 5.652a.5.5 0 10-.707.707L9.293 10l-3.64 3.64a.5.5 0 10.707.707L10 10.707l3.64 3.64a.5.5 0 10.707-.707L10.707 10l3.64-3.64a.5.5 0 000-.707z"/></svg>
+          <svg className="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 5.652a.5.5 0 00-.707 0L10 9.293 6.36 5.652a.5.5 0 10-.707.707L9.293 10l-3.64 3.64a.5.5 0 10.707.707L10 10.707l3.64-3.64a.5.5 0 000-.707z"/></svg>
+        </span>
+      </div>}
+      {successMessage && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+        <strong className="font-bold">Éxito: </strong>
+        <span className="block sm:inline">{successMessage}</span>
+        <span onClick={() => setSuccessMessage(null)} className="absolute top-0 bottom-0 right-0 px-4 py-3">
+          <svg className="fill-current h-6 w-6 text-green-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 5.652a.5.5 0 00-.707 0L10 9.293 6.36 5.652a.5.5 0 10-.707.707L9.293 10l-3.64 3.64a.5.5 0 10.707.707L10 10.707l3.64-3.64a.5.5 0 000-.707z"/></svg>
         </span>
       </div>}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 overflow-auto max-h-96">
         <div className="form-group">
           <label htmlFor="nivelEducacion" className="block text-gray-700 font-semibold mb-2">Nivel de Educación:</label>
-          <select id="nivelEducacion" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" onChange={handleNivelChange} value={selectedNivel}>
+          <select id="nivelEducacion" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" onChange={handleNivelChange} value={selectedNivel} disabled={!!formacion}>
             <option value="">Seleccione</option>
             {niveles.map((nivel, index) => (
               <option key={index} value={nivel}>
@@ -243,7 +298,7 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
         </div>
         <div className="form-group">
           <label htmlFor="campoAmplio" className="block text-gray-700 font-semibold mb-2">Campo Amplio:</label>
-          <select id="campoAmplio" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" onChange={handleCampoChange} value={selectedCampo} disabled={!selectedNivel}>
+          <select id="campoAmplio" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" onChange={handleCampoChange} value={selectedCampo} disabled={!selectedNivel || !!formacion}>
             <option value="">Seleccione</option>
             {campos.map((campo, index) => (
               <option key={index} value={campo}>
@@ -254,7 +309,7 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
         </div>
         <div className="form-group">
           <label htmlFor="titulo" className="block text-gray-700 font-semibold mb-2">Título:</label>
-          <select id="titulo" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" onChange={handleTituloChange} value={selectedTitulo} disabled={!selectedNivel || !selectedCampo}>
+          <select id="titulo" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" onChange={handleTituloChange} value={selectedTitulo} disabled={!selectedNivel || !selectedCampo || !!formacion}>
             <option value="">Seleccione</option>
             {titulos.map((titulo, index) => (
               <option key={index} value={titulo.id}>
@@ -262,6 +317,11 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
               </option>
             ))}
           </select>
+        </div>
+        <div className="form-group">
+          <label htmlFor="titulo_acreditado" className="block text-gray-700 font-semibold mb-2">Título Acreditado:</label>
+          <input type="text" id="titulo_acreditado" {...register('titulo_acreditado', { required: true })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" />
+          {errors.titulo_acreditado && <span className="text-red-500">Este campo es obligatorio</span>}
         </div>
         <div className="form-group">
           <label htmlFor="institucion" className="block text-gray-700 font-semibold mb-2">Institución:</label>

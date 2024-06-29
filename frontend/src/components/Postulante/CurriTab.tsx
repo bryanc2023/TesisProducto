@@ -23,7 +23,7 @@ const CurriTab: React.FC = () => {
         if (user) {
           setLoading(true);
           const response = await axios.get(`postulante/${user.id}/cv`);
-          console.log('Response data:', response.data); // Agregar log para ver la respuesta
+         
           const data = response.data;
           setCvs([{ id: user.id, nombre: user.name, url: data.cv_url }]);
           setLoading(false);

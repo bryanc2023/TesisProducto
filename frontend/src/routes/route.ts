@@ -30,9 +30,9 @@ import MonitoreoG from "../pages/empresaG/MonitoreoG"
 import PerfilG from "../pages/empresaG/PerfilG"
 import ReportesG from "../pages/empresaG/ReportesG"
 import PostulanteDetallePage from "../pages/empresa/PostulanteDetallePage"
-
-
-
+import AdminLayout from "../components/layout/AdminLayout"
+import VistaPreviaArchivo from "../components/Admin/VistaPreviaArchivo"  
+import ConfiguracionAdmin from "../pages/admin/ConfiguracionAdmin"
 
 type TypeRoute = {
     path: string;
@@ -112,8 +112,7 @@ export const routes: TypeRoute[] = [
         element: CompletarE,
         isProtected: true,
         allowedRoles: ['empresa_oferente'],
-    }
-    ,
+    },
     {
         path: '/inicio-e',
         element: EmpresaLayout,
@@ -127,8 +126,7 @@ export const routes: TypeRoute[] = [
             },
             
         ],
-    }
-    ,
+    },
     {
         path: '/add-oferta',
         element: EmpresaLayout,
@@ -142,8 +140,8 @@ export const routes: TypeRoute[] = [
             },
             
         ],
-    }
-    ,{
+    },
+    {
         path: '/',
         element: PostulanteLayout,
         isProtected: true,
@@ -156,8 +154,7 @@ export const routes: TypeRoute[] = [
             },
             
         ],
-    }
-    ,
+    },
     {
         path: '/',
         element: PostulanteLayout,
@@ -171,8 +168,7 @@ export const routes: TypeRoute[] = [
             },
             
         ],
-    }
-    ,
+    },
     {
         path: '/',
         element: EmpresaLayout,
@@ -237,15 +233,29 @@ export const routes: TypeRoute[] = [
             
         ],
     },
-    
-  
     {
-        path: '/administrador',
-        element: InicioAdmin,
+        path: '/',
+        element: AdminLayout,
         isProtected: true,
         allowedRoles: ['admin'],
+        children: [
+            {
+                path: 'InicioAdmin',
+                element: InicioAdmin,
+                allowedRoles: ['admin'],
+            },
+            {
+                path: 'vista-previa',
+                element: VistaPreviaArchivo,
+                allowedRoles: ['admin'],
+            },
+            {
+                path: 'configuracion',
+                element: ConfiguracionAdmin,
+                allowedRoles: ['admin'],
+            },
+        ],
     },
-    
     {
         path: '/',
         element: EmpresaGLayout,
@@ -284,9 +294,8 @@ export const routes: TypeRoute[] = [
             },
         ],
     },
-    
     {
         path: '/unauthorized',
-        element: Unauthorized, // Asegúrate de que esta ruta existe
+        element: Unauthorized, 
     },
 ];

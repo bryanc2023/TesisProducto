@@ -1,12 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import EducationTab from './EducationTab';
 import ExperienceTab from './ExperienceTab';
 import LanguagesTab from './LanguagesTab';
 import CoursesTab from './CoursesTab';
 import CurriTab from './CurriTab';
-import axios from 'axios';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../store';
 
 interface TabsProps {
   profileData: ProfileData;
@@ -32,7 +29,7 @@ interface ProfileData {
     genero: string;
     informacion_extra: string;
     idiomas: Idioma[];
-    cv: string; // URL del CV
+    cv: string;
   };
   ubicacion: {
     provincia: string;
@@ -92,11 +89,6 @@ const Tabs: React.FC<TabsProps> = ({
   handleDownloadCV,
 }) => {
   const [activeTab, setActiveTab] = useState('education');
- 
- 
-
-
-
 
   const renderContent = () => {
     switch (activeTab) {
@@ -105,7 +97,7 @@ const Tabs: React.FC<TabsProps> = ({
           <EducationTab
             formaciones={profileData.formaciones}
             openEditFormacionModal={openEditFormacionModal}
-            handleDeleteFormacion={handleDeleteFormacion}
+            setFormaciones={handleDeleteFormacion}
           />
         );
       case 'experience':
