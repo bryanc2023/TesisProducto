@@ -4,8 +4,6 @@ import axios from "../../services/axios";
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { useNavigate } from 'react-router-dom';
-import { storage } from '../../config/firebaseConfig';
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Swal from 'sweetalert2';
 
 interface IFormInput {
@@ -17,7 +15,7 @@ interface IFormInput {
   id_idioma: number;
   niveloral: string;
   nivelescrito: string;
-  cv: FileList;
+
 }
 
 interface Titulo {
@@ -153,10 +151,7 @@ function CompletarP2() {
         });
         const postulanteId = response2.data.id_postulante;
 
-        const cvFile = data.cv[0];
-        const cvRef = ref(storage, `cvs/${cvFile.name}`);
-        await uploadBytes(cvRef, cvFile);
-        const cvUrl = await getDownloadURL(cvRef);
+       
 
         const formData = new FormData();
         formData.append('id_postulante', postulanteId.toString());
@@ -169,7 +164,7 @@ function CompletarP2() {
         formData.append('niveloral', data.niveloral);
         formData.append('nivelescrito', data.nivelescrito);
         formData.append('titulo_acreditado', data.titulo_acreditado);
-        formData.append('cv', cvUrl);
+        
 
         await axios.post('postulante/forma', formData, {
           headers: {
@@ -201,7 +196,7 @@ function CompletarP2() {
       <h1 className="text-3xl font-bold text-center mb-8">Completar registro</h1>
       <p className="text-center mb-8">Necesitamos más información acerca de tu trayectoria, tranquilo podras aumentar más experiencia, títulos e idiomas en tu perfil.</p>
       <form onSubmit={handleSubmit(onSubmit)} className="bg-white p-10 rounded-lg shadow-lg w-full max-w-4xl">
-        <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Agregar Título</h2>
+        <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Formación Académica</h2>
         <p className="text-center mb-8">Añade mínimo un título para comenzar:</p>
         <div className="form-group mb-8">
           <label htmlFor="nivelEducacion" className="block text-gray-700 font-semibold mb-2">Nivel de Educación:</label>
@@ -288,7 +283,7 @@ function CompletarP2() {
           )}
         </div>
 
-        <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Agregar Idioma</h2>
+        <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Información básica:</h2>
         <p className="text-center mb-8">Añade mínimo un idioma para comenzar:</p>
         <p className="text-right text-gray-500 text-sm">*Campos obligatorios</p>
         <div className="grid grid-cols-1 gap-4">
@@ -328,20 +323,7 @@ function CompletarP2() {
             </select>
           </div>
         </div>
-        <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Añade tu CV</h2>
-        <p className="text-center mb-8">Sube tu archivo que contenga todos los datos de un CV correcto:</p>
-
-        <div className="mb-8">
-          <label htmlFor="cv" className="block text-gray-700 font-semibold mb-2">Curriculum Vitae (PDF):</label>
-          <input
-            type="file"
-            id="cv"
-            accept=".pdf"
-            {...register('cv', { required: 'Este campo es requerido' })}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
-          />
-          {errors.cv && <p className="text-red-500 text-sm mt-2">{errors.cv.message}</p>}
-        </div>
+        
 
         <button type="submit" className="w-full py-3 px-4 bg-blue-500 text-white font-bold rounded-lg hover:bg-slate-600">Culminar registro</button>
       </form>

@@ -7,6 +7,8 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { storage } from '../../config/firebaseConfig';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
 interface CV {
   id: number;
@@ -114,6 +116,7 @@ interface PostulanteData {
 }
 const CurriTab: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
+  const navigate = useNavigate();
   const [cvs, setCvs] = useState<CV[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -132,7 +135,17 @@ const CurriTab: React.FC = () => {
           const response = await axios.get(`/postulante/${user.id}/cv`);
           const data = response.data;
           setCvs([{ id: user.id, nombre: user.name, url: data.cv_url }]);
+          const [profileResponse, imageResponse] = await Promise.all([
+            axios.get(`/curri/${user.id}`),
+            axios.get(`/foto/${user.id}`, { responseType: 'blob' })
+          ]);
+  
+          const imageURL = URL.createObjectURL(imageResponse.data);
+  
+          setProfileData(profileResponse.data);
+          setImageSrc(imageURL);
           setLoading(false);
+          
         }
       } catch (error) {
         console.error('Error al obtener el CV:', error);
@@ -144,35 +157,17 @@ const CurriTab: React.FC = () => {
     fetchCVs();
   }, [user]);
 
-  const fetchProfileData = async () => {
-    try {
-      if (user) {
-        setLoading(true);
-        const [profileResponse, imageResponse] = await Promise.all([
-          axios.get(`/curri/${user.id}`),
-          axios.get(`/foto/${user.id}`, { responseType: 'blob' })
-        ]);
-
-        const imageURL = URL.createObjectURL(imageResponse.data);
-
-        setProfileData(profileResponse.data);
-        setImageSrc(imageURL);
-        setLoading(false);
-      }
-    } catch (error) {
-      console.error('Error al obtener los datos del perfil:', error);
-      setError('Error al obtener los datos del perfil');
-      setLoading(false);
-    }
-  };
+  
 
   const generatePDF = async () => {
-    await fetchProfileData();
-
+  
+    
+  
     if (!profileData || !profileData.postulante) {
       console.error('No hay datos de perfil disponibles para generar el PDF.');
       return;
     }
+  
 
     const doc = new jsPDF();
     let yOffset = 10; // Offset para manejar el espacio vertical en el PDF
@@ -299,6 +294,15 @@ const CurriTab: React.FC = () => {
       await axios.put(apiUrl, { cv: downloadURL });
 
       console.log('URL del CV generado:', downloadURL);
+      
+      Swal.fire({
+        icon: 'success',
+        title: '!Hoja de vida lista!',
+        text: 'Se ha actualizado/generado tu hoja de vida correctamente',
+      }).then(() => {
+        navigate("/perfilP");
+        
+      });
     } catch (error) {
       console.error('Error al subir el PDF a Firebase Storage:', error);
     }
@@ -322,7 +326,11 @@ const CurriTab: React.FC = () => {
     <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Currículo</h2>
-        <button onClick={generatePDF}>Regenerar PDF</button>
+        {loading ? (
+          <></>) :(
+        <button onClick={generatePDF}>
+  { profileData?.postulante.cv != null ? '¿Has añadido/modificado información?: Actualiza tu CV' : 'Generar CV'}
+</button>)}
             
             {imageSrc && (
                 <div>
@@ -348,7 +356,8 @@ const CurriTab: React.FC = () => {
       ) : error ? (
         <p>{error}</p>
       ) : (
-        cvs.length > 0 ? (
+        
+        cvs.length > 0 && profileData?.postulante.cv !=null ? (
           cvs.map((cv, index) => (
             <div key={index} className="mb-4 p-4 border rounded-lg bg-gray-700 relative flex">
               <div style={{ flex: '0 0 200px', height: '200px', border: '1px solid rgba(0, 0, 0, 0.3)' }}>
@@ -379,7 +388,7 @@ const CurriTab: React.FC = () => {
             </div>
           ))
         ) : (
-          <p>No hay currículos disponibles en este momento.</p>
+          <p>Aun no has generado tu hoja de vida.</p>
         )
       )}
 

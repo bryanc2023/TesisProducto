@@ -94,11 +94,17 @@ const Profile: React.FC = () => {
                 }
                
                 setProfileData(data);
-                const redesResponse = await axios.get(`/postulante-red/${data.postulante.id_postulante}`);
-                setRedes(redesResponse.data);
-                if (!redesResponse.data) {
-                    redesResponse.data = [];
-                }
+                 try{
+                    const redesResponse = await axios.get(`/postulante-red/${data.postulante.id_postulante}`);
+                    setRedes(redesResponse.data);
+                    if (!redesResponse.data) {
+                        redesResponse.data = [];
+                    }
+                 }catch{
+                    console.log("Redes no");
+                 }
+                
+                
             }
         } catch (error) {
             console.error('Error reloading profile data:', error);

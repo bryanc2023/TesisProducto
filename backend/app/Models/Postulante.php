@@ -86,6 +86,6 @@ public function formapro()
 
 public function certificado()
 {
-    return $this->hasMany(Certificado::class, 'id_certificado');
+    return $this->hasMany(Certificado::class, 'id_postulante', 'id_postulante');
 }
 }
