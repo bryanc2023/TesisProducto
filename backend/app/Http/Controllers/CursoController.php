@@ -31,9 +31,9 @@ class CursoController extends Controller
         return response()->json($certificado, 200);
     }
 
-    public function getCertificados()
+    public function getCertificados($id_postulante)
     {
-        $certificados = Certificado::all();
+        $certificados = Certificado::where('id_postulante', $id_postulante)->get();
 
         return response()->json($certificados, 200);
     }
