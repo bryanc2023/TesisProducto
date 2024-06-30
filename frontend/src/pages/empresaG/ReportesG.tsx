@@ -5,6 +5,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import axios from '../../services/axios';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import Modal from 'react-modal';
 
 interface ReportData {
   id: number;
@@ -21,6 +22,7 @@ const Reportes: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const fetchData = async () => {
     try {
@@ -110,6 +112,7 @@ const Reportes: React.FC = () => {
     const pdfBlob = doc.output('blob');
     const url = URL.createObjectURL(pdfBlob);
     setPreviewUrl(url);
+    setIsModalOpen(true);
   };
 
   const handleReportTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -125,6 +128,10 @@ const Reportes: React.FC = () => {
   const handleEndDateChange = (date: Date | null) => {
     setEndDate(date);
     setPreviewUrl(null);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
   };
 
   return (
@@ -214,12 +221,21 @@ const Reportes: React.FC = () => {
                 </button>
               )}
             </div>
-            {previewUrl && (
-              <div className="mt-6">
-                <h3 className="text-xl font-semibold mb-4">Vista previa del reporte PDF</h3>
+            <Modal
+              isOpen={isModalOpen}
+              onRequestClose={closeModal}
+              contentLabel="Vista previa del PDF"
+              className="bg-white p-6 rounded-lg shadow-md w-full max-w-4xl mx-auto my-20 relative"
+              overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+            >
+              <button onClick={closeModal} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl font-bold">
+                &times;
+              </button>
+              <h3 className="text-xl font-semibold mb-4">Vista previa del reporte PDF</h3>
+              {previewUrl && (
                 <iframe src={previewUrl} width="100%" height="500px" style={{ border: 'none' }}></iframe>
-              </div>
-            )}
+              )}
+            </Modal>
           </>
         )}
       </div>
