@@ -65,6 +65,7 @@ const EmpresaDetails: React.FC = () => {
             }));
         }
     };
+
     useEffect(() => {
         const fetchProfileData = async () => {
             try {
@@ -159,12 +160,13 @@ const EmpresaDetails: React.FC = () => {
 
     const openAddRedModal = () => {
         setIsAddRedModalOpen(true);
-        
     };
 
-    const closeAddRedModal = () => {
+    const closeAddRedModal = async () => {
         setIsAddRedModalOpen(false);
-        fetchRedes();
+        if (empresa?.id) {
+            await fetchRedes(empresa.id);
+        }
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -193,7 +195,7 @@ const EmpresaDetails: React.FC = () => {
             const response = await axios.get(`/empresaById/${user.id}`);
             const empresaData = response.data;
 
-            const redesResponse = await axios.get(`/empresa-red/${empresaData.id}`);
+            const redesResponse = await axios.get(`/empresa-red/${empresaData.id_empresa}`);
             empresaData.red = redesResponse.data;
 
             setEmpresa(empresaData);
