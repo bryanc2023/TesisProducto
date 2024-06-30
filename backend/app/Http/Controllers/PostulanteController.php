@@ -13,6 +13,7 @@ use App\Models\Ubicacion;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use PhpParser\Node\Stmt\TryCatch;
 
@@ -524,6 +525,50 @@ public function getCurriculum($id)
     }
 }
 
-   
+public function getProfileImage($userId)
+{
+    // Obtén la URL de la imagen desde la base de datos usando el ID del usuario
+    $postulante = Postulante::where('id_usuario', $userId)->first();
+
+    if (!$postulante || !$postulante->foto) {
+        return response('No se encontró la imagen del perfil.', 404);
+    }
+
+    $firebaseImageUrl = $postulante->foto;
+
+    // Descarga la imagen desde Firebase Storage
+    $response = Http::get($firebaseImageUrl);
+
+    if ($response->ok()) {
+        // Retorna la imagen como respuesta
+        return response($response->body(), 200)->header('Content-Type', $response->header('Content-Type'));
+    } else {
+        // Maneja el error si no se puede descargar la imagen
+        return response('No se pudo descargar la imagen.', 404);
+    }
+}
+
+public function updateCV($userId, Request $request)
+    {
+        // Validar y obtener el URL del CV desde el request
+        $request->validate([
+            'cv' => 'required|string', // Asegúrate de validar que el CV sea una URL válida
+        ]);
+        
+        $cvUrl = $request->input('cv');
+
+        // Obtén el postulante por el id_usuario
+        $postulante = Postulante::where('id_usuario', $userId)->first();
+
+        if (!$postulante) {
+            return response()->json(['error' => 'No se encontró el postulante.'], 404);
+        }
+
+        // Actualizar el campo cv del postulante con la nueva URL
+        $postulante->cv = $cvUrl;
+        $postulante->save();
+
+        return response()->json(['message' => 'CV actualizado correctamente.', 'postulante' => $postulante], 200);
+    }
 }
 

@@ -90,6 +90,8 @@ Route::get('postulanteId/id',[PostulanteController::class,'obtenerIdPostulante']
 Route::post('postulante/forma',[PostulanteController::class,'registroFormaAca']);
 Route::get('/perfil/{id}', [PostulanteController::class, 'getPerfil']);
 Route::get('/curri/{id}', [PostulanteController::class, 'getCurriculum']);
+Route::put('/postulantes/{userId}/cv', [PostulanteController::class, 'updateCV']);
+Route::get('/foto/{userId}', [PostulanteController::class, 'getProfileImage']);
 Route::post('/exp', [PostulanteController::class, 'agregarExperiencia']);
 Route::get('/experiencia/{id}', [PostulanteController::class, 'getExperiencia']);
 Route::get('/experienciaById/{id}', [PostulanteController::class, 'getExperienciaById']);

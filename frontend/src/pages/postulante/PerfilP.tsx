@@ -123,6 +123,7 @@ const Profile: React.FC = () => {
         return modulus === 0 ? verifier === 0 : 10 - modulus === verifier;
     };
 
+    
     const openModal = (content: string) => {
         setModalContent(content);
         setSelectedFormacion(null);
@@ -210,6 +211,7 @@ const Profile: React.FC = () => {
         <div className="max-w-4xl mx-auto mt-10 p-6 bg-[#111827] rounded-lg shadow-md text-white pb-6" id="profile-content">
             <div className="flex items-center space-x-4">
                 <img
+                
                     src={profileData.postulante.foto}
                     alt={`${profileData.postulante.nombres} ${profileData.postulante.apellidos}`}
                     className="w-24 h-24 rounded-full object-cover border-4 border-white"
@@ -220,7 +222,7 @@ const Profile: React.FC = () => {
                     </h1>
                     <p className="text-gray-400">{profileData.ubicacion.provincia}, {profileData.ubicacion.canton}</p>
                     <button onClick={openEditModal} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700">Editar Datos</button>
-                    <button onClick={() => navigate('/generate-pdf')} className="mt-2 ml-2 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-700">Descargar PDF</button>
+                   
                 </div>
             </div>
 
