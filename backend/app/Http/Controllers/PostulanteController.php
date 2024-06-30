@@ -121,6 +121,24 @@ class PostulanteController extends Controller
     }
 }
 
+public function getCurriculum($id)
+{
+    try {
+        $postulante = Postulante::with(['ubicacion', 'formaciones.titulo', 'idiomas.idioma','red','certificado','formapro'])->where('id_usuario', $id)->first();
+        if (!$postulante) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $response = [
+            'postulante' => $postulante
+        ];
+
+        return response()->json($response);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Error retrieving user profile'], 500);
+    }
+}
+
     public function registroFormaAca(Request $request)
     {
         $request->validate([
@@ -133,6 +151,7 @@ class PostulanteController extends Controller
             'id_idioma' => 'required|integer|exists:idioma,id',
             'niveloral' => 'required|string|max:20',
             'nivelescrito' => 'required|string|max:20',
+            'titulo_acreditado' => 'required|string|max:220',
             'cv' => 'required|string', // URL del CV desde Firebase
         ]);
 
@@ -143,6 +162,7 @@ class PostulanteController extends Controller
         $postulantefor->estado = $request->estado;
         $postulantefor->fecha_ini = $request->fechaini;
         $postulantefor->fecha_fin = $request->fechafin;
+        $postulantefor->titulo_acreditado = $request->titulo_acreditado;
         $postulantefor->save();
 
         $postulanteidi = new PostulanteIdioma();
@@ -351,8 +371,8 @@ class PostulanteController extends Controller
             'id_postulante' => 'required|integer',
             'empresa' => 'required|string|max:100',
             'puesto' => 'required|string|max:100',
-            'fechaini' => 'nullable|date',
-            'fechafin' => 'nullable|date',
+            'fecha_ini' => 'nullable|date',
+            'fecha_fin' => 'nullable|date',
             'descripcion' => 'required|string|max:500',
             'referencia' => 'required|string|max:250',
             'area'=> 'required|string|max:250',
@@ -368,8 +388,8 @@ class PostulanteController extends Controller
         $postulantexp->id_postulante = $request->id_postulante;
         $postulantexp->empresa = $request->empresa;
         $postulantexp->puesto = $request->puesto;
-        $postulantexp->fecha_ini = $request->fechaini;
-        $postulantexp->fecha_fin = $request->fechafin;
+        $postulantexp->fecha_ini = $request->fecha_ini;
+        $postulantexp->fecha_fin = $request->fecha_fin;
         $postulantexp->descripcion_responsabilidades = $request->descripcion;
         $postulantexp->persona_referencia = $request->referencia;
         $postulantexp->area = $request->area;
