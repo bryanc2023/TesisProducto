@@ -25,7 +25,7 @@ const Login = () => {
     useEffect(() => {
         if (isLogged && role) {
             if (role === 'postulante') {
-                navigate('/inicio');
+                navigate('/verOfertasAll');
             } else if (role === 'empresa_oferente') {
                 navigate('/inicio-e');
             } else if (role === 'admin') {
@@ -71,7 +71,7 @@ const Login = () => {
                     if (user.first_login_at === null) {
                         navigate("/completar");
                     } else {
-                        navigate("/inicio");
+                        navigate("/verOfertasAll");
                     }
                 } else if (role === 'empresa_oferente') {
                     setIdEmpresa(user.id);
