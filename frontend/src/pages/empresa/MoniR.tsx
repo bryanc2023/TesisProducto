@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import axios from '../../services/axios';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
-
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
 const COLORS2 = ['#8884d8'];
@@ -23,7 +22,7 @@ const RecruitmentDashboard = () => {
         };
 
         fetchPostulaciones();
-    }, []);
+    }, [user]);
 
     // Verificar si postulaciones es un array válido antes de mapearlo
     if (!Array.isArray(postulaciones) || postulaciones.length === 0) {
@@ -37,11 +36,10 @@ const RecruitmentDashboard = () => {
 
     // Mapear postulaciones solo si es un array válido y tiene elementos
     const data = postulaciones.map((postulacion, index) => ({
-        name: `Oferta ${ index + 1}`,
+        name: `Oferta ${index + 1}`,
         postulantes: postulacion.num_postulantes,
         cargo: postulacion.cargo,
-        number:index + 1, // Contador de oferta comenzando desde 1
-        
+        number: index + 1, // Contador de oferta comenzando desde 1
     }));
 
     let totalPendientes = 0;
@@ -60,6 +58,12 @@ const RecruitmentDashboard = () => {
         { name: 'Solicitudes Aprobados', value: totalAprobados },
         { name: 'Solicitudes Rechazados', value: totalRechazados },
     ];
+
+    // Datos para el gráfico de líneas (evolución temporal)
+    const lineData = postulaciones.map((postulacion, index) => ({
+        fecha: postulacion.fecha, // Asumiendo que hay una propiedad "fecha"
+        postulantes: postulacion.num_postulantes,
+    }));
 
     return (
         <div className="w-full p-4">
@@ -113,6 +117,49 @@ const RecruitmentDashboard = () => {
                             <Legend />
                         </PieChart>
                     </ResponsiveContainer>
+                </div>
+            </div>
+
+            <div className="bg-white p-4 rounded shadow mb-4">
+                <h2 className="text-xl font-semibold mb-4">Evolución de Postulaciones</h2>
+                <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={lineData}>
+                        <XAxis dataKey="fecha" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Line type="monotone" dataKey="postulantes" stroke="#8884d8" />
+                    </LineChart>
+                </ResponsiveContainer>
+            </div>
+
+            <div className="bg-white p-4 rounded shadow">
+                <h2 className="text-xl font-semibold mb-4">Detalle de Postulaciones</h2>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th className="py-2 px-4 border-b">Oferta</th>
+                                <th className="py-2 px-4 border-b">Cargo</th>
+                                <th className="py-2 px-4 border-b">Número de Postulantes</th>
+                                <th className="py-2 px-4 border-b">Pendientes</th>
+                                <th className="py-2 px-4 border-b">Aprobados</th>
+                                <th className="py-2 px-4 border-b">Rechazados</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {postulaciones.map((postulacion, index) => (
+                                <tr key={index}>
+                                    <td className="py-2 px-4 border-b">{`Oferta ${index + 1}`}</td>
+                                    <td className="py-2 px-4 border-b">{postulacion.cargo}</td>
+                                    <td className="py-2 px-4 border-b">{postulacion.num_postulantes}</td>
+                                    <td className="py-2 px-4 border-b">{postulacion.estado_count['P']}</td>
+                                    <td className="py-2 px-4 border-b">{postulacion.estado_count['A']}</td>
+                                    <td className="py-2 px-4 border-b">{postulacion.estado_count['R']}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
