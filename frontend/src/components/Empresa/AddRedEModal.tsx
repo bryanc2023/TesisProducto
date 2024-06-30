@@ -25,7 +25,7 @@ const AddRedModal: React.FC<AddRedModalProps> = ({ isOpen, onRequestClose, reloa
                     const response = await axios.get(`/empresaById/${user.id}`);
                     const empresaData = response.data;
                     setIdEmpresaState(empresaData.id_empresa); // Guardar el id_empresa en el estado
-                    console.log("ID Empresa: ", empresaData.id_empresa);
+                   
                 }
             } catch (error) {
                 console.error('Error fetching profile data:', error);

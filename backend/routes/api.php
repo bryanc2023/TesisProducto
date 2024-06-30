@@ -17,7 +17,7 @@ use App\Http\Controllers\UbicacionController;
 use App\Http\Controllers\PostulanteRedController;
 use App\Http\Controllers\EmpresaRedController;
 use App\Http\Controllers\CursoController;
-use App\Models\Controllers\EmpresaGestoraController;
+use App\Http\Controllers\EmpresaGestoraController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

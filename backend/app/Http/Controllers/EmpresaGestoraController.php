@@ -4,20 +4,61 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use Carbon\Carbon; ;
 
 class EmpresaGestoraController extends Controller
 {
-    // Función para obtener todos los usuarios que sean postulantes
-    public function getPostulantes()
+    public function getPostulantes(Request $request)
     {
-        $postulantes = User::whereHas('postulante')->with('postulante')->get();
-        return response()->json($postulantes);
+        $startDate = $request->query('startDate') ? Carbon::parse($request->query('startDate'))->startOfDay() : null;
+        $endDate = $request->query('endDate') ? Carbon::parse($request->query('endDate'))->endOfDay() : null;
+    
+        $query = User::whereHas('postulante');
+    
+        if ($startDate) {
+            $query->where('created_at', '>=', $startDate);
+        }
+    
+        if ($endDate) {
+            $query->where('created_at', '<=', $endDate);
+        }
+    
+        $users = $query->get()->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'created_at' => $user->created_at->format('Y-m-d'),
+            ];
+        });
+    
+        return response()->json($users);
     }
-
-    // Función para obtener todos los usuarios que sean empresas
-    public function getEmpresas()
+    
+    public function getEmpresas(Request $request)
     {
-        $empresas = User::whereHas('empresa')->with('empresa')->get();
-        return response()->json($empresas);
+        $startDate = $request->query('startDate') ? Carbon::parse($request->query('startDate'))->startOfDay() : null;
+        $endDate = $request->query('endDate') ? Carbon::parse($request->query('endDate'))->endOfDay() : null;
+    
+        $query = User::whereHas('empresa');
+    
+        if ($startDate) {
+            $query->where('created_at', '>=', $startDate);
+        }
+    
+        if ($endDate) {
+            $query->where('created_at', '<=', $endDate);
+        }
+    
+        $users = $query->get()->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'created_at' => $user->created_at->format('Y-m-d'),
+            ];
+        });
+    
+        return response()->json($users);
     }
 }
