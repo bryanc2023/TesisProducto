@@ -55,8 +55,8 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
       setValue('area', experiencia.area);
       setValue('fecha_ini', experiencia.fecha_ini);
       setValue('fecha_fin', experiencia.fecha_fin);
-      setValue('descripcion', experiencia.descripcion_responsabilidades);
-      setValue('referencia', experiencia.persona_referencia);
+      setValue('descripcion', experiencia.descripcion);
+      setValue('referencia', experiencia.referencia);
       setValue('contacto', experiencia.contacto);
     } else {
       reset();
@@ -112,7 +112,7 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
         onSubmit(data);
       } catch (error) {
         console.error('Error adding experiencia:', error);
-        console.log('Error details:', error.response?.data); // Detalles del error
+        
       }
     }
     onRequestClose();
@@ -151,7 +151,7 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
               >
                 <option value="">Seleccione</option>
                 {areas.map(area => (
-                  <option key={area.id} value={area.nombre_area}>
+                  <option key={area.id} value={`${area.id},${area.nombre_area}`}>
                     {area.nombre_area}
                   </option>
                 ))}

@@ -15,6 +15,14 @@ interface IFormInput {
   id_idioma: number;
   niveloral: string;
   nivelescrito: string;
+  empresa:string;
+  area:string;
+  puesto:string;
+  fechae1:string;
+  fechae2:string;
+  descripcion:string;
+  referencia:string;
+  contacto:string;
 
 }
 
@@ -27,6 +35,12 @@ interface Idioma {
   id: number;
   nombre: string;
 }
+
+interface Area {
+  id: number;
+  nombre_area: string;
+}
+
 
 function CompletarP2() {
   const navigate = useNavigate();
@@ -41,12 +55,31 @@ function CompletarP2() {
   const [selectedTituloId, setSelectedTituloId] = useState<string>('');
   const [isEnCurso, setIsEnCurso] = useState(false);
   const [languages, setLanguages] = useState<Idioma[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
+  const [hasExperience, setHasExperience] = useState(false);
+
+  const handleCheckboxChange = () => {
+    setHasExperience(!hasExperience);
+    if (!hasExperience) {
+      // Clear the values when experience is not checked
+      setValue('empresa', '');
+      setValue('area', '');
+      setValue('puesto', '');
+      setValue('fechae1', '');
+      setValue('fechae2', '');
+      setValue('descripcion', '');
+      setValue('referencia', '');
+      setValue('contacto', '');
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get('titulos');
         const response2 = await axios.get('idioma');
+        const response3 = await axios.get('areas');
+        setAreas(response3.data.areas);
         setNiveles(response.data.nivel);
         setCampos(response.data.campo);
         setTitulos(response.data.titulo);
@@ -154,17 +187,54 @@ function CompletarP2() {
        
 
         const formData = new FormData();
-        formData.append('id_postulante', postulanteId.toString());
-        formData.append('id_titulo', selectedTituloId);
-        formData.append('institucion', data.institucion);
-        formData.append('estado', data.estado);
-        formData.append('fechaini', data.fechaini);
-        formData.append('fechafin', data.fechafin);
-        formData.append('id_idioma', data.id_idioma.toString());
-        formData.append('niveloral', data.niveloral);
-        formData.append('nivelescrito', data.nivelescrito);
-        formData.append('titulo_acreditado', data.titulo_acreditado);
-        
+    
+        if (hasExperience) {
+          formData.append('id_postulante', postulanteId.toString());
+          formData.append('id_titulo', selectedTituloId);
+          formData.append('institucion', data.institucion);
+          formData.append('estado', data.estado);
+          formData.append('fechaini', data.fechaini);
+          formData.append('fechafin', data.fechafin);
+          formData.append('id_idioma', data.id_idioma.toString());
+          formData.append('niveloral', data.niveloral);
+          formData.append('nivelescrito', data.nivelescrito);
+          formData.append('titulo_acreditado', data.titulo_acreditado);
+          formData.append('area', data.area);
+          formData.append('empresa', data.empresa);
+          formData.append('puesto', data.puesto);
+          formData.append('fechae1', data.fechae1);
+          formData.append('fechae2', data.fechae2);
+          formData.append('descripcion', data.descripcion);
+          formData.append('referencia', data.referencia);
+          formData.append('contacto', data.contacto);
+          formData.append('empresa', data.empresa);
+          formData.append('area', data.area);
+          formData.append('puesto', data.puesto);
+          formData.append('fechae1', data.fechae1);
+          formData.append('fechae2', data.fechae2);
+          formData.append('descripcion', data.descripcion);
+          formData.append('referencia', data.referencia);
+          formData.append('contacto', data.contacto);
+        } else {
+          formData.append('id_postulante', postulanteId.toString());
+          formData.append('id_titulo', selectedTituloId);
+          formData.append('institucion', data.institucion);
+          formData.append('estado', data.estado);
+          formData.append('fechaini', data.fechaini);
+          formData.append('fechafin', data.fechafin);
+          formData.append('id_idioma', data.id_idioma.toString());
+          formData.append('niveloral', data.niveloral);
+          formData.append('nivelescrito', data.nivelescrito);
+          formData.append('titulo_acreditado', data.titulo_acreditado);
+          formData.append('area', data.area);
+          formData.append('empresa', data.empresa);
+          formData.append('puesto', data.puesto);
+          formData.append('fechae1', data.fechae1);
+          formData.append('fechae2', data.fechae2);
+          formData.append('descripcion', data.descripcion);
+          formData.append('referencia', data.referencia);
+          formData.append('contacto', data.contacto);
+        }
 
         await axios.post('postulante/forma', formData, {
           headers: {
@@ -180,9 +250,9 @@ function CompletarP2() {
         }).then(() => {
           navigate("/perfilP");
           Swal.fire({
-            icon: 'success',
-            title: '¡Para tener mejores oportunidades!',
-            text: 'Completa tu registro añadiendo experiencias , cursos, idiomas , certificaciones..',
+            icon: 'info',
+            title: '¡Ya casi terminas!',
+            text: 'Antes de postular genera tu cv con los datos que tengas ingresados, no te preocupes si deseas añadir más información o editarlas puedes generarlo siempre que desees en el apartado de "CV',
           })
         });
       } catch (error) {
@@ -321,10 +391,123 @@ function CompletarP2() {
               <option value="Avanzado">Avanzado</option>
               <option value="Nativo">Nativo</option>
             </select>
+            
+          </div>
+          
+        </div>
+        <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Formación profesional:</h2>
+        <p className="text-center mb-8">¿Tienes experiencia en alguna empresa?</p>
+      <div className="text-center mb-4">
+        <input
+          type="checkbox"
+          id="hasExperience"
+          checked={hasExperience}
+          onChange={handleCheckboxChange}
+        />
+        <label htmlFor="hasExperience" className="ml-2 text-gray-700">Sí, tengo experiencia</label>
+      </div>
+      
+      {hasExperience && (
+        <div className="grid grid-cols-1 gap-4">
+          <div className="mb-4">
+            <label className="block text-gray-700">Nombre de la Empresa:</label>
+            <input 
+              {...register('empresa', { 
+                required: hasExperience ? 'Este campo es obligatorio' : false, 
+                maxLength: { value: 100, message: 'Máximo 100 caracteres' } 
+              })} 
+              className="w-full px-4 py-2 border rounded-md text-gray-700" 
+            />
+            {errors.empresa && <p className="text-red-500">{errors.empresa.message}</p>}
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Área del puesto de trabajo:</label>
+            <select 
+              className="w-full px-4 py-2 border rounded-md text-gray-700" 
+              {...register('area', { 
+                required: hasExperience ? 'Área es requerida' : false, 
+                maxLength: { value: 250, message: 'Máximo 250 caracteres' } 
+              })}
+            >
+              <option value="">Seleccione</option>
+              {areas.map(area => (
+                <option key={area.id} value={`${area.id},${area.nombre_area}`}>
+                  {area.nombre_area}
+                </option>
+              ))}
+            </select>
+            {errors.area && <p className="text-red-500">{errors.area.message}</p>}
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Puesto en la empresa:</label>
+            <input 
+              {...register('puesto', { 
+                required: hasExperience ? 'Este campo es obligatorio' : false, 
+                maxLength: { value: 100, message: 'Máximo 100 caracteres' } 
+              })} 
+              className="w-full px-4 py-2 border rounded-md text-gray-700" 
+            />
+            {errors.puesto && <p className="text-red-500">{errors.puesto.message}</p>}
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Fecha de inicio labores:</label>
+            <input 
+              type="date" 
+              {...register('fechae1', { 
+                required: hasExperience ? 'Este campo es obligatorio' : false 
+              })} 
+              className="w-full px-4 py-2 border rounded-md text-gray-700" 
+            />
+            {errors.fechae1 && <p className="text-red-500">{errors.fechae1.message}</p>}
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Fecha de fin de labores:</label>
+            <input 
+              type="date" 
+              {...register('fechae2', { 
+                required: hasExperience ? 'Este campo es obligatorio' : false 
+              })} 
+              className="w-full px-4 py-2 border rounded-md text-gray-700" 
+            />
+            {errors.fechae2 && <p className="text-red-500">{errors.fechae2.message}</p>}
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Descripción de responsabilidades en la empresa:</label>
+            <textarea 
+              {...register('descripcion', { 
+                required: hasExperience ? 'Este campo es obligatorio' : false, 
+                maxLength: { value: 500, message: 'Máximo 500 caracteres' } 
+              })} 
+              className="w-full px-4 py-2 border rounded-md text-gray-700" 
+            />
+            {errors.descripcion && <p className="text-red-500">{errors.descripcion.message}</p>}
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Nombre Persona Referencia:</label>
+            <input 
+              {...register('referencia', { 
+                required: hasExperience ? 'Este campo es obligatorio' : false, 
+                maxLength: { value: 250, message: 'Máximo 250 caracteres' } 
+              })} 
+              className="w-full px-4 py-2 border rounded-md text-gray-700" 
+            />
+            {errors.referencia && <p className="text-red-500">{errors.referencia.message}</p>}
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Contacto:</label>
+            <input 
+              type="text" 
+              {...register('contacto', { 
+                required: hasExperience ? 'Este campo es obligatorio' : false, 
+                maxLength: { value: 250, message: 'Máximo 250 caracteres' } 
+              })} 
+              className="w-full px-4 py-2 border rounded-md text-gray-700" 
+              placeholder="Número o Correo de contacto de la persona de referencia"
+            />
+            {errors.contacto && <p className="text-red-500">{errors.contacto.message}</p>}
           </div>
         </div>
-        
-
+      )}
         <button type="submit" className="w-full py-3 px-4 bg-blue-500 text-white font-bold rounded-lg hover:bg-slate-600">Culminar registro</button>
       </form>
     </div>

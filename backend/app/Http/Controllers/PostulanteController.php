@@ -153,7 +153,14 @@ public function getCurriculum($id)
             'niveloral' => 'required|string|max:20',
             'nivelescrito' => 'required|string|max:20',
             'titulo_acreditado' => 'required|string|max:220',
-            
+            'empresa' => 'nullable|string|max:100',
+            'puesto' => 'nullable|string|max:100',
+            'fechae1' => 'nullable|date',
+            'fechae2' => 'nullable|date',
+            'descripcion' => 'nullable|string|max:500',
+            'referencia' => 'nullable|string|max:250',
+            'area'=> 'nullable|string|max:250',
+            'contacto'=> 'nullable|string|max:250'
         ]);
 
         $postulantefor = new PersonaFormacionPro();
@@ -175,6 +182,32 @@ public function getCurriculum($id)
 
         $postulante = Postulante::find($request->id_postulante);
         $postulante->cv = null;
+
+        if ($request->empresa && $request->puesto && $request->descripcion && $request->referencia && $request->area && $request->contacto) {
+            $postulantexp = new FormacionPro();
+            $postulantexp->id_postulante = $request->id_postulante;
+            $postulantexp->empresa = $request->empresa;
+            $postulantexp->puesto = $request->puesto;
+            $postulantexp->fecha_ini = $request->fechae1;
+            $postulantexp->fecha_fin = $request->fechae2;
+            $postulantexp->descripcion_responsabilidades = $request->descripcion;
+            $postulantexp->persona_referencia = $request->referencia;
+            $postulantexp->area = $request->area;
+            $postulantexp->contacto = $request->contacto;
+    
+            if ($request->fechae1 && $request->fechae2) {
+                $fecha1 = new DateTime($request->fechae1);
+                $fecha2 = new DateTime($request->fechae2);
+                $diferencia = $fecha1->diff($fecha2);
+                $postulantexp->mes_e = $diferencia->m;
+                $postulantexp->anios_e = $diferencia->y;
+            } else {
+                $postulantexp->mes_e = 0;
+                $postulantexp->anios_e = 0;
+            }
+    
+            $postulantexp->save();
+        }
 
         return response()->json(['message' => 'Formación académica registrada exitosamente', 'postulante_formacion' => $postulante], 201);
     }
