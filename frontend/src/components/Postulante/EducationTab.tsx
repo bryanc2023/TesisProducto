@@ -4,6 +4,8 @@ import axios from '../../services/axios';
 import { Formacion } from '../../types/FormacionType';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';  // Importar el locale en español
 
 interface EducationTabProps {
   formaciones: Formacion[];
@@ -58,7 +60,7 @@ const EducationTab: React.FC<EducationTabProps> = ({ formaciones, openEditFormac
         headers: { 'Content-Type': 'application/json' },
       });
 
-      setFormaciones(prevFormaciones => prevFormaciones.filter(f => !(f.id_postulante === id_postulante && f.titulo.id_titulo === id_titulo)));
+      setFormaciones(prevFormaciones => prevFormaciones.filter(f => !(f.id_postulante === id_postulante && f.titulo.id === id_titulo)));
       setMessage({ type: 'success', text: 'Formación académica eliminada exitosamente' });
     } catch (error: any) {
       console.error('Error al eliminar la formación académica', error.response ? error.response.data : error.message);
@@ -93,6 +95,13 @@ const EducationTab: React.FC<EducationTabProps> = ({ formaciones, openEditFormac
     return <p className="text-gray-400">Cargando...</p>;
   }
 
+  const formatearFecha = (fecha:any) => {
+    const fechaObj = new Date(fecha);
+    const fechaFormateada = format(fechaObj, 'MMMM yyyy', { locale: es });
+    return fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1);
+  };
+
+
   return (
     <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
       <div className="flex justify-between items-center">
@@ -108,33 +117,35 @@ const EducationTab: React.FC<EducationTabProps> = ({ formaciones, openEditFormac
         </div>
       )}
 
-      {formaciones.length > 0 ? (
-        formaciones.map((formacion, index) => (
-          <div key={index} className="mb-4 p-4 border rounded-lg bg-gray-700 relative">
-            <div className="flex justify-end space-x-2 mb-2">
-              <button
-                onClick={() => openEditFormacionModal(formacion)}
-                className="px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
-              >
-                <FaPencilAlt className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => openConfirmModal(formacion)}
-                className="px-2 py-1 bg-rose-500 text-white rounded-md hover:bg-rose-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-rose-300"
-              >
-                <FaTrash className="w-4 h-4" />
-              </button>
+     
+{formaciones.length > 0 ? (
+        formaciones.map((formacion, index) => {
+          const fechainiFormateada = formatearFecha(formacion.fechaini);
+          const fechafinFormateada = formacion.fechafin ? formatearFecha(formacion.fechafin) : 'Presente';
+
+          return (
+            <div key={index} className="mb-4 p-4 border rounded-lg bg-gray-700 relative">
+              <div className="flex justify-end space-x-2 mb-2">
+                <button
+                  onClick={() => openEditFormacionModal(formacion)}
+                  className="px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                >
+                  <FaPencilAlt className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => openConfirmModal(formacion)}
+                  className="px-2 py-1 bg-rose-500 text-white rounded-md hover:bg-rose-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-rose-300"
+                >
+                  <FaTrash className="w-4 h-4" />
+                </button>
+              </div>
+              <p><strong> {formacion.titulo_acreditado}</strong> </p>
+              <p> {fechainiFormateada} - {fechafinFormateada}</p>
+              <p><strong>Institución:</strong> {formacion.institucion}</p>
+              <p><strong>Estado:</strong> {formacion.estado}</p>
             </div>
-            <p><strong>Institución:</strong> {formacion.institucion}</p>
-            <p><strong>Estado:</strong> {formacion.estado}</p>
-            <p><strong>Fecha de Inicio:</strong> {formacion.fechaini}</p>
-            <p><strong>Fecha de Fin:</strong> {formacion.fechafin}</p>
-            <p><strong>Título:</strong> {formacion.titulo.titulo}</p>
-            <p><strong>Nivel de Educación:</strong> {formacion.titulo.nivel_educacion}</p>
-            <p><strong>Campo Amplio:</strong> {formacion.titulo.campo_amplio}</p>
-            <p><strong>Título Acreditado:</strong> {formacion.titulo_acreditado}</p>
-          </div>
-        ))
+          );
+        })
       ) : (
         <p className="text-gray-400">No hay formación académica disponible en este momento.</p>
       )}

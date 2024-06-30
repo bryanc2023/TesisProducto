@@ -37,6 +37,7 @@ interface ProfileData {
   };
   formaciones: Formacion[];
   cursos: Curso[];
+  redes: Red[];
 }
 
 interface Formacion {
@@ -75,6 +76,12 @@ interface CV {
   nombre: string;
   imagen: string;
   url: string;
+}
+
+interface Red{
+  id: number;
+  nombre_red:string;
+  enlace:string;
 }
 
 const Tabs: React.FC<TabsProps> = ({

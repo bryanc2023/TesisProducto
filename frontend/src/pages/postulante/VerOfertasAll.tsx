@@ -148,42 +148,41 @@ function Modal({ oferta, onClose, userId }: ModalProps) {
     };
 
 
-
     const renderCriterioValor = (criterio: Criterio) => {
-
-        if (criterio.criterio === 'Experiencia') {
-            return "Los años mínimos indicados";
-        }
-        if (criterio.criterio === 'Titulo') {
-            return "Alguno de los títulos mencionados";
-        }
-        if (criterio.criterio === 'Sueldo') {
-            return "Indicar el sueldo prospecto a ganar";
-        }
-
-        if (criterio.criterio === 'Edad') {
+        if (criterio && criterio.pivot && criterio.pivot.valor) {
             const valorArray = criterio.pivot.valor.split(",");
-            return valorArray.length > 1 ? valorArray[2].trim() : criterio.pivot.valor;
-        }
-        if (criterio.criterio === "Ubicación") {
-            const valorArray = criterio.pivot.valor.split(",");
-            return valorArray.length > 1 ? valorArray[1].trim() : criterio.pivot.valor;
-        }
-        if (criterio.criterio === "Idioma") {
-            const valorArray = criterio.pivot.valor.split(",");
-            return valorArray.length > 1 ? valorArray[1].trim() : criterio.pivot.valor;
-        }
-        if (criterio.criterio === "Estado Civil") {
-            if (criterio.pivot.valor === "Casado") {
-                return "Casado/a";
-            } else if (criterio.pivot.valor === "Soltero") {
-                return "Soltero/a";
-            } else {
-                return "Viudo/a";
+            
+            switch (criterio.criterio) {
+                case 'Experiencia':
+                    return "Los años mínimos indicados";
+                case 'Titulo':
+                    return "Alguno de los títulos mencionados";
+                case 'Sueldo':
+                    return "Indicar el sueldo prospecto a ganar";
+                case 'Edad':
+                    return valorArray.length > 1 ? valorArray[2].trim() : criterio.pivot.valor;
+                case 'Ubicación':
+                    return valorArray.length > 1 ? valorArray[1].trim() : criterio.pivot.valor;
+                case 'Idioma':
+                    return valorArray.length > 1 ? valorArray[1].trim() : criterio.pivot.valor;
+                case 'Estado Civil':
+                    switch (criterio.pivot.valor) {
+                        case "Casado":
+                            return "Casado/a";
+                        case "Soltero":
+                            return "Soltero/a";
+                        default:
+                            return "Viudo/a";
+                    }
+                default:
+                    return criterio.pivot.valor;
             }
+        } else {
+            return "";
         }
-        return criterio.pivot.valor;
     };
+    
+    
 
 
     return (

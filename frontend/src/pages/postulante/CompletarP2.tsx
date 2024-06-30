@@ -13,6 +13,7 @@ interface IFormInput {
   estado: string;
   fechaini: string;
   fechafin: string;
+  titulo_acreditado:string;
   id_idioma: number;
   niveloral: string;
   nivelescrito: string;
@@ -167,6 +168,7 @@ function CompletarP2() {
         formData.append('id_idioma', data.id_idioma.toString());
         formData.append('niveloral', data.niveloral);
         formData.append('nivelescrito', data.nivelescrito);
+        formData.append('titulo_acreditado', data.titulo_acreditado);
         formData.append('cv', cvUrl);
 
         await axios.post('postulante/forma', formData, {
@@ -240,6 +242,11 @@ function CompletarP2() {
               </option>
             ))}
           </select>
+        </div>
+        <div className="form-group">
+          <label htmlFor="titulo_acreditado" className="block text-gray-700 font-semibold mb-2">Título Acreditado:</label>
+          <input type="text" id="titulo_acreditado" {...register('titulo_acreditado', { required: true })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" />
+          {errors.titulo_acreditado && <span className="text-red-500">Este campo es obligatorio</span>}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
