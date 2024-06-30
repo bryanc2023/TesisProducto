@@ -153,7 +153,7 @@ public function getCurriculum($id)
             'niveloral' => 'required|string|max:20',
             'nivelescrito' => 'required|string|max:20',
             'titulo_acreditado' => 'required|string|max:220',
-            'cv' => 'required|string', // URL del CV desde Firebase
+            
         ]);
 
         $postulantefor = new PersonaFormacionPro();
@@ -174,10 +174,7 @@ public function getCurriculum($id)
         $postulanteidi->save();
 
         $postulante = Postulante::find($request->id_postulante);
-        if ($postulante) {
-            $postulante->cv = $request->cv;
-            $postulante->save();
-        }
+        $postulante->cv = null;
 
         return response()->json(['message' => 'Formación académica registrada exitosamente', 'postulante_formacion' => $postulante], 201);
     }
