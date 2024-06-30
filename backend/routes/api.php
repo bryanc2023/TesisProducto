@@ -43,7 +43,7 @@ Route::get('userById/{id}', [UserController::class, 'getUserById']);
 //Rutas para certificados
 Route::post('certificadoC',[CursoController::class,'newCertificado']);
 Route::get('certificadoId/{id}', [CursoController::class, 'getCertificado']);
-Route::get('certificados', [CursoController::class, 'getCertificados']);
+Route::get('certificados/{id}', [CursoController::class, 'getCertificados']);
 Route::put('certificadoU/{id}', [CursoController::class, 'updateCertificado']);
 Route::delete('certificadoD/{id}', [CursoController::class, 'deleteCertificado']);
 

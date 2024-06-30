@@ -23,11 +23,26 @@ const CoursesTab: React.FC<CoursesTabProps> = () => {
   const [cursoToDelete, setCursoToDelete] = useState<Curso | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [cursoToEdit, setCursoToEdit] = useState<Curso | null>(null);
+  const [profileData, setProfileData] = useState<any>(null);
 
-  const fetchCursos = async () => {
+  const fetchProfileData = async () => {
+    try {
+      if (user) {
+        const response = await axios.get(`/perfil/${user.id}`);
+        setProfileData(response.data);
+        fetchCursos(response.data.postulante.id_postulante);
+      }
+    } catch (error) {
+      console.error('Error fetching profile data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCursos = async (id_postulante: number) => {
     setLoading(true);
     try {
-      const response = await axios.get('/certificados');
+      const response = await axios.get(`/certificados/${id_postulante}`);
       const certificados = response.data.map((certificado: any) => ({
         id_certificado: certificado.id_certificado,
         titulo: certificado.titulo,
@@ -42,7 +57,7 @@ const CoursesTab: React.FC<CoursesTabProps> = () => {
   };
 
   useEffect(() => {
-    fetchCursos();
+    fetchProfileData();
   }, []);
 
   const handleDeleteCurso = async () => {
@@ -55,7 +70,7 @@ const CoursesTab: React.FC<CoursesTabProps> = () => {
     try {
       await axios.delete(`/certificadoD/${cursoToDelete.id_certificado}`);
       setDeleteMessage('Curso eliminado exitosamente');
-      fetchCursos(); // Actualiza la lista de cursos después de eliminar
+      fetchCursos(profileData.postulante.id_postulante); // Actualiza la lista de cursos después de eliminar
       setTimeout(() => setDeleteMessage(null), 3000);
     } catch (error) {
       console.error('Error deleting curso:', error.response ? error.response.data : error);
@@ -157,7 +172,7 @@ const CoursesTab: React.FC<CoursesTabProps> = () => {
         <EditCurso
           isOpen={isEditModalOpen}
           closeModal={closeEditModal}
-          reloadCursos={fetchCursos} // Pasar la función fetchCursos directamente
+          reloadCursos={() => fetchCursos(profileData.postulante.id_postulante)} // Pasar la función fetchCursos directamente
           curso={cursoToEdit}
         />
       )}

@@ -139,8 +139,11 @@ const EmpresaDetails: React.FC = () => {
         setIsAddRedModalOpen(true);
     };
 
-    const closeAddRedModal = () => {
+    const closeAddRedModal = async () => {
         setIsAddRedModalOpen(false);
+        if (empresa?.id) {
+            await fetchRedes(empresa.id);
+        }
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -200,6 +203,29 @@ const EmpresaDetails: React.FC = () => {
                     setError(`General error: ${(err as Error).message}`);
                 }
             }
+        }
+    };
+
+    const fetchRedes = async (empresaId: number) => {
+        try {
+            const response = await axios.get(`/empresa-red/${empresaId}`);
+            if (response.data && Array.isArray(response.data)) {
+                setEmpresa((prevState) => ({
+                    ...prevState!,
+                    red: response.data
+                }));
+            } else {
+                setEmpresa((prevState) => ({
+                    ...prevState!,
+                    red: []
+                }));
+            }
+        } catch (error) {
+            console.error('Error fetching redes:', error);
+            setEmpresa((prevState) => ({
+                ...prevState!,
+                red: []
+            }));
         }
     };
 
