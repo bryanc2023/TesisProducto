@@ -38,15 +38,20 @@ const Reportes: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [useFilters, setUseFilters] = useState<boolean>(false);
 
   const fetchData = async () => {
+    if (useFilters && (!startDate || !endDate || startDate > endDate)) {
+      setError('Por favor, selecciona fechas válidas.');
+      return;
+    }
     try {
       setLoading(true);
       const response = await axios.get(`/usuarios/${reportType}`, {
-        params: {
+        params: useFilters ? {
           startDate: startDate?.toISOString().split('T')[0],
           endDate: endDate?.toISOString().split('T')[0],
-        },
+        } : {},
       });
       if (Array.isArray(response.data)) {
         setData(response.data);
@@ -62,9 +67,7 @@ const Reportes: React.FC = () => {
   };
 
   useEffect(() => {
-    if (startDate && endDate) {
-      fetchData();
-    }
+    fetchData();
   }, [startDate, endDate, reportType]);
 
   const generatePDF = () => {
@@ -158,11 +161,21 @@ const Reportes: React.FC = () => {
   const handleStartDateChange = (date: Date | null) => {
     setStartDate(date);
     setPreviewUrl(null);
+    if (date && !endDate) {
+      setError('Selecciona la fecha de fin.');
+    } else {
+      setError(null);
+    }
   };
 
   const handleEndDateChange = (date: Date | null) => {
     setEndDate(date);
     setPreviewUrl(null);
+    if (startDate && date && date < startDate) {
+      setError('La fecha de fin no puede ser anterior a la fecha de inicio.');
+    } else {
+      setError(null);
+    }
   };
 
   const closeModal = () => {
@@ -184,23 +197,39 @@ const Reportes: React.FC = () => {
         </select>
       </div>
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de Inicio</label>
-        <DatePicker
-          selected={startDate}
-          onChange={handleStartDateChange}
-          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-          dateFormat="yyyy/MM/dd"
-        />
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          <input
+            type="checkbox"
+            checked={useFilters}
+            onChange={(e) => setUseFilters(e.target.checked)}
+            className="mr-2"
+          />
+          Usar filtros de fecha
+        </label>
       </div>
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de Fin</label>
-        <DatePicker
-          selected={endDate}
-          onChange={handleEndDateChange}
-          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-          dateFormat="yyyy/MM/dd"
-        />
-      </div>
+      {useFilters && (
+        <>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de Inicio</label>
+            <DatePicker
+              selected={startDate}
+              onChange={handleStartDateChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              dateFormat="yyyy/MM/dd"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de Fin</label>
+            <DatePicker
+              selected={endDate}
+              onChange={handleEndDateChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              dateFormat="yyyy/MM/dd"
+            />
+          </div>
+        </>
+      )}
+      {error && <div className="text-red-500 mb-4">{error}</div>}
       <div className="mb-4">
         <button
           onClick={fetchData}
