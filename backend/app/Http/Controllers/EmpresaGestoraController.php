@@ -29,6 +29,7 @@ class EmpresaGestoraController extends Controller
 
     $users = $query->get()->map(function ($user) {
         $postulante = $user->postulante;
+        
         $postulaciones = $postulante ? $postulante->postulaciones->map(function ($postulacion) {
             return [
                 'cargo' => $postulacion->oferta->cargo,

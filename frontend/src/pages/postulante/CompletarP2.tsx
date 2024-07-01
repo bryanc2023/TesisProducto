@@ -310,11 +310,7 @@ const handleRedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
             formData.append('area', data.area);
             formData.append('empresa', data.empresa);
             formData.append('puesto', data.puesto);
-            formData.append('fechae1', data.fechae1);
-            formData.append('fechae2', data.fechae2);
-            formData.append('descripcion', data.descripcion);
-            formData.append('referencia', data.referencia);
-            formData.append('contacto', data.contacto);
+        
           }
           
         }
