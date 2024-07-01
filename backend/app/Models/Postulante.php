@@ -28,7 +28,8 @@ class Postulante extends Model
         'genero',
         'informacion_extra',
         'foto',
-        'cv'
+        'cv',
+        'vigencia',
     ];
      /**
     * Get the rent of a Tenant

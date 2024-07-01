@@ -27,7 +27,7 @@ class CreatePostulantesTable extends Migration
             $table->string('informacion_extra', 1000)->nullable();
             $table->string('foto', 500)->nullable();
             $table->string('cv', 500)->nullable();
-      
+            $table->boolean('vigencia')->default(1); 
 
             // Agregar claves foráneas
             $table->foreign('id_ubicacion')->references('id')->on('ubicacion')->onDelete('cascade');

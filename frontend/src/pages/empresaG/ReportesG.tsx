@@ -110,7 +110,7 @@ const Reportes: React.FC = () => {
     doc.save('reporte.pdf');
   };
 
-  const previewPDF = () => {
+  const previewPDF = async () => {
     const doc = new jsPDF();
     doc.text('Proajob', 14, 16);
     doc.setFontSize(10);
@@ -180,6 +180,7 @@ const Reportes: React.FC = () => {
 
   const closeModal = () => {
     setIsModalOpen(false);
+    setPreviewUrl(null);
   };
 
   return (
@@ -245,83 +246,89 @@ const Reportes: React.FC = () => {
           <p>{error}</p>
         ) : (
           <>
-            {data.length > 0 && (
-              <div id="reportTable" className="bg-white p-4 rounded-md shadow-md">
-                <table className="min-w-full">
-                  <thead>
-                    <tr>
-                      <th className="w-2/12 px-4 py-2">Nombre</th>
-                      <th className="w-2/12 px-4 py-2">Correo</th>
-                      <th className="w-2/12 px-4 py-2">Fecha de Creación</th>
-                      {reportType === 'postulantes' && (
-                        <>
-                          <th className="w-2/12 px-4 py-2">Número de Postulaciones</th>
-                          <th className="w-5/12 px-4 py-2">Postulaciones</th>
-                          <th className="w-2/12 px-4 py-2">Vigencia</th>
-                        </>
-                      )}
-                      {reportType === 'empresas' && (
-                        <>
-                          <th className="w-2/12 px-4 py-2">Empresa</th>
-                          <th className="w-4/12 px-4 py-2">Ofertas Publicadas</th>
-                        </>
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.map((item) => (
-                      <tr key={item.id}>
-                        <td className="border px-4 py-2">{item.name}</td>
-                        <td className="border px-4 py-2">{item.email}</td>
-                        <td className="border px-4 py-2">{item.created_at}</td>
+            {data.length === 0 ? (
+              <p className="text-center text-gray-500">
+                {reportType === 'postulantes' ? 'No se han encontrado postulantes registrados' : 'No se han encontrado empresas registradas'}
+              </p>
+            ) : (
+              <>
+                <div id="reportTable" className="bg-white p-4 rounded-md shadow-md">
+                  <table className="min-w-full">
+                    <thead>
+                      <tr>
+                        <th className="w-2/12 px-4 py-2">Nombre</th>
+                        <th className="w-2/12 px-4 py-2">Correo</th>
+                        <th className="w-2/12 px-4 py-2">Fecha de Creación</th>
                         {reportType === 'postulantes' && (
                           <>
-                            <td className="border px-4 py-2">{item.num_postulaciones}</td>
-                            <td className="border px-4 py-2">{item.detalles_postulaciones?.map(detalle => detalle.cargo).join(', ')}</td>
-                            <td className="border px-4 py-2">{item.vigencia}</td>
+                            <th className="w-2/12 px-4 py-2">Número de Postulaciones</th>
+                            <th className="w-5/12 px-4 py-2">Postulaciones</th>
+                            <th className="w-2/12 px-4 py-2">Vigencia</th>
                           </>
                         )}
-                        {reportType === 'empresas' && item.empresa && (
+                        {reportType === 'empresas' && (
                           <>
-                            <td className="border px-4 py-2">{item.empresa.nombre_comercial}</td>
-                            <td className="border px-4 py-2">{item.empresa.ofertas.map(oferta => `${oferta.cargo} (Postulantes: ${oferta.num_postulantes})`).join(', ')}</td>
+                            <th className="w-2/12 px-4 py-2">Empresa</th>
+                            <th className="w-4/12 px-4 py-2">Ofertas Publicadas</th>
                           </>
                         )}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {data.map((item) => (
+                        <tr key={item.id}>
+                          <td className="border px-4 py-2">{item.name}</td>
+                          <td className="border px-4 py-2">{item.email}</td>
+                          <td className="border px-4 py-2">{item.created_at}</td>
+                          {reportType === 'postulantes' && (
+                            <>
+                              <td className="border px-4 py-2">{item.num_postulaciones}</td>
+                              <td className="border px-4 py-2">{item.detalles_postulaciones?.map(detalle => detalle.cargo).join(', ')}</td>
+                              <td className="border px-4 py-2">{item.vigencia}</td>
+                            </>
+                          )}
+                          {reportType === 'empresas' && item.empresa && (
+                            <>
+                              <td className="border px-4 py-2">{item.empresa.nombre_comercial}</td>
+                              <td className="border px-4 py-2">{item.empresa.ofertas.map(oferta => `${oferta.cargo} (Postulantes: ${oferta.num_postulantes})`).join(', ')}</td>
+                            </>
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="mt-4 flex space-x-2">
+                  <button
+                    onClick={generatePDF}
+                    className="px-2 py-1 bg-green-500 text-white rounded-md hover:bg-green-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-green-300"
+                  >
+                    <FaDownload className="w-4 h-4" />
+                  </button>
+                  {data.length > 0 && (
+                    <button
+                      onClick={previewPDF}
+                      className="px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    >
+                      <FaEye className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </>
             )}
-            <div className="mt-4 flex space-x-2">
-              <button
-                onClick={generatePDF}
-                className="px-2 py-1 bg-green-500 text-white rounded-md hover:bg-green-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-green-300"
-              >
-                <FaDownload className="w-4 h-4" />
-              </button>
-              {data.length > 0 && (
-                <button
-                  onClick={previewPDF}
-                  className="px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                >
-                  <FaEye className="w-4 h-4" />
-                </button>
-              )}
-            </div>
             <Modal
               isOpen={isModalOpen}
               onRequestClose={closeModal}
               contentLabel="Vista previa del PDF"
-              className="bg-white p-6 rounded-lg shadow-md w-full max-w-4xl mx-auto my-20 relative"
-              overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+              className="bg-white p-6 rounded-lg shadow-md w-full max-w-4xl mx-auto my-20 relative overflow-y-auto z-50"
+              overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-40"
             >
               <button onClick={closeModal} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl font-bold">
                 &times;
               </button>
               <h3 className="text-xl font-semibold mb-4">Vista previa del reporte PDF</h3>
               {previewUrl && (
-                <iframe src={previewUrl} width="100%" height="500px" style={{ border: 'none' }}></iframe>
+                <iframe src={previewUrl} width="100%" height="500px" style={{ border: 'none', minHeight: '300px' }}></iframe>
               )}
             </Modal>
           </>

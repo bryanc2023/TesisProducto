@@ -12,50 +12,50 @@ use App\Models\Postulante;
 
 class EmpresaGestoraController extends Controller
 {
+ 
+    
     public function getPostulantes(Request $request)
-{
-    $startDate = $request->query('startDate') ? Carbon::parse($request->query('startDate'))->startOfDay() : null;
-    $endDate = $request->query('endDate') ? Carbon::parse($request->query('endDate'))->endOfDay() : null;
-
-    $query = User::whereHas('postulante');
-
-    if ($startDate) {
-        $query->where('created_at', '>=', $startDate);
-    }
-
-    if ($endDate) {
-        $query->where('created_at', '<=', $endDate);
-    }
-
-    $users = $query->get()->map(function ($user) {
-        $postulante = $user->postulante;
-        
-        $postulaciones = $postulante ? $postulante->postulaciones->map(function ($postulacion) {
+    {
+        $startDate = $request->query('startDate') ? Carbon::parse($request->query('startDate'))->startOfDay() : null;
+        $endDate = $request->query('endDate') ? Carbon::parse($request->query('endDate'))->endOfDay() : null;
+    
+        $query = DB::table('users')
+            ->join('postulante', 'users.id', '=', 'postulante.id_usuario')
+            ->select('users.id', 'users.name', 'users.email', 'users.created_at', 'postulante.id_postulante', 'postulante.vigencia');
+    
+        if ($startDate) {
+            $query->where('users.created_at', '>=', $startDate);
+        }
+    
+        if ($endDate) {
+            $query->where('users.created_at', '<=', $endDate);
+        }
+    
+        $users = $query->get();
+    
+        $result = $users->map(function ($user) {
+            $postulaciones = DB::table('postulacion')
+                ->join('oferta', 'postulacion.id_oferta', '=', 'oferta.id_oferta')
+                ->where('postulacion.id_postulante', '=', $user->id_postulante)
+                ->select('oferta.cargo')
+                ->get();
+    
             return [
-                'cargo' => $postulacion->oferta->cargo,
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'created_at' => Carbon::parse($user->created_at)->format('Y-m-d'),
+                'num_postulaciones' => $postulaciones->count(),
+                'detalles_postulaciones' => $postulaciones,
+                'vigencia' => $user->vigencia ? 'Activo' : 'Inactivo',
             ];
-        }) : [];
-
-        return [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'created_at' => $user->created_at->format('Y-m-d'),
-            'num_postulaciones' => $postulaciones->count(),
-            'detalles_postulaciones' => $postulaciones,
-            'vigencia' => $postulante ? ($postulante->vigencia ? 'Activo' : 'Inactivo') : 'Inactivo',
-        ];
-    });
-
-    return response()->json($users);
-}
-
-
+        });
     
-    
+        return response()->json($result);
+    }
     
 
-    
+
     
     public function getEmpresas(Request $request)
     {
