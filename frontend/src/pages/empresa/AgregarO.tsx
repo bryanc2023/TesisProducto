@@ -521,6 +521,7 @@ function AgregarO() {
               <option value="">Seleccione una modalidad</option>
               <option value="Presencial">Presencial</option>
               <option value="Virtual">Virtual</option>
+              <option value="Hibrida">Hibrida</option>
             </select>
             {errors.modalidad && <p className="text-red-500">{errors.modalidad.message}</p>}
           </div>

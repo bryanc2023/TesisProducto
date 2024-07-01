@@ -248,8 +248,8 @@ const CompletarP: React.FC = () => {
         </div>
 
         <div className="form-group mb-8">
-          <label htmlFor="description" className="block text-gray-700 font-semibold mb-2">Descripción sobre ti:</label>
-          <textarea id="description" {...register('description', { required: 'Descripción es requerida' })} placeholder="Habilidades y competencias propias..." className={getInputClassName(errors.description)}></textarea>
+          <label htmlFor="description" className="block text-gray-700 font-semibold mb-2">Presentación:</label>
+          <textarea id="description" {...register('description', { required: 'Descripción es requerida' })} placeholder="Describete, Tus Habilidades y competencias propias..." className={getInputClassName(errors.description)}></textarea>
           {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
         </div>
 
