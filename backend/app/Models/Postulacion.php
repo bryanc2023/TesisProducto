@@ -34,6 +34,4 @@ class Postulacion extends Model
     {
         return $this->belongsTo(Oferta::class, 'id_oferta');
     }
-
-
 }

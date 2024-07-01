@@ -43,7 +43,7 @@ class Empresa extends Model
 
     public function ofertas()
     {
-        return $this->hasMany(Oferta::class);
+        return $this->hasMany(Oferta::class, 'id_empresa','id_empresa' );
     }
 
     public static function getIdEmpresaPorIdUsuario($idUsuario)
