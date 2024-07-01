@@ -28,8 +28,7 @@ class Postulante extends Model
         'genero',
         'informacion_extra',
         'foto',
-        'cv',
-        'vigencia'
+        'cv'
     ];
      /**
     * Get the rent of a Tenant
@@ -87,10 +86,11 @@ public function formapro()
 
 public function certificado()
 {
-    return $this->hasMany(Certificado::class, 'id_certificado');
+    return $this->hasMany(Certificado::class, 'id_postulante', 'id_postulante');
 }
-public function postulaciones()
-    {
-        return $this->hasMany(Postulacion::class, 'id_postulante', 'id_postulante');
-    }
+
+public function hasCv(): bool
+{
+    return !is_null($this->cv);
+}
 }

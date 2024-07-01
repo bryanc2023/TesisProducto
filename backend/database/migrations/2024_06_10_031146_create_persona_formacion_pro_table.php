@@ -23,6 +23,7 @@ class CreatePersonaFormacionProTable extends Migration
             $table->string('estado', 30);
             $table->date('fecha_ini')->nullable();
             $table->date('fecha_fin')->nullable();
+            $table->string('titulo_acreditado', 500);
             // Aquí puedes agregar más columnas si es necesario
            
         });

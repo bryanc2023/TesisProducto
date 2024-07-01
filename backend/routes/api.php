@@ -46,7 +46,7 @@ Route::get('userById/{id}', [UserController::class, 'getUserById']);
 //Rutas para certificados
 Route::post('certificadoC',[CursoController::class,'newCertificado']);
 Route::get('certificadoId/{id}', [CursoController::class, 'getCertificado']);
-Route::get('certificados', [CursoController::class, 'getCertificados']);
+Route::get('certificados/{id}', [CursoController::class, 'getCertificados']);
 Route::put('certificadoU/{id}', [CursoController::class, 'updateCertificado']);
 Route::delete('certificadoD/{id}', [CursoController::class, 'deleteCertificado']);
 
@@ -92,6 +92,10 @@ Route::post('postulanteC',[PostulanteController::class,'registerPos']);
 Route::get('postulanteId/id',[PostulanteController::class,'obtenerIdPostulante']);
 Route::post('postulante/forma',[PostulanteController::class,'registroFormaAca']);
 Route::get('/perfil/{id}', [PostulanteController::class, 'getPerfil']);
+Route::get('/curri/{id}', [PostulanteController::class, 'getCurriculum']);
+Route::put('/postulantes/{userId}/cv', [PostulanteController::class, 'updateCV']);
+Route::get('check-cv/{id_postulante}', [PostulanteController::class, 'checkCv']);
+Route::get('/foto/{userId}', [PostulanteController::class, 'getProfileImage']);
 Route::post('/exp', [PostulanteController::class, 'agregarExperiencia']);
 Route::get('/experiencia/{id}', [PostulanteController::class, 'getExperiencia']);
 Route::get('/experienciaById/{id}', [PostulanteController::class, 'getExperienciaById']);

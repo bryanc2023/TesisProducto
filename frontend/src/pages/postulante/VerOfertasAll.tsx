@@ -65,11 +65,29 @@ interface PostData {
     sueldo?: number | null; // Hacer sueldo opcional en la interfaz
 }
 
-
+interface CheckCvResponse {
+    hasCv: boolean;
+    message: string;
+}
 function Modal({ oferta, onClose, userId }: ModalProps) {
 
-    const [sueldoDeseado, setSueldoDeseado] = useState(null);
 
+
+    const [sueldoDeseado, setSueldoDeseado] = useState(null);
+    const [checkCvResponse, setCheckCvResponse] = useState<CheckCvResponse | null>(null);
+
+    const fetchCvStatus = async () => {
+        try {
+            const response = await axios.get(`check-cv/${userId}`);
+            setCheckCvResponse(response.data);
+        } catch (error) {
+            console.error('Error checking CV status:', error);
+        }
+    };
+    
+    useEffect(() => {
+        fetchCvStatus();
+    }, []);
 
 
     const navigate = useNavigate();
@@ -83,7 +101,29 @@ function Modal({ oferta, onClose, userId }: ModalProps) {
     if (!oferta) return null;
     const handlePostular = async () => {
         console.log(`id_usuario: ${userId}, id_oferta: ${oferta.id_oferta}, sueldo: ${sueldoDeseado}`);
+         // Validar si el sueldo deseado es requerido y está vacío
+         if (oferta.soli_sueldo === 1 && (sueldoDeseado === null || sueldoDeseado === undefined)) {
+            Swal.fire({
+                title: '¡Error!',
+                text: 'El campo de sueldo es obligatorio.',
+                icon: 'error',
+                confirmButtonText: 'Ok'
+            });
+            return;
+        }
         try {
+
+            await fetchCvStatus();
+
+            if (!checkCvResponse?.hasCv) {
+                Swal.fire({
+                    title: '¡Error!',
+                    text: "Parece que no has generado tu cv. Ve a la pestaña CV y generalo antes de postular",
+                    icon: 'error',
+                    confirmButtonText: 'Ok'
+                });
+                return;
+            }
 
             const postData: PostData = {
                 id_postulante: userId,
@@ -93,7 +133,9 @@ function Modal({ oferta, onClose, userId }: ModalProps) {
             // Agregar sueldoDeseado al postData solo si está definido y no es null
             if (sueldoDeseado !== null && sueldoDeseado !== undefined) {
                 postData.sueldo = sueldoDeseado;
+                 // Verificar si el sueldo es requerido y no está definido
             }
+            
             await axios.post('postular', postData);
             Swal.fire({
                 title: '¡Hecho!',
@@ -103,16 +145,26 @@ function Modal({ oferta, onClose, userId }: ModalProps) {
             }).then(() => {
                 navigate("/verOfertasAll");
             });
-        } catch (error) {
+        } catch (error:any) {
             console.error('Error postulando:', error);
+             // Comprobar si el error es debido a la falta de CV
+        if (error.response && error.response.status === 400 && error.response.data.message === 'No has subido tu CV.') {
+            Swal.fire({
+                title: '¡Error!',
+                text: 'No has generado tu CV. Ve a la pestaña de CV de perfil y generalo',
+                icon: 'error',
+                confirmButtonText: 'Ok'
+            });
+        } else {
             Swal.fire({
                 title: '¡Ha ocurrido un error!',
-                text: 'Ya  has postulado para esta oferta, consulta su estado en la pestaña de "Consultar postulación" ',
+                text: 'Ya has postulado para esta oferta, consulta su estado en la pestaña de "Consultar postulación".',
                 icon: 'error',
                 confirmButtonText: 'Ok'
             }).then(() => {
                 navigate("/verOfertasAll");
             });
+        }
         }
     };
 
@@ -148,42 +200,41 @@ function Modal({ oferta, onClose, userId }: ModalProps) {
     };
 
 
-
     const renderCriterioValor = (criterio: Criterio) => {
-
-        if (criterio.criterio === 'Experiencia') {
-            return "Los años mínimos indicados";
-        }
-        if (criterio.criterio === 'Titulo') {
-            return "Alguno de los títulos mencionados";
-        }
-        if (criterio.criterio === 'Sueldo') {
-            return "Indicar el sueldo prospecto a ganar";
-        }
-
-        if (criterio.criterio === 'Edad') {
+        if (criterio && criterio.pivot && criterio.pivot.valor) {
             const valorArray = criterio.pivot.valor.split(",");
-            return valorArray.length > 1 ? valorArray[2].trim() : criterio.pivot.valor;
-        }
-        if (criterio.criterio === "Ubicación") {
-            const valorArray = criterio.pivot.valor.split(",");
-            return valorArray.length > 1 ? valorArray[1].trim() : criterio.pivot.valor;
-        }
-        if (criterio.criterio === "Idioma") {
-            const valorArray = criterio.pivot.valor.split(",");
-            return valorArray.length > 1 ? valorArray[1].trim() : criterio.pivot.valor;
-        }
-        if (criterio.criterio === "Estado Civil") {
-            if (criterio.pivot.valor === "Casado") {
-                return "Casado/a";
-            } else if (criterio.pivot.valor === "Soltero") {
-                return "Soltero/a";
-            } else {
-                return "Viudo/a";
+            
+            switch (criterio.criterio) {
+                case 'Experiencia':
+                    return "Los años mínimos indicados";
+                case 'Titulo':
+                    return "Alguno de los títulos mencionados";
+                case 'Sueldo':
+                    return "Indicar el sueldo prospecto a ganar";
+                case 'Edad':
+                    return valorArray.length > 1 ? valorArray[2].trim() : criterio.pivot.valor;
+                case 'Ubicación':
+                    return valorArray.length > 1 ? valorArray[1].trim() : criterio.pivot.valor;
+                case 'Idioma':
+                    return valorArray.length > 1 ? valorArray[1].trim() : criterio.pivot.valor;
+                case 'Estado Civil':
+                    switch (criterio.pivot.valor) {
+                        case "Casado":
+                            return "Casado/a";
+                        case "Soltero":
+                            return "Soltero/a";
+                        default:
+                            return "Viudo/a";
+                    }
+                default:
+                    return criterio.pivot.valor;
             }
+        } else {
+            return "";
         }
-        return criterio.pivot.valor;
     };
+    
+    
 
 
     return (

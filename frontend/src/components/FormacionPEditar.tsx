@@ -88,6 +88,7 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isEnCurso, setIsEnCurso] = useState(false);
 
   const fechaini = watch('fechaini');
   const fechafin = watch('fechafin');
@@ -202,6 +203,14 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
     } else {
       setSelectedTituloId('');
       setValue('titulo_acreditado', '');
+    }
+  };
+  const handleEstadoChange = (e: any) => {
+    const selectedEstado = e.target.value;
+    if (selectedEstado === 'En curso') {
+      setIsEnCurso(true);
+    } else {
+      setIsEnCurso(false);
     }
   };
 
@@ -330,7 +339,7 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
         </div>
         <div className="form-group">
           <label htmlFor="estado" className="block text-gray-700 font-semibold mb-2">Estado:</label>
-          <select id="estado" {...register('estado', { required: true })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600">
+          <select id="estado" {...register('estado', { required: true })} onChange={handleEstadoChange}  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600">
             <option value="">Seleccione</option>
             <option value="En curso">En curso</option>
             <option value="Culminado">Culminado</option>
@@ -343,12 +352,18 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
             <input type="date" id="fechaini" {...register('fechaini', { required: true })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" />
             {errors.fechaini && <span className="text-red-500">Este campo es obligatorio</span>}
           </div>
-          <div className="form-group">
-            <label htmlFor="fechafin" className="block text-gray-700 font-semibold mb-2">Fecha de Fin:</label>
-            <input type="date" id="fechafin" {...register('fechafin', { required: true })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" />
-            {errors.fechafin && <span className="text-red-500">Este campo es obligatorio</span>}
-          </div>
+          {!isEnCurso && (
+            <div className="form-group">
+              <label htmlFor="fechafin" className="block text-gray-700 font-semibold mb-2">Fecha de Fin:</label>
+              <input type="date" id="fechafin" {...register('fechafin', { required: 'Este campo es requerido', validate: value => {
+                const today = new Date().toISOString().split('T')[0];
+                return value <= today || 'La fecha no puede ser mayor a hoy';
+              } })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600" />
+              {errors.fechafin && <p className="text-red-500 text-sm mt-2">{errors.fechafin.message}</p>}
+            </div>
+          )}
         </div>
+      
         <div className="flex justify-between">
           <button type="button" onClick={closeModal} className="px-4 py-2 text-red-500 border border-red-500 rounded-md hover:bg-red-500 hover:text-white">Cancelar</button>
           <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700">{formacion ? 'Guardar' : 'Añadir'}</button>

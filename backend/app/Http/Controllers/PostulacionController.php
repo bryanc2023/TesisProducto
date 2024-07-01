@@ -307,6 +307,7 @@ class PostulacionController extends Controller
                     'id_oferta' => $item->first()->oferta->id_oferta,
                     'id_empresa' => $item->first()->oferta->id_empresa,
                     'cargo' => $item->first()->oferta->cargo,
+                    
                     'postulantes' => $item->map(function ($postulacion) {
                         return [
                             'id_postulante' => $postulacion->postulante->id_postulante,
@@ -321,6 +322,7 @@ class PostulacionController extends Controller
                             'foto' => $postulacion->postulante->foto,
                             'cv' => $postulacion->postulante->cv,
                             'total_evaluacion' => $postulacion->total_evaluacion,
+                            'fecha'=> $postulacion->fecha_postulacion,
                         ];
                     })->sortByDesc('total_evaluacion')->values()->all(),
                 ];

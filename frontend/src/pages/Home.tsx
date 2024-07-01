@@ -1,14 +1,33 @@
 import '../components/css/Footer.css';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus, faUserTie, faBriefcase, faBuilding } from '@fortawesome/free-solid-svg-icons';
 import Navbar from "../components/layout/Navbar";
+import { loginUser } from '../store/authSlice';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch ,RootState} from '../store';
 
 const Home: React.FC = () => {
   const { ref: section1Ref, inView: section1InView } = useInView({ triggerOnce: true });
   const { ref: section2Ref, inView: section2InView } = useInView({ triggerOnce: true });
   const { ref: section3Ref, inView: section3InView } = useInView({ triggerOnce: true });
+  const navigate = useNavigate();
+  const { isLogged, role } = useSelector((state: RootState) => state.auth);
+  useEffect(() => {
+    if (isLogged && role) {
+        if (role === 'postulante') {
+            navigate('/verOfertasAll');
+        } else if (role === 'empresa_oferente') {
+            navigate('/inicio-e');
+        } else if (role === 'admin') {
+            navigate('/inicioAdmin');
+        } else if (role === 'empresa_gestora') {
+            navigate('/inicioG');
+        }
+    }
+}, [isLogged, role, navigate]);
 
   return (
     <div className="flex flex-col min-h-screen">

@@ -33,6 +33,7 @@ import PostulanteDetallePage from "../pages/empresa/PostulanteDetallePage"
 import AdminLayout from "../components/layout/AdminLayout"
 import VistaPreviaArchivo from "../components/Admin/VistaPreviaArchivo"  
 import ConfiguracionAdmin from "../pages/admin/ConfiguracionAdmin"
+import VerCV from "../pages/postulante/VerCV"
 
 type TypeRoute = {
     path: string;
@@ -164,6 +165,20 @@ export const routes: TypeRoute[] = [
             {
                 path: 'perfilP',
                 element: PerfilP,
+                allowedRoles: ['postulante'],
+            },
+            
+        ],
+    },
+    {
+        path: '/',
+        element: PostulanteLayout,
+        isProtected: true,
+        allowedRoles: ['postulante'],
+        children: [
+            {
+                path: 'vercv',
+                element: VerCV,
                 allowedRoles: ['postulante'],
             },
             
