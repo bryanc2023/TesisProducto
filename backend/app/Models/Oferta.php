@@ -67,4 +67,9 @@ public function ubicacion()
 {
     return $this->empresa ? $this->empresa->ubicacion() : null;
 }
+
+public function postulaciones()
+{
+    return $this->hasMany(Postulacion::class, 'id_oferta');
+}
 }

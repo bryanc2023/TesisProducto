@@ -8,44 +8,16 @@ use Carbon\Carbon; ;
 use App\Models\Oferta;
 use Illuminate\Support\Facades\DB;
 use App\Models\Postulacion;
+use App\Models\Postulante;
 
 class EmpresaGestoraController extends Controller
 {
     public function getPostulantes(Request $request)
-    {
-        $startDate = $request->query('startDate') ? Carbon::parse($request->query('startDate'))->startOfDay() : null;
-        $endDate = $request->query('endDate') ? Carbon::parse($request->query('endDate'))->endOfDay() : null;
-    
-        $query = User::whereHas('postulante');
-    
-        if ($startDate) {
-            $query->where('created_at', '>=', $startDate);
-        }
-    
-        if ($endDate) {
-            $query->where('created_at', '<=', $endDate);
-        }
-    
-        $users = $query->get()->map(function ($user) {
-            return [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'created_at' => $user->created_at->format('Y-m-d'),
-            ];
-        });
-    
-        return response()->json($users);
-    }
-    
-    public function getEmpresas(Request $request)
 {
     $startDate = $request->query('startDate') ? Carbon::parse($request->query('startDate'))->startOfDay() : null;
     $endDate = $request->query('endDate') ? Carbon::parse($request->query('endDate'))->endOfDay() : null;
 
-    $roleId = 3; // Role ID for 'empresa'
-
-    $query = User::where('role_id', $roleId)->whereHas('empresa');
+    $query = User::whereHas('postulante');
 
     if ($startDate) {
         $query->where('created_at', '>=', $startDate);
@@ -56,16 +28,77 @@ class EmpresaGestoraController extends Controller
     }
 
     $users = $query->get()->map(function ($user) {
+        $postulante = $user->postulante;
+        $postulaciones = $postulante ? $postulante->postulaciones->map(function ($postulacion) {
+            return [
+                'cargo' => $postulacion->oferta->cargo,
+            ];
+        }) : [];
+
         return [
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
             'created_at' => $user->created_at->format('Y-m-d'),
+            'num_postulaciones' => $postulaciones->count(),
+            'detalles_postulaciones' => $postulaciones,
+            'vigencia' => $postulante ? ($postulante->vigencia ? 'Activo' : 'Inactivo') : 'Inactivo',
         ];
     });
 
     return response()->json($users);
 }
+
+
+    
+    
+    
+
+    
+    
+    public function getEmpresas(Request $request)
+    {
+        $startDate = $request->query('startDate') ? Carbon::parse($request->query('startDate'))->startOfDay() : null;
+        $endDate = $request->query('endDate') ? Carbon::parse($request->query('endDate'))->endOfDay() : null;
+
+        $roleId = 3; // Role ID para 'empresa'
+
+        $query = User::where('role_id', $roleId)->whereHas('empresa');
+
+        if ($startDate) {
+            $query->where('created_at', '>=', $startDate);
+        }
+
+        if ($endDate) {
+            $query->where('created_at', '<=', $endDate);
+        }
+
+        $users = $query->get()->map(function ($user) {
+            $empresa = $user->empresa;
+            $ofertas = $empresa ? $empresa->ofertas->map(function ($oferta) {
+                return [
+                    'id_oferta' => $oferta->id_oferta,
+                    'cargo' => $oferta->cargo,
+                    'experiencia' => $oferta->experiencia,
+                    'fecha_publi' => $oferta->fecha_publi,
+                    'num_postulantes' => $oferta->postulaciones->count(), // Conteo de postulaciones
+                ];
+            }) : [];
+
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'created_at' => $user->created_at->format('Y-m-d'),
+                'empresa' => $empresa ? [
+                    'nombre_comercial' => $empresa->nombre_comercial,
+                    'ofertas' => $ofertas,
+                ] : null,
+            ];
+        });
+
+        return response()->json($users);
+    }
 
 public function getOfertasPorMes(Request $request)
     {

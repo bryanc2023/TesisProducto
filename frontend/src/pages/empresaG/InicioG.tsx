@@ -108,7 +108,7 @@ const handleCloseModal = () => {
             </table>
         </div>
         <div className="mt-4 flex justify-between items-center">
-            <Link to="/add-oferta" className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Agregar Nueva Oferta</Link>
+            <Link to="/add-ofertaG" className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Agregar Nueva Oferta</Link>
         </div>
 
         {/* Mostrar detalles de la oferta seleccionada */}

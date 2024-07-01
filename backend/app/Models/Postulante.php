@@ -28,7 +28,8 @@ class Postulante extends Model
         'genero',
         'informacion_extra',
         'foto',
-        'cv'
+        'cv',
+        'vigencia'
     ];
      /**
     * Get the rent of a Tenant
@@ -88,4 +89,8 @@ public function certificado()
 {
     return $this->hasMany(Certificado::class, 'id_postulante', 'id_postulante');
 }
+public function postulaciones()
+    {
+        return $this->hasMany(Postulacion::class, 'id_postulante', 'id_postulante');
+    }
 }
