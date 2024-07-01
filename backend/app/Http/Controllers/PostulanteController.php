@@ -7,6 +7,7 @@ use App\Models\FormacionPro;
 use App\Models\PersonaFormacionPro;
 use App\Models\Postulante;
 use App\Models\PostulanteIdioma;
+use App\Models\PostulanteRed;
 use App\Models\User;
 use App\Models\Titulo;
 use App\Models\Ubicacion;
@@ -160,7 +161,9 @@ public function getCurriculum($id)
             'descripcion' => 'nullable|string|max:500',
             'referencia' => 'nullable|string|max:250',
             'area'=> 'nullable|string|max:250',
-            'contacto'=> 'nullable|string|max:250'
+            'contacto'=> 'nullable|string|max:250',
+            'red'=>'nullable|string|max:250',
+            'enlace'=>'nullable|url'
         ]);
 
         $postulantefor = new PersonaFormacionPro();
@@ -208,6 +211,18 @@ public function getCurriculum($id)
     
             $postulantexp->save();
         }
+
+        if ($request->red && $request->enlace){
+
+      
+
+        $postulanteRed = new PostulanteRed();
+        $postulanteRed->id_postulante = $request->id_postulante;
+        $postulanteRed->nombre_red = $request->red;
+        $postulanteRed->enlace = $request->enlace;
+        $postulanteRed->save();
+    }
+
 
         return response()->json(['message' => 'Formación académica registrada exitosamente', 'postulante_formacion' => $postulante], 201);
     }
@@ -600,5 +615,16 @@ public function updateCV($userId, Request $request)
 
         return response()->json(['message' => 'CV actualizado correctamente.', 'postulante' => $postulante], 200);
     }
+
+    public function checkCv($id_postulante)
+{
+    $postulante = Postulante::where('id_usuario', $id_postulante)->first();
+
+    if ($postulante && $postulante->hasCv()) {
+        return response()->json(['hasCv' => true], 200);
+    } else {
+        return response()->json(['hasCv' => false, 'message' => 'No has subido tu CV.'], 400);
+    }
+}
 }
 

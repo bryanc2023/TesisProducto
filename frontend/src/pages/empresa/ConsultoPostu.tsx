@@ -4,6 +4,10 @@ import axios from '../../services/axios';
 import ModalDetail from '../../components/ModalPostu';
 import PostulanteDetail from '../../pages/empresa/PostuDeta';
 import { RootState } from '../../store';
+import jszip from 'jszip';
+import FileSaver from 'file-saver';
+import {getStorage, ref, getDownloadURL } from 'firebase/storage';
+import {storage } from '../../config/firebaseConfig';
 
 interface Postulacion {
     id_oferta: number;
@@ -28,6 +32,7 @@ interface Postulacion {
             foto: string;
             cv: string | null;
             total_evaluacion: number;
+            fecha:string;
         }[];
     };
 }
@@ -38,6 +43,7 @@ const PostulantesList: React.FC = () => {
     const [showModal, setShowModal] = useState(false);
     const [selectedOfertaId, setSelectedOfertaId] = useState<number | null>(null);
     const { user } = useSelector((state: RootState) => state.auth);
+    const [numCVs, setNumCVs] = useState<number>(3);
 
     useEffect(() => {
         const fetchPostulaciones = async () => {
@@ -107,6 +113,7 @@ const PostulantesList: React.FC = () => {
                         foto: postulante.foto,
                         cv: postulante.cv,
                         total_evaluacion: postulante.total_evaluacion,
+                        fecha:postulante.fecha,
                     })),
                 },
             };
@@ -127,22 +134,81 @@ const PostulantesList: React.FC = () => {
         ? postulaciones.find(postulacion => postulacion.id_oferta === selectedOfertaId)
         : null;
 
+        const descargarCVs = async () => {
+            if (!filteredPostulaciones) return;
+        
+            const zip = new jszip();
+            const promises = [];
+        
+            filteredPostulaciones.oferta.postulantes.slice(0, numCVs).forEach((postulante, index) => {
+                const nombreArchivo = `${index + 1}-${postulante.nombres}-${postulante.apellidos}.pdf`;
+        
+                if (postulante.cv) {
+                    //const storageRef = ref(storage, postulante.cv);
+                    // Create a reference to the file we want to download
+const storage = getStorage();
+const starsRef = ref(storage, postulante.cv);
+                    promises.push(
+                        getDownloadURL(starsRef).then(url => {
+                            console.log("URL de descarga:", url);
+                            return fetch(url)
+                                .then(response => response.blob())
+                                .then(blob => {
+                                    zip.file(nombreArchivo, blob, { binary: true });
+                                })
+                                .catch(error => {
+                                    console.error("Error al obtener el archivo:", error);
+                                });
+                        }).catch(error => {
+                            console.error("Error al obtener URL de descarga:", error);
+                        })
+                    );
+                }
+            });
+        
+            await Promise.all(promises);
+        
+            const nombreZip = `CVs_${filteredPostulaciones.oferta.cargo}.zip`;
+
+        zip.generateAsync({ type: 'blob' }).then((content) => {
+            FileSaver.saveAs(content, nombreZip);
+        });
+        };
+
     return (
         <div className="w-full p-4">
             <div className="mb-4">
+            <>
+                <p > En esta sección te mostramos todos los postulantes para cada oferta, para mejor visibilidad selecciona una oferta y veras las mejoras postulaciones para cada oferta</p>
+                </>
                 <label htmlFor="selectOferta" className="mr-2 font-semibold">Selecciona una oferta:</label>
+              
                 <select
                     id="selectOferta"
                     className="px-2 py-1 border border-gray-300 rounded"
                     value={selectedOfertaId || ''}
                     onChange={(e) => setSelectedOfertaId(parseInt(e.target.value) || null)}
                 >
-                    <option value="">Seleccione una oferta</option>
+                    <option value="">Todas las ofertas</option>
                     {ofertaOptions}
                 </select>
+            
             </div>
 
             {filteredPostulaciones ? (
+                <>
+                 <span className="ml-4 mr-2 font-semibold">Número de CVs a descargar:</span>
+                            <input
+                                type="number"
+                                min="1"
+                                max={filteredPostulaciones.oferta.postulantes.length}
+                                value={numCVs}
+                                onChange={(e) => setNumCVs(parseInt(e.target.value))}
+                                className="border border-gray-300 rounded px-2 py-1 w-16 text-center"
+                            />
+                            <button onClick={descargarCVs} className="ml-2 bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded">
+                                Descargar
+                            </button>
                 <div key={filteredPostulaciones.oferta.id_oferta} className="mb-8">
                     <h1 className="text-2xl font-semibold mb-4">Te presentamos un top 3 de mejores postulantes para ti:</h1>
                     <h1 className="text-2xl font-semibold mb-4">{filteredPostulaciones.oferta.cargo}:</h1>
@@ -171,12 +237,15 @@ const PostulantesList: React.FC = () => {
                         </table>
                     </div>
                 </div>
+                </>
             ) : (
                 
-              
                 postulaciones.map((postulacion) => (
+                    <>
+                   
                     <div key={postulacion.id_oferta} className="mb-8">
                         <h1 className="text-2xl font-semibold mb-4">Oferta: {postulacion.oferta.cargo}</h1>
+                        <p>Para esta oferta te mostramos todos los postulantes:</p>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {postulacion.oferta.postulantes.map((postulante) => (
                                 <div key={postulante.id_postulante} className="p-6 bg-white rounded-lg shadow-lg flex items-center">
@@ -185,6 +254,7 @@ const PostulantesList: React.FC = () => {
                                         <h2 className="text-sm font-bold mb-2 text-orange-500">Postulante:</h2><p  className="text-sm font-bold mb-2 text-blue-500">{`${postulante.nombres} ${postulante.apellidos}`}</p> 
                                         <p className="text-sm"><strong>Estado:</strong> {renderEstadoPostulacion(postulacion.estado_postulacion)}</p>
                                         <p className="text-sm"><strong>Calificación de CV:</strong> {postulante.total_evaluacion}</p>
+                                        <p className="text-sm"><strong>Fecha de postulación:</strong> {postulante.fecha}</p>
                                         <button onClick={() => handleShowModal(postulante)} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 text-sm">Ver Detalles</button>
                                     </div>
                                 </div>
@@ -192,6 +262,7 @@ const PostulantesList: React.FC = () => {
                         </div>
 
                     </div>
+                    </>
                 ))
                 
             )}

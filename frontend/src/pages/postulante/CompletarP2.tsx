@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { FaLinkedin, FaInstagram, FaFacebook, FaXTwitter } from 'react-icons/fa6';
 
 interface IFormInput {
   institucion: string;
@@ -23,6 +24,8 @@ interface IFormInput {
   descripcion:string;
   referencia:string;
   contacto:string;
+  red:string;
+  enlace:string;
 
 }
 
@@ -57,6 +60,21 @@ function CompletarP2() {
   const [languages, setLanguages] = useState<Idioma[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
   const [hasExperience, setHasExperience] = useState(false);
+  const [hasRed, setHasRed] = useState(false);
+  const [nombreRed, setNombreRed] = useState('');
+  const [enlace, setEnlace] = useState('');
+
+  const redes = [
+    { nombre: 'LinkedIn', icono: <FaLinkedin className="text-blue-600 inline" /> },
+    { nombre: 'Instagram', icono: <FaInstagram className="text-pink-600 inline" /> },
+    { nombre: 'Facebook', icono: <FaFacebook className="text-blue-800 inline" /> },
+    { nombre: 'X', icono: <FaXTwitter className="text-blue-400 inline" /> }, // Reemplaza Twitter por X
+];
+
+const handleRedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedRed = redes.find((red) => red.nombre === e.target.value);
+    setNombreRed(selectedRed ? selectedRed.nombre : '');
+};
 
   const handleCheckboxChange = () => {
     setHasExperience(!hasExperience);
@@ -73,6 +91,15 @@ function CompletarP2() {
     }
   };
 
+  const handleCheckboxChange2 = () => {
+    setHasRed(!hasRed);
+    if (!hasRed) {
+      // Clear the values when experience is not checked
+      setValue('red', '');
+      setValue('enlace', '');
+      setNombreRed('');
+    }
+  };
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -189,51 +216,107 @@ function CompletarP2() {
         const formData = new FormData();
     
         if (hasExperience) {
-          formData.append('id_postulante', postulanteId.toString());
-          formData.append('id_titulo', selectedTituloId);
-          formData.append('institucion', data.institucion);
-          formData.append('estado', data.estado);
-          formData.append('fechaini', data.fechaini);
-          formData.append('fechafin', data.fechafin);
-          formData.append('id_idioma', data.id_idioma.toString());
-          formData.append('niveloral', data.niveloral);
-          formData.append('nivelescrito', data.nivelescrito);
-          formData.append('titulo_acreditado', data.titulo_acreditado);
-          formData.append('area', data.area);
-          formData.append('empresa', data.empresa);
-          formData.append('puesto', data.puesto);
-          formData.append('fechae1', data.fechae1);
-          formData.append('fechae2', data.fechae2);
-          formData.append('descripcion', data.descripcion);
-          formData.append('referencia', data.referencia);
-          formData.append('contacto', data.contacto);
-          formData.append('empresa', data.empresa);
-          formData.append('area', data.area);
-          formData.append('puesto', data.puesto);
-          formData.append('fechae1', data.fechae1);
-          formData.append('fechae2', data.fechae2);
-          formData.append('descripcion', data.descripcion);
-          formData.append('referencia', data.referencia);
-          formData.append('contacto', data.contacto);
+          if(hasRed){
+            formData.append('id_postulante', postulanteId.toString());
+            formData.append('id_titulo', selectedTituloId);
+            formData.append('institucion', data.institucion);
+            formData.append('estado', data.estado);
+            formData.append('fechaini', data.fechaini);
+            formData.append('fechafin', data.fechafin);
+            formData.append('id_idioma', data.id_idioma.toString());
+            formData.append('niveloral', data.niveloral);
+            formData.append('nivelescrito', data.nivelescrito);
+            formData.append('titulo_acreditado', data.titulo_acreditado);
+            formData.append('area', data.area);
+            formData.append('empresa', data.empresa);
+            formData.append('puesto', data.puesto);
+            formData.append('fechae1', data.fechae1);
+            formData.append('fechae2', data.fechae2);
+            formData.append('descripcion', data.descripcion);
+            formData.append('referencia', data.referencia);
+            formData.append('contacto', data.contacto);
+            formData.append('empresa', data.empresa);
+            formData.append('area', data.area);
+            formData.append('puesto', data.puesto);
+            formData.append('fechae1', data.fechae1);
+            formData.append('fechae2', data.fechae2);
+            formData.append('descripcion', data.descripcion);
+            formData.append('referencia', data.referencia);
+            formData.append('contacto', data.contacto);
+            formData.append('red',data.red);
+            formData.append('enlace',data.enlace);
+          }else{
+            formData.append('id_postulante', postulanteId.toString());
+            formData.append('id_titulo', selectedTituloId);
+            formData.append('institucion', data.institucion);
+            formData.append('estado', data.estado);
+            formData.append('fechaini', data.fechaini);
+            formData.append('fechafin', data.fechafin);
+            formData.append('id_idioma', data.id_idioma.toString());
+            formData.append('niveloral', data.niveloral);
+            formData.append('nivelescrito', data.nivelescrito);
+            formData.append('titulo_acreditado', data.titulo_acreditado);
+            formData.append('area', data.area);
+            formData.append('empresa', data.empresa);
+            formData.append('puesto', data.puesto);
+            formData.append('fechae1', data.fechae1);
+            formData.append('fechae2', data.fechae2);
+            formData.append('descripcion', data.descripcion);
+            formData.append('referencia', data.referencia);
+            formData.append('contacto', data.contacto);
+            formData.append('empresa', data.empresa);
+            formData.append('area', data.area);
+            formData.append('puesto', data.puesto);
+            formData.append('fechae1', data.fechae1);
+            formData.append('fechae2', data.fechae2);
+            formData.append('descripcion', data.descripcion);
+            formData.append('referencia', data.referencia);
+            formData.append('contacto', data.contacto);
+          }
+          
         } else {
-          formData.append('id_postulante', postulanteId.toString());
-          formData.append('id_titulo', selectedTituloId);
-          formData.append('institucion', data.institucion);
-          formData.append('estado', data.estado);
-          formData.append('fechaini', data.fechaini);
-          formData.append('fechafin', data.fechafin);
-          formData.append('id_idioma', data.id_idioma.toString());
-          formData.append('niveloral', data.niveloral);
-          formData.append('nivelescrito', data.nivelescrito);
-          formData.append('titulo_acreditado', data.titulo_acreditado);
-          formData.append('area', data.area);
-          formData.append('empresa', data.empresa);
-          formData.append('puesto', data.puesto);
-          formData.append('fechae1', data.fechae1);
-          formData.append('fechae2', data.fechae2);
-          formData.append('descripcion', data.descripcion);
-          formData.append('referencia', data.referencia);
-          formData.append('contacto', data.contacto);
+          if(hasRed){
+            formData.append('id_postulante', postulanteId.toString());
+            formData.append('id_titulo', selectedTituloId);
+            formData.append('institucion', data.institucion);
+            formData.append('estado', data.estado);
+            formData.append('fechaini', data.fechaini);
+            formData.append('fechafin', data.fechafin);
+            formData.append('id_idioma', data.id_idioma.toString());
+            formData.append('niveloral', data.niveloral);
+            formData.append('nivelescrito', data.nivelescrito);
+            formData.append('titulo_acreditado', data.titulo_acreditado);
+            formData.append('area', data.area);
+            formData.append('empresa', data.empresa);
+            formData.append('puesto', data.puesto);
+            formData.append('fechae1', data.fechae1);
+            formData.append('fechae2', data.fechae2);
+            formData.append('descripcion', data.descripcion);
+            formData.append('referencia', data.referencia);
+            formData.append('contacto', data.contacto);
+            formData.append('red', data.red);
+            formData.append('enlace', data.enlace);
+          }else{
+            formData.append('id_postulante', postulanteId.toString());
+            formData.append('id_titulo', selectedTituloId);
+            formData.append('institucion', data.institucion);
+            formData.append('estado', data.estado);
+            formData.append('fechaini', data.fechaini);
+            formData.append('fechafin', data.fechafin);
+            formData.append('id_idioma', data.id_idioma.toString());
+            formData.append('niveloral', data.niveloral);
+            formData.append('nivelescrito', data.nivelescrito);
+            formData.append('titulo_acreditado', data.titulo_acreditado);
+            formData.append('area', data.area);
+            formData.append('empresa', data.empresa);
+            formData.append('puesto', data.puesto);
+            formData.append('fechae1', data.fechae1);
+            formData.append('fechae2', data.fechae2);
+            formData.append('descripcion', data.descripcion);
+            formData.append('referencia', data.referencia);
+            formData.append('contacto', data.contacto);
+          }
+          
         }
 
         await axios.post('postulante/forma', formData, {
@@ -506,6 +589,65 @@ function CompletarP2() {
             />
             {errors.contacto && <p className="text-red-500">{errors.contacto.message}</p>}
           </div>
+        </div>
+      )}
+
+<h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Redes sociales:</h2>
+        <p className="text-center mb-8">¿Tienes redes sociales?</p>
+      <div className="text-center mb-4">
+        <input
+          type="checkbox"
+          id="hasRed"
+          checked={hasRed}
+          onChange={handleCheckboxChange2}
+        />
+        <label htmlFor="hasRed" className="ml-2 text-gray-700">Sí, tengo red</label>
+      </div>
+      {hasRed && (
+        <div className="grid grid-cols-1 gap-4">
+          <div className="mb-4">
+          <label className="block text-gray-700">Nombre de la Red</label>
+                    <select
+                           {...register('red', { 
+                            required: hasRed ? 'Este campo es obligatorio' : false, 
+                            maxLength: { value: 100, message: 'Máximo 100 caracteres' } 
+                          })} 
+                        className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                        value={nombreRed}
+                        onChange={handleRedChange}
+                        required
+                    >
+                        <option value="" disabled>Seleccione una red social</option>
+                        {redes.map((red) => (
+                            <option key={red.nombre} value={red.nombre}>
+                                {red.nombre}
+                            </option>
+                        ))}
+                    </select>
+                    </div>
+                {nombreRed && (
+                    <div className="flex items-center mt-2">
+                        <span className="mr-2">Red Seleccionada:</span>
+                        {redes.find((red) => red.nombre === nombreRed)?.icono}
+                    </div>
+                )}
+                <div>
+          </div>
+          <div className="mb-4">
+          <label className="block text-gray-700">Enlace</label>
+                    <input
+                           {...register('enlace', { 
+                            required: hasRed ? 'Este campo es obligatorio' : false, 
+                            maxLength: { value: 600, message: 'Máximo 600 caracteres' } 
+                          })} 
+                        type="url"
+                        className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                        value={enlace}
+                        onChange={(e) => setEnlace(e.target.value)}
+                        required
+                    />
+          </div>
+       
         </div>
       )}
         <button type="submit" className="w-full py-3 px-4 bg-blue-500 text-white font-bold rounded-lg hover:bg-slate-600">Culminar registro</button>

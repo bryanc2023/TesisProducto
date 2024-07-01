@@ -91,6 +91,7 @@ Route::post('postulante/forma',[PostulanteController::class,'registroFormaAca'])
 Route::get('/perfil/{id}', [PostulanteController::class, 'getPerfil']);
 Route::get('/curri/{id}', [PostulanteController::class, 'getCurriculum']);
 Route::put('/postulantes/{userId}/cv', [PostulanteController::class, 'updateCV']);
+Route::get('check-cv/{id_postulante}', [PostulanteController::class, 'checkCv']);
 Route::get('/foto/{userId}', [PostulanteController::class, 'getProfileImage']);
 Route::post('/exp', [PostulanteController::class, 'agregarExperiencia']);
 Route::get('/experiencia/{id}', [PostulanteController::class, 'getExperiencia']);

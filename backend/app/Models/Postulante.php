@@ -88,4 +88,9 @@ public function certificado()
 {
     return $this->hasMany(Certificado::class, 'id_postulante', 'id_postulante');
 }
+
+public function hasCv(): bool
+{
+    return !is_null($this->cv);
+}
 }
