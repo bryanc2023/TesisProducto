@@ -109,7 +109,7 @@ function VerOfertasPPage() {
                     <div className="bg-gray-100 p-4 rounded-lg shadow-md max-w-xl text-center flex-grow">
                         {/* Sección de filtro por fecha */}
                         <div className="flex items-center mb-4 space-x-5">
-                            <label htmlFor="selectFecha" className="mr-2 font-semibold text-orange-500">Selecciona una fecha:</label>
+                            <label htmlFor="selectFecha" className="mr-2 font-semibold text-orange-500">Selecciona una fecha de publicación:</label>
                             <input
                                 type="date"
                                 id="selectFecha"
@@ -144,6 +144,7 @@ function VerOfertasPPage() {
                         <FaBriefcase className="text-blue-500 text-2xl mr-2" />
                         <h1 className="text-2xl font-semibold text-blue-500">OFERTAS PUBLICADAS:</h1>
                     </div>
+                   
                     <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
                         <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                             <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">

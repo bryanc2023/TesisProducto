@@ -80,7 +80,7 @@ const Login = () => {
                     if (user.first_login_at === null) {
                         navigate("/completare");
                     } else {
-                        navigate("/inicio-e");
+                        navigate("/verOfertasE");
                     }
                 } else if (role === 'empresa_gestora') {
                     setIdEmpresa(user.id);
