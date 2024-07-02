@@ -25,6 +25,15 @@ class Postulacion extends Model
         // Puedes agregar más campos si es necesario
     ];
 
+      // Este método indica que la clave primaria está compuesta por estos dos campos
+      protected function setKeysForSaveQuery($query)
+      {
+          $query
+              ->where('id_oferta', '=', $this->getAttribute('id_oferta'))
+              ->where('id_postulante', '=', $this->getAttribute('id_postulante'));
+  
+          return $query;
+      }
     public function postulante()
     {
         return $this->belongsTo(Postulante::class, 'id_postulante');

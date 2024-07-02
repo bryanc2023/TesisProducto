@@ -142,6 +142,8 @@ Route::post('postular', [PostulacionController::class, 'registroPostulacion']);
 Route::get('postulaciones/{id}', [PostulacionController::class, 'getPostulacionPostulante']);
 Route::get('postulacionesE/{id}', [PostulacionController::class, 'getPostulacionEmpresa']);
 Route::get('estadistica/{id}', [PostulacionController::class, 'getPostulacionEsta']);
+Route::post('actualizar-postulaciones', [PostulacionController::class, 'actualizarPostulaciones']);
+Route::get('existe-aprobado', [PostulacionController::class, 'existePostulacionAprobadaParaOferta']);
 
 
 Route::get('perfildet/{id}', [PostulanteController::class, 'getPerfilEmpresa']);
