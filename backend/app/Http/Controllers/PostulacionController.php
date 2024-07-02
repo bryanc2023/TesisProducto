@@ -9,8 +9,9 @@ use App\Models\Postulacion;
 use App\Models\Postulante;
 use App\Models\Titulo;
 use App\Models\Ubicacion;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Log;
 
 class PostulacionController extends Controller
 {
@@ -307,7 +308,7 @@ class PostulacionController extends Controller
                     'id_oferta' => $item->first()->oferta->id_oferta,
                     'id_empresa' => $item->first()->oferta->id_empresa,
                     'cargo' => $item->first()->oferta->cargo,
-                    
+                    'fecha_oferta'=>$item->first()->oferta->fecha_publi,
                     'postulantes' => $item->map(function ($postulacion) {
                         return [
                             'id_postulante' => $postulacion->postulante->id_postulante,
@@ -323,6 +324,7 @@ class PostulacionController extends Controller
                             'cv' => $postulacion->postulante->cv,
                             'total_evaluacion' => $postulacion->total_evaluacion,
                             'fecha'=> $postulacion->fecha_postulacion,
+                            'estado_postulacion'=> $postulacion->estado_postulacion,
                         ];
                     })->sortByDesc('total_evaluacion')->values()->all(),
                 ];
@@ -409,4 +411,94 @@ class PostulacionController extends Controller
             ], 500);
         }
     }
+
+    public function actualizarPostulaciones(Request $request)
+{
+    // Validación de datos recibidos
+    $request->validate([
+        'id_oferta' => 'required|integer',
+        'id_postulante' => 'required|integer',
+        'comentario' => 'required|string|max:255',
+    ]);
+
+    // Obtener los datos del request
+    $id_oferta = $request->input('id_oferta');
+    $id_postulante = $request->input('id_postulante');
+    $comentario = $request->input('comentario');
+
+
+    try {
+        // Cambiar estado y comentario para todas las postulaciones de la oferta excepto la del postulante seleccionado
+       
+          // Actualizar el estado de la oferta a "Culminada"
+          $oferta = Oferta::find($id_oferta);
+          if ($oferta) {
+              $oferta->estado = 'Culminada';
+              $oferta->save();
+          } else {
+              return response()->json(['message' => 'Oferta no encontrada'], 404);
+          }
+        Postulacion::where('id_oferta', $id_oferta)
+            ->where('id_postulante', '!=', $id_postulante)
+            ->update([
+                'estado_postulacion' => 'R',
+                'comentario' => 'Ha sido seleccionado otro candidato',
+                'fecha_revision' => Carbon::now(),
+            ]);
+
+        // Cambiar estado y guardar comentario para la postulación del postulante seleccionado
+        $postulacion = Postulacion::where('id_oferta', $id_oferta)
+            ->where('id_postulante', $id_postulante)
+            ->first();
+
+  
+
+        if ($postulacion) {
+            
+            $postulacion->estado_postulacion = 'A';
+            $postulacion->comentario = $comentario;
+            $postulacion->fecha_revision = Carbon::now(); 
+           
+
+            try {
+                $postulacion->save();
+                Log::info("Postulacion guardada exitosamente");
+            } catch (\Exception $e) {
+        
+                return response()->json(['message' => 'Error al guardar la postulación', 'error' => $e->getMessage()], 500);
+            }
+        } else {
+            
+            return response()->json(['message' => 'Postulación no encontrada'], 404);
+        }
+
+        return response()->json(['message' => 'Postulaciones actualizadas correctamente'], 200);
+    } catch (\Exception $e) {
+      
+        return response()->json(['message' => 'Error al actualizar las postulaciones', 'error' => $e->getMessage()], 500);
+    }
+}
+
+public function existePostulacionAprobadaParaOferta(Request $request)
+{
+    // Validar datos recibidos
+    $request->validate([
+        'id_oferta' => 'required|integer',
+    ]);
+
+    // Obtener el ID de la oferta desde la solicitud
+    $id_oferta = $request->input('id_oferta');
+
+    try {
+        // Buscar si existe alguna postulación con estado 'A' para la oferta dada
+        $existeAprobado = Postulacion::where('id_oferta', $id_oferta)
+            ->where('estado_postulacion', 'A')
+            ->exists();
+
+        return response()->json(['existe_aprobado' => $existeAprobado]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Error al verificar la postulación aprobada', 'message' => $e->getMessage()], 500);
+    }
+}
+
 }

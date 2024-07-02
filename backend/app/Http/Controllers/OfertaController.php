@@ -100,18 +100,28 @@ class OfertaController extends Controller
         return response()->json(['message' => 'Oferta creado exitosamente', 'oferta' => $oferta], 201);
     }
 
-    public function getOfertasByEmpresa($idEmpresa)
-{
-    $user = Empresa::getIdEmpresaPorIdUsuario($idEmpresa);
-    if (!$user) {
-        return response()->json(['error' => 'Usuario no encontrado'], 404);
+    public function getOfertasByEmpresa($idEmpresa, Request $request)
+    {
+        $user = Empresa::getIdEmpresaPorIdUsuario($idEmpresa);
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no encontrado'], 404);
+        }
+    
+        $query = Oferta::where('id_empresa', $user)
+                       ->with(['areas', 'criterios', 'expe']);
+    
+        // Verifica si se proporcionó la fecha_publi en los parámetros de la solicitud
+        if ($request->has('fecha_publi')) {
+            $fechaPubli = $request->input('fecha_publi');
+            // Agrega la condición para filtrar por fecha de publicación
+            $query->whereDate('fecha_publi', $fechaPubli);
+        }
+    
+        $ofertas = $query->get();
+    
+        return response()->json(['ofertas' => $ofertas]);
     }
-    $ofertas = Oferta::where('id_empresa', $user)
-                     ->with(['areas', 'criterios','expe'])
-                     ->get();
-    return response()->json(['ofertas' => $ofertas]);
-}
-
+    
 public function getAllOfertas()
 {
     $ofertas = Oferta::with(['areas', 'criterios', 'empresa','expe'])
