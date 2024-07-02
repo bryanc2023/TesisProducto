@@ -5,6 +5,7 @@ import axios from '../../services/axios';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { useNavigate } from 'react-router-dom';
+import { FiPlus } from 'react-icons/fi';
 
 interface Titulo {
   id: number;
@@ -293,7 +294,7 @@ function AgregarO() {
           icon: 'success',
           confirmButtonText: 'Ok'
         }).then(() => {
-          navigate("/InicioG");
+          navigate("/inicioG");
         });
       } catch (error) {
         console.log(error);
@@ -304,7 +305,14 @@ function AgregarO() {
   return (
     <>
       <div className="bg-white p-6 rounded-lg shadow-lg ">
-        <h3 className="text-2xl font-bold mb-4">Publicar Oferta</h3>
+        <div className="text-center mb-4">
+          <h3 className="text-2xl font-bold flex justify-center items-center text-blue-900">
+            Publicar Oferta
+            <FiPlus className="text-blue-900 ml-2" />
+          </h3>
+        </div>
+        <p>Para publicar una oferta completa los datos necesarios:</p>
+        <hr className="my-4" />
         <h3 className="text-1xl text-red-500 font-bold mb-4">Datos de la oferta:</h3>
         <form onSubmit={onSubmit}>
           <div className="mb-4">
@@ -327,11 +335,12 @@ function AgregarO() {
                 checked={requireEducation}
                 onChange={() => setRequireEducation(!requireEducation)}
               />
-              <label className="text-sm" htmlFor="requireEducation">
+              <label className="block text-sm font-bold mb-2 text-blue-500" htmlFor="requireEducation">
                 ¿Requiere titulo específico?
               </label>
             </div>
           </div>
+          <hr className="my-4" />
 
           {requireEducation && (
             <>
@@ -409,6 +418,7 @@ function AgregarO() {
                   </div>
                 )}
               </div>
+              <hr className="my-4" />
             </>
           )}
 
@@ -425,17 +435,20 @@ function AgregarO() {
             {errors.id_area && <p className="text-red-500">{errors.id_area.message}</p>}
           </div>
 
+
           <div className="mb-4">
-            <label className="block text-sm font-bold mb-2" htmlFor="experienciaCheckbox">
+            <label className="block text-sm font-bold mb-2 text-blue-500" htmlFor="experienciaCheckbox">
               <input
                 type="checkbox"
                 id="experienciaCheckbox"
                 onChange={handleCheckboxChange}
               />{' '}
-              Requiere experiencia
+              ¿Requiere experiencia?
             </label>
+            <hr className="my-4" />
             {showExperiencia && (
-              <div id="experienciaContainer">
+              <>
+              <div id="experienciaContainer" className="flex-col bg-gray-200 rounded-lg shadow-md items-center p-10">
                 <label className="block text-sm font-bold mb-2" htmlFor="experiencia">
                   Años de Experiencia requerida
                 </label>
@@ -443,7 +456,7 @@ function AgregarO() {
                   className="w-full p-2 border rounded"
                   type="number"
                   id="experiencia"
-                  placeholder="Describa los años de experiencia en puestos similares"
+                  placeholder="Número de  años de experiencia en puestos similares"
                   {...register('experiencia', {
                     required: 'Experiencia es requerida',
                     validate: validateNoNegative,
@@ -453,6 +466,9 @@ function AgregarO() {
                   <p className="text-red-500">{errors.experiencia.message}</p>
                 )}
               </div>
+          <hr className="my-4" />
+          </>
+
             )}
           </div>
 
@@ -521,6 +537,7 @@ function AgregarO() {
               <option value="">Seleccione una modalidad</option>
               <option value="Presencial">Presencial</option>
               <option value="Virtual">Virtual</option>
+              <option value="Hibrida">Hibrida</option>
             </select>
             {errors.modalidad && <p className="text-red-500">{errors.modalidad.message}</p>}
           </div>
@@ -534,17 +551,19 @@ function AgregarO() {
             ></textarea>
             {errors.detalles_adicionales && <p className="text-red-500">{errors.detalles_adicionales.message}</p>}
           </div>
+          <hr className="my-4" />
           <div className="flex items-center">
-                <input
-                  className="mr-2 leading-tight"
-                  type="checkbox"
-                  id="solicitar_sueldo"
-                  {...register('solicitar_sueldo')}
-                />
-                <label className="text-sm" htmlFor="solicitar_sueldo">
-                  Solicitar al postulante el sueldo que espera ganar en este puesto.
-                </label>
-              </div>
+            <input
+              className="mr-2 leading-tight"
+              type="checkbox"
+              id="solicitar_sueldo"
+              {...register('solicitar_sueldo')}
+            />
+            <label className="block text-sm font-bold mb-2 text-blue-500" htmlFor="solicitar_sueldo">
+              Solicitar al postulante el sueldo que espera ganar en este puesto.
+            </label>
+          </div>
+          <hr className="my-4" />
           <div className="bg-white p-6 rounded-lg shadow-lg py-8" >
             <h3 className="text-1xl text-red-500 font-bold mb-4">Datos de contacto extra:</h3>
             <div className="flex items-center">
@@ -555,13 +574,14 @@ function AgregarO() {
                 checked={showCorreo}
                 onChange={() => setShowCorreo(!showCorreo)}
               />
-              <label className="text-sm" htmlFor="showCorreo">
+              <label className="block text-sm font-bold mb-2 text-blue-500" htmlFor="showCorreo">
                 ¿Requiere correo extra de contacto?
               </label>
             </div>
             {showCorreo && (
               <>
-                <div className="mb-4">
+                 <hr className="my-4" />
+                <div className="flex-col bg-gray-200 rounded-lg shadow-md items-center p-10">
                   <label className="block text-sm font-bold mb-2" htmlFor="correo_contacto">Correo de Contacto</label>
                   <input
                     className="w-full p-2 border rounded"
@@ -571,6 +591,7 @@ function AgregarO() {
                     {...register('correo_contacto')}
                   />
                 </div>
+                <hr className="my-4" />
               </>
             )}
             <div className="flex items-center">
@@ -581,13 +602,14 @@ function AgregarO() {
                 checked={showNumeroContacto}
                 onChange={() => setShowNumeroContacto(!showNumeroContacto)}
               />
-              <label className="text-sm" htmlFor="showNumeroContacto">
+              <label className="block text-sm font-bold mb-2 text-blue-500" htmlFor="showNumeroContacto">
                 ¿Requiere un número extra de contacto?
               </label>
             </div>
             {showNumeroContacto && (
               <>
-                <div className="mb-4">
+                 <hr className="my-4" />
+                <div className="flex-col bg-gray-200 rounded-lg shadow-md items-center p-10">
                   <label className="block text-sm font-bold mb-2" htmlFor="numero_contacto">Número de Contacto</label>
                   <input
                     className="w-full p-2 border rounded"
@@ -597,6 +619,7 @@ function AgregarO() {
                     {...register('numero_contacto')}
                   />
                 </div>
+                <hr className="my-4" />
               </>
             )}
           </div>
@@ -611,7 +634,7 @@ function AgregarO() {
                   id="mostrar_sueldo"
                   {...register('mostrar_sueldo')}
                 />
-                <label className="text-sm" htmlFor="mostrar_sueldo">
+                <label className="block text-sm font-bold mb-2 text-blue-500" htmlFor="mostrar_sueldo">
                   No mostrar el sueldo ofrecido al postulante
                 </label>
               </div>
@@ -624,11 +647,11 @@ function AgregarO() {
                   id="mostrar_empresa"
                   {...register('mostrar_empresa')}
                 />
-                <label className="text-sm" htmlFor="mostrar_empresa">
+                <label className="block text-sm font-bold mb-2 text-blue-500" htmlFor="mostrar_empresa">
                   No mostrar nombre de Empresa publicadora
                 </label>
               </div>
-             
+
             </div>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-lg py-7" style={{ marginTop: '20px' }}>
@@ -644,7 +667,7 @@ function AgregarO() {
                   checked={requireCriterio}
                   onChange={() => setRequireCriterio(!requireCriterio)}
                 />
-                <label className="text-sm" htmlFor="requireCriterio">
+                <label className="block text-sm font-bold mb-2 text-blue-500" htmlFor="requireCriterio">
                   ¿Requiere requisitos extras?
                 </label>
               </div>
@@ -652,7 +675,8 @@ function AgregarO() {
 
             {requireCriterio && (
               <>
-                <div className="mb-4">
+                 <hr className="my-4" />
+                <div className="flex-col bg-gray-200 rounded-lg shadow-md items-center p-10">
                   <label className="block text-sm font-bold mb-2" htmlFor="id_criterio">Criterio</label>
                   <div className="flex">
                     <select
@@ -790,13 +814,25 @@ function AgregarO() {
                     </div>
                   )}
                 </div>
+                <hr className="my-4" />
               </>)}
-            <button
-              type="submit"
-              className="bg-blue-500 text-white p-2 rounded-lg mt-4">
-              Publicar Oferta
-            </button>
+            
           </div>
+          <div className="flex justify-center">
+    <button
+        onClick={() => navigate('/inicioG')}
+        className="bg-red-500 text-white p-2 rounded-lg mt-4 mr-4"
+    >
+        Cancelar
+    </button>
+    <button
+        type="submit"
+        className="bg-blue-500 text-white p-2 rounded-lg mt-4"
+    >
+        Publicar Oferta
+    </button>
+</div>
+
         </form>
       </div>
     </>

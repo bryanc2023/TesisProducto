@@ -15,6 +15,7 @@ interface Empresa {
 
 function EmpresaLayout() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [dropdownOpen2, setDropdownOpen2] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [empresa, setEmpresa] = useState<Empresa | null>(null);
     const { user } = useSelector((state: RootState) => state.auth);
@@ -53,6 +54,10 @@ function EmpresaLayout() {
         setDropdownOpen(!dropdownOpen);
     };
 
+    const toggleDropdown2 = () => {
+        setDropdownOpen2(!dropdownOpen2);
+    };
+
     const toggleSidebar = () => {
         setSidebarOpen(!sidebarOpen);
     };
@@ -82,40 +87,54 @@ function EmpresaLayout() {
                     <span className="mt-2">{empresa ? empresa.nombre_comercial : 'Nombre del Usuario'}</span>
                 </div>
                 <ul>
-                <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
-                        <Link to="/InicioG" className="flex items-center w-full">
-                            <FontAwesomeIcon icon={faClipboardList} className="mr-2" />
-                            <span>Gestión de Ofertas</span>
-                        </Link>
+                    <li className={`mb-4 flex items-center hover:bg-gray-700 rounded-md p-2 relative`}>
+                        <div onClick={toggleDropdown2} className="flex items-center w-full cursor-pointer">
+                            <FontAwesomeIcon icon={faChevronDown} className={`mr-2 ${dropdownOpen ? 'transform rotate-180' : ''}`} />
+                            <span className="mr-2">Ofertas</span>
+                        </div>
+                        {dropdownOpen2 && (
+                            <ul className="mt-2 bg-white text-black shadow-lg rounded-md overflow-hidden z-20 absolute left-0 top-full w-full">
+                                <li className={`p-2 ${location.pathname === '/InicioG' ? 'bg-gray-200' : ''}`}>
+                                    <Link to="/InicioG" className="flex items-center w-full pl-6">
+                                        <FontAwesomeIcon icon={faClipboardList} className="mr-2" />
+                                        <span>Gestión de Ofertas</span>
+                                    </Link>
+                                </li>
+                                <li className={`p-2 ${location.pathname === '/ConsultoPostuG' ? 'bg-gray-200' : ''}`}>
+                                    <Link to="/ConsultoPostuG" className="flex items-center w-full pl-6">
+                                        <FontAwesomeIcon icon={faUsers} className="mr-2" />
+                                        <span>Consultar Postulantes</span>
+                                    </Link>
+                                </li>
+                            </ul>
+                        )}
                     </li>
-                    <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
-                        <Link to="CatalogoRegistro" className="flex items-center w-full">
+                    <li className={`mb-4 flex items-center hover:bg-gray-700 rounded-md p-2 ${location.pathname === '/CatalogoRegistro' ? 'bg-gray-700' : ''}`}>
+                        <Link to="/CatalogoRegistro" className="flex items-center w-full">
                             <FontAwesomeIcon icon={faFileAlt} className="mr-2" />
                             <span className="lg:inline">Registro de catálogos</span>
                         </Link>
                     </li>
-                    <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
-                        <Link to="MonitoreoG" className="flex items-center w-full">
+                    <li className={`mb-4 flex items-center hover:bg-gray-700 rounded-md p-2 ${location.pathname === '/MonitoreoG' ? 'bg-gray-700' : ''}`}>
+                        <Link to="/MonitoreoG" className="flex items-center w-full">
                             <FontAwesomeIcon icon={faUsers} className="mr-2" />
                             <span className="lg:inline">Control y monitoreo</span>
                         </Link>
                     </li>
-                    <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
-                        <Link to="ReportesG" className="flex items-center w-full">
+                    <li className={`mb-4 flex items-center hover:bg-gray-700 rounded-md p-2 ${location.pathname === '/ReportesG' ? 'bg-gray-700' : ''}`}>
+                        <Link to="/ReportesG" className="flex items-center w-full">
                             <FontAwesomeIcon icon={faChartLine} className="mr-2" />
                             <span className="lg:inline">Reportes</span>
                         </Link>
                     </li>
-                    <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
-                        <Link to="PerfilG" className="flex items-center w-full">
+                    <li className={`mb-4 flex items-center hover:bg-gray-700 rounded-md p-2 ${location.pathname === '/PerfilG' ? 'bg-gray-700' : ''}`}>
+                        <Link to="/PerfilG" className="flex items-center w-full">
                             <FontAwesomeIcon icon={faUser} className="mr-2" />
                             <span className="lg:inline">Mi perfil</span>
                         </Link>
                     </li>
-                   
                 </ul>
             </nav>
-
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-auto">
                 {/* Top Nav */}

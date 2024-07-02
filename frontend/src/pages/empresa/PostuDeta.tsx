@@ -16,7 +16,7 @@ interface Postulante {
     cv: string | null;
     total_evaluacion: number;
     fecha: string;
-    estado_postulacion:string;
+    estado_postulacion: string;
 }
 
 interface PostulanteDetailProps {
@@ -69,13 +69,13 @@ const PostulanteDetail: React.FC<PostulanteDetailProps> = ({ postulante, idOfert
                 id_postulante: postulante.id_postulante,
                 id_oferta: idOferta,
             };
-    
+
             const response = await axios.post(`actualizar-postulaciones`, comentarioData);
-    
+
             if (response.status === 200) {
                 console.log('Comentario enviado:', comentario);
-                 // Mostrar SweetAlert
-                 Swal.fire({
+                // Mostrar SweetAlert
+                Swal.fire({
                     icon: 'success',
                     title: 'Postulante Aceptado',
                     text: 'Se le ha notificado al postulante y a los demás enlistados la decisión.',
@@ -90,7 +90,7 @@ const PostulanteDetail: React.FC<PostulanteDetailProps> = ({ postulante, idOfert
         } catch (error) {
             console.error('Error al enviar comentario:', error);
         }
-    
+
         // Limpiar el campo de comentario después de enviar
         setComentario('');
         // Cerrar el modal de comentario
@@ -141,16 +141,15 @@ const PostulanteDetail: React.FC<PostulanteDetailProps> = ({ postulante, idOfert
                 </div>
             )}
             <div className="flex justify-end mt-4">
-            {postulante.estado_postulacion !== 'A' && (
-    <button
-        onClick={handleAprobarPostulante}
-        className={`py-2 px-4 rounded mr-4 ${
-            hayAprobado ? 'bg-purple-500 text-white hover:bg-purple-600' : 'bg-green-500 text-white hover:bg-green-600'
-        }`}
-    >
-        {hayAprobado ? 'Aprobar nuevo postulante' : 'Aceptar Postulante'}
-    </button>
-)}
+                {postulante.estado_postulacion !== 'A' && (
+                    <button
+                        onClick={handleAprobarPostulante}
+                        className={`py-2 px-4 rounded mr-4 ${hayAprobado ? 'bg-purple-500 text-white hover:bg-purple-600' : 'bg-green-500 text-white hover:bg-green-600'
+                            }`}
+                    >
+                        {hayAprobado ? 'Aprobar nuevo postulante' : 'Aceptar Postulante'}
+                    </button>
+                )}
                 <button
                     onClick={onClose}
                     className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
@@ -166,7 +165,7 @@ const PostulanteDetail: React.FC<PostulanteDetailProps> = ({ postulante, idOfert
                         <div className="relative flex flex-col w-full bg-white border-0 rounded-lg shadow-lg outline-none focus:outline-none">
                             <div className="flex items-start justify-between p-5 border-b border-solid rounded-t border-blueGray-200">
                                 <h3 className="text-2xl font-semibold">
-                                  <center>  ¿Deseas Aceptar Este Postulante Para La Oferta?</center>
+                                    <center>  ¿Deseas Aceptar Este Postulante Para La Oferta?</center>
                                 </h3>
                                 <button
                                     className="p-1 ml-auto  border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
@@ -183,7 +182,7 @@ const PostulanteDetail: React.FC<PostulanteDetailProps> = ({ postulante, idOfert
                                     value={comentario}
                                     onChange={(e) => setComentario(e.target.value)}
                                 ></textarea>
-                               <div className="flex justify-center">
+                                <div className="flex justify-center">
                                     <button
                                         onClick={handleCancelComentario}
                                         className="bg-red-500 text-white active:bg-red-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-4"

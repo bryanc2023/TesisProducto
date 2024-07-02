@@ -34,6 +34,7 @@ import AdminLayout from "../components/layout/AdminLayout"
 import VistaPreviaArchivo from "../components/Admin/VistaPreviaArchivo"  
 import ConfiguracionAdmin from "../pages/admin/ConfiguracionAdmin"
 import VerCV from "../pages/postulante/VerCV"
+import ConsultoPostuG from "../pages/empresaG/ConsultoPostuG"
 
 type TypeRoute = {
     path: string;
@@ -285,6 +286,11 @@ export const routes: TypeRoute[] = [
             {
                 path: 'CatalogoRegistro',
                 element: CatalogoRegistro,
+                allowedRoles: ['empresa_gestora'],
+            },
+            {
+                path: 'ConsultoPostuG',
+                element: ConsultoPostuG,
                 allowedRoles: ['empresa_gestora'],
             },
             {
