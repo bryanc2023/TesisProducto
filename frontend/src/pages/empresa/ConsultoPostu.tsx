@@ -412,7 +412,7 @@ const PostulantesList: React.FC = () => {
                                         key={index}
                                         href="#"
                                         onClick={() => setCurrentPage(index + 1)}
-                                        className={`-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium ${currentPage === index + 1 ? 'bg-orange-500 text-white' : 'text-gray-700 hover:bg-blue-500 hover:text-white'}`}
+                                        className={`-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium ${currentPage === index + 1 ? 'bg-neutral-900 text-white' : 'text-gray-700 hover:bg-blue-500 hover:text-white'}`}
                                         >
                                         {index + 1}
                                     </a>

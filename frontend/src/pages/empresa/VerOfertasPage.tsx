@@ -192,7 +192,7 @@ function VerOfertasPPage() {
                                 <a
                                     href="#"
                                     onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : 1)}
-                                    className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${currentPage === 1 ? 'text-gray-500 cursor-not-allowed' : 'text-gray-700 hover:bg-blue-500 hover:text-white'}`}
+                                    className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${currentPage === 1 ? 'text-slate-950 cursor-not-allowed' : 'text-gray-700 hover:bg-blue-500 hover:text-white'}`}
                                 >
                                     <span className="sr-only">Anterior</span>
                                     Anterior
@@ -202,7 +202,7 @@ function VerOfertasPPage() {
                                         key={index}
                                         href="#"
                                         onClick={() => setCurrentPage(index + 1)}
-                                        className={`-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium ${currentPage === index + 1 ? 'bg-orange-500 text-white' : 'text-gray-700 hover:bg-blue-500 hover:text-white'}`}
+                                        className={`-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium ${currentPage === index + 1 ? 'bg-neutral-900 text-white' : 'text-gray-700 hover:bg-blue-500 hover:text-white'}`}
                                     >
                                         {index + 1}
                                     </a>
