@@ -545,6 +545,7 @@ function VerOfertasAll() {
                             </nav>
                             
             {selectedOferta && <Modal oferta={selectedOferta} onClose={() => setSelectedOferta(null)} userId={user?.id} />}
+                        
                         </div>
                         
                     )}
