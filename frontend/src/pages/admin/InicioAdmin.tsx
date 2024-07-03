@@ -49,22 +49,7 @@ function InicioAdmin() {
     };
 
     const handlePreview = (field: string) => {
-        const file = files[field];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const data = new Uint8Array(event.target.result as ArrayBuffer);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const sheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[sheetName];
-                const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                navigate('/vista-previa', { state: { fileData: JSON.stringify(json), fileName: file.name } });
-            };
-            reader.readAsArrayBuffer(file);
-        } else {
-            setModalContent({ title: 'Advertencia', message: 'Seleccione un archivo primero', success: false });
-            setModalOpen(true);
-        }
+        navigate('/vista-previa', { state: { field } });
     };
 
     const handleSubmit = async (e: React.FormEvent, field: string) => {
