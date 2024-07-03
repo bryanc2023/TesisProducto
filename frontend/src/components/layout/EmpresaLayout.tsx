@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, KeyboardEvent } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown, faBars, faTimes, faClipboardList, faUsers, faChartLine, faUser } from '@fortawesome/free-solid-svg-icons';
@@ -6,6 +6,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import axios from '../../services/axios';
 import { RootState } from '../../store';
+import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/solid'
+import ListPostulantes from '../Empresa/ListPostulantes';
+import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
+import Postulante from '../../../api/Postulante';
+import instance from '../../services/axios';
+import ListEmpresa from '../Empresa/ListEmpresa';
 
 interface Empresa {
     id_empresa: number;
@@ -13,12 +19,111 @@ interface Empresa {
     logo: string;
 }
 
+interface Postulante {
+    id_postulante: number
+    nombres: string
+    apellidos: string
+    foto: string
+}
+
+interface PostulanteData {
+    id_postulante: number;
+    nombres: string;
+    apellidos: string;
+    fecha_nac: Date;
+    foto: string;
+    edad: number;
+    estado_civil: string;
+    cedula: string;
+    genero: string;
+    informacion_extra: string;
+    idiomas: Array<{
+      id_idioma: number;
+      nivel_oral: string;
+      nivel_escrito: string;
+    }>;
+}
+
+interface EmpresaData {
+    id_empresa: number
+    nombre_comercial: string
+    tamanio: string
+    descripcion: string
+    logo: string
+    cantidad_empleados: number
+    sector: {
+        id: number
+        sector: string
+        division: string
+    }
+    red: Array<{
+        nombre_red: string
+        enlace: string
+    }>
+}
+
+  const initialPostulanteData: PostulanteData = {
+    id_postulante: 0,
+    nombres: '',
+    apellidos: '',
+    fecha_nac: new Date(),
+    foto: '',
+    edad: 0,
+    estado_civil: '',
+    cedula: '',
+    genero: '',
+    informacion_extra: '',
+    idiomas: [], // Asegurando que idiomas esté inicializado como un array vacío
+  };
+
+  const initialEmpresaData: EmpresaData = {
+    id_empresa: 0,
+    nombre_comercial: '',
+    tamanio: '',
+    descripcion: '',
+    logo: '',
+    cantidad_empleados: 0,
+    sector: {
+      id: 0, // Inicializa con valores apropiados
+      sector: '',
+      division: ''
+    },
+    red: []
+  };
+
+
 function EmpresaLayout() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [empresa, setEmpresa] = useState<Empresa | null>(null);
     const { user } = useSelector((state: RootState) => state.auth);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    //Controla lo que selecciona el usuario Postulante o empresa
+    const [ select, setSelect] = useState(1)
+
+    //Postulantes -----------------------------------------------------------------------------------
+    const [query, setQuery] = useState('') //Guardara el nombre y apellido del postulante
+    const [postulantes, setPostulantes] = useState<Postulante[]>([])
+    const [isLoading, setIsLoading] = useState(false)
+    const [isModal, setIsmodal] = useState(false)
+
+    //modal para ver la información completa del postulante
+    const [isModalPost, setIsModalPost] = useState(false)
+    const [isLoadingPost, setIsLoadingPost] = useState(false)
+    const [dataPost, setDataPost] = useState<PostulanteData>(initialPostulanteData)
+
+    //Empresa -----------------------------------------------------------------------------------
+    const [ queryEmpresa, setQueryEmpresa] = useState('')
+    const [ empresas, setEmpresas] = useState<Empresa[]>([])
+    const [ isLoadingEmpresas, setIsLoadingEmpresas] = useState(false)
+    const [ isModalEmpresas, setIsModalEmpresas] = useState(false)
+
+    //modal para ver la información completa del postulante
+    const [isModalEmpresa, setIsModalEmpresa] = useState(false)
+    const [isLoadingEmpresa, setIsLoadingEmpresa] = useState(false)
+    const [dataEmpresa, setDataEmpresa] = useState<EmpresaData>(initialEmpresaData)
+
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -34,7 +139,7 @@ function EmpresaLayout() {
         };
     }, [dropdownRef]);
 
-   
+
 
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen);
@@ -68,8 +173,141 @@ function EmpresaLayout() {
         return logoPath.startsWith('http') ? logoPath : `http://localhost:8000/storage/${logoPath}`;
     };
 
+    //Busca a todos los postulantes
+    const searchPostulante = async () => {
+        try {
+            setIsLoading(true)
+            setIsmodal(true)
+            const { data } = await instance.get('postulanteByName', {
+                params: {
+                  'nombre_apellido': query
+                }
+            });
+
+            setPostulantes(
+                data
+            )
+
+        } catch (error) {
+            setPostulantes([]);
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    //Datos de la emprsa
+    const searchEmpresa = async () => {
+        try {
+            setIsLoadingEmpresas(true)
+            setIsModalEmpresas(true)
+            const { data } = await instance.get('getEmpresaByName', {
+                params: {
+                  'nombre_comercial': queryEmpresa
+                }
+            });
+
+            setEmpresas(data)
+
+        } catch (error) {
+            
+        } finally {
+            setIsLoadingEmpresas(false)
+        }
+    }
+
+    //Evento para buscar cuando de enter:
+    const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            searchPostulante();
+        }
+    };
+
+    const handleKeyDownEmpresa = (event: KeyboardEvent<HTMLInputElement>) => {
+        if(event.key === 'Enter') {
+            searchEmpresa()
+        }
+    }
+
+    const closeModal = () => {
+        setIsmodal(false)
+    }
+
+    const closeModalEmpresa = () => {
+        setIsModalEmpresas(false)
+    }
+
+    //Comprueba si esta vacio el query para cerrar el modal
+    useEffect(() => {
+        if (!query) {
+            setIsmodal(false)
+        }
+        if(!queryEmpresa) {
+            setIsModalEmpresas(false)
+        }
+    }, [query, queryEmpresa])
+    
+
+    // Maneja el cambio de selección
+    const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        setSelect(Number(event.target.value));
+    };
+
+    //Use effect para limpiar la consulta
+    useEffect(() => {
+        if (select === 1) {
+            setQueryEmpresa('');  // Limpia el query relacionado con empresas
+            setEmpresas([])
+            setIsModalEmpresas(false)
+        
+        } else if (select === 2) {
+            setQuery('');  
+            setPostulantes([]);
+            setIsmodal(false);
+        }
+
+      }, [select]);
+    
+      
+
+
+    //Función para traer los datos completos del postulante y abrir el modal
+    const getPostulante = async (postulanteData: Postulante) => {
+        try {
+            setIsLoadingPost(true)
+            setIsModalPost(true)
+
+            //Consulto a la API
+            const { data } = await Postulante.getDataPostulante(postulanteData.id_postulante)
+            setDataPost(data)
+            console.log(data)
+
+        } catch (error) {
+            console.log(error)
+
+        } finally {
+            setIsLoadingPost(false)
+        }
+    }
+
+    //Funcion para traer los datos completos de la empresa y abrir el modal
+    const getEmpresa = async (idEmpresa : Empresa['id_empresa']) =>  {
+        try {
+            setIsLoadingEmpresa(true)
+            setIsModalEmpresa(true)
+
+            const { data } = await instance.get(`getEmpresaById/${idEmpresa}`)
+            setDataEmpresa(data)
+            console.log(data)
+
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setIsLoadingEmpresa(false)
+        }
+    }
+
     return (
-        <div className="flex h-screen overflow-hidden" onClick={handleContentClick}>
+        <div className={`flex h-screen overflow-hidden ${(isModalPost || isModalEmpresa) && ' opacity-50'}`} onClick={handleContentClick}>
             {/* Lateral Nav */}
             <nav className={`bg-orange-700 text-white p-4 fixed top-16 bottom-0 lg:relative lg:translate-x-0 transition-transform transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:w-64 z-20`}>
                 <div className="flex flex-col items-center mb-4">
@@ -113,10 +351,127 @@ function EmpresaLayout() {
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-auto">
                 {/* Top Nav */}
-                <nav className="bg-orange-700 text-white p-4 flex justify-between items-center w-full fixed top-0 left-0 right-0 z-30">
+                <nav className="bg-orange-700 text-white p-4 flex justify-between items-center gap-2 w-full fixed top-0 left-0 right-0 z-30">
                     <div>
-                        <span>ProaJob Empresa</span>
+                        <span className=' font-bold'>ProaJob Empresa</span>
                     </div>
+
+                    <div className=' w-1/2 relative'>
+                        <div className=' bg-white rounded-lg text-gray-700 flex gap-1 p-2'>
+                            <MagnifyingGlassIcon className=' w-5' />
+                            
+                            {
+                                select === 1 ?
+                                (
+                                    <input
+                                        type='text'
+                                        className=' w-full focus:outline-none'
+                                        placeholder='Buscar postulante por el nombre, apellido'
+                                        onChange={(e) => setQuery(e.target.value)}
+                                        onKeyDown={handleKeyDown}
+                                        value={query}
+                                    />
+                                )
+                                :
+                                (
+                                    <input
+                                        type='text'
+                                        className=' w-full focus:outline-none'
+                                        placeholder='Buscar postulante por el nombre de la empresa'
+                                        onChange={(e) => setQueryEmpresa(e.target.value)}
+                                        onKeyDown={handleKeyDownEmpresa}
+                                        value={queryEmpresa}
+                                    />
+                                )
+                                
+                            }
+              
+                                <select
+                                    className='focus:outline-none'
+                                    value={select}
+                                    onChange={handleSelectChange}
+                                >
+                                    <option value={1}>Postulantes</option>
+                                    <option value={2}>Empresas</option>
+                                </select>
+
+                        </div>
+
+                        {/** Contenedor  para los resultados de la busqueda de postulante*/
+                        
+                            isModal &&
+                            <div className=' absolute w-full'>
+                                <div className=' bg-white rounded-md p-2 mt-5 shadow-xl'>
+                                    <div className=' flex justify-between text-gray-700 items-center mb-5'>
+
+                                        <p className=' font-bold text-lg'> Lista de resultados </p>
+                                        <button onClick={closeModal}>
+                                            <XMarkIcon className=' w-4' />
+                                        </button>
+                                    </div>
+
+
+                                    {
+                                        isLoading ?
+                                            <p className=' text-center text-white'>cargando resultados</p>
+                                            :
+                                            postulantes?.length > 0 ?
+                                                postulantes?.map(postulante => (
+                                                    <ListPostulantes
+                                                        key={postulante.id_postulante}
+                                                        postulante={postulante}
+                                                        getPostulante={getPostulante}
+                                                    />
+                                                ))
+                                                :
+                                                <p className=' text-center font-bold text-red-500 '>
+                                                    --------- No hay resultados ---------
+                                                </p>
+
+                                    }
+
+                                </div>
+                            </div>
+                        }
+
+                        {/** Contenedor  para los resultados de la busqueda de empresas*/
+                            isModalEmpresas && 
+                            <div className=' absolute w-full'>
+                                <div className=' bg-white rounded-md p-2 mt-5 shadow-xl'>
+                                    <div className=' flex justify-between text-gray-700 items-center mb-5'>
+
+                                        <p className=' font-bold text-lg'> Lista de resultados </p>
+                                        <button onClick={closeModalEmpresa}>
+                                            <XMarkIcon className=' w-4' />
+                                        </button>
+                                    </div>
+
+
+                                    {
+                                        isLoadingEmpresas ?
+                                            <p className=' text-center text-white'>cargando resultados</p>
+                                            :
+                                            empresas?.length > 0 ?
+                                                empresas?.map(empresa => (
+                                                    <ListEmpresa 
+                                                        key={empresa.id_empresa}
+                                                        empresa={empresa}
+                                                        getEmpresa={getEmpresa}
+                                                        
+                                                    />
+                                                ))
+                                                :
+                                                <p className=' text-center font-bold text-red-500 '>
+                                                    --------- No hay resultados ---------
+                                                </p>
+
+                                    }
+
+                                </div>
+                            </div>
+                        }
+                    </div>
+
                     <div className="relative" ref={dropdownRef}>
                         <button onClick={toggleDropdown} className="flex items-center focus:outline-none">
                             {empresa && (
@@ -150,6 +505,162 @@ function EmpresaLayout() {
                         <FontAwesomeIcon icon={sidebarOpen ? faTimes : faBars} />
                     </button>
                 </nav>
+
+                {/**MODAL PARA LOS DATOS COMPLETOS DEL POSTULANTE */}
+
+                <Dialog open={isModalPost} onClose={() => setIsModalPost(false)} className="relative  z-50 bg-red-500">
+                    <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
+                        <DialogPanel className="w-full lg:w-1/2 p-12 bg-white border-2 border-gray-300 shadow-lg">
+                            <DialogTitle className="font-bold text-lg text-center text-orange-500">Detalles del postulante</DialogTitle>
+
+                            {!isLoadingPost ?
+
+                                <div>
+                                    <div className=' flex gap-5 mt-10'>
+                                        <div className=' w-1/2'>
+                                            <img src={dataPost.foto} alt="Foto de perfil" />
+                                        </div>
+                                        <div className=' w-1/2'>
+
+                                            <div className=' mb-5'>
+
+                                                <p className=' text-lg text-orange-500 font-semibold'>
+                                                    Nombre completo: <span className=' font-normal'>{`${dataPost.nombres} ${dataPost.apellidos}`}</span>
+                                                </p>
+                                                <p className=' text-gray-700 font-semibold'>
+                                                    Cedula: <span className=' font-normal'>{`${dataPost.cedula}`}</span>
+                                                </p>
+                                            </div>
+
+
+                                            <p className=' text-gray-700 font-semibold'>
+                                                Fecha de nacimiento: <span className=' font-normal'>{`${dataPost.fecha_nac}`}</span>
+                                            </p>
+
+                                            <p className=' text-gray-700 font-semibold'>
+                                                Edad: <span className=' font-normal'>{`${dataPost.edad}`}</span>
+                                            </p>
+
+                                            <p className=' text-gray-700 font-semibold'>
+                                                Estado civil: <span className=' font-normal'>{`${dataPost.estado_civil}`}</span>
+                                            </p>
+
+                                            <p className=' text-gray-700 font-semibold'>
+                                                Genero: <span className=' font-normal'>{`${dataPost.genero}`}</span>
+                                            </p>
+
+                                            <p className=' text-gray-700 font-semibold'>
+                                                Detalles: <span className=' font-normal'>{`${dataPost.informacion_extra}`}</span>
+                                            </p>
+
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className=' text-center mt-4 text-lg text-orange-500'>Idiomas</p>    
+                                        {
+                                            dataPost.idiomas.length > 0 ? 
+                                            (
+                                                dataPost.idiomas.map( idioma => (
+                                                    <div key={idioma.id_idioma}>
+                                                        
+                                                        <p className=' text-gray-700 font-semibold'>Nivel escrito: <span className=' font-normal'>{idioma.nivel_escrito}</span> </p>
+                                                        <p className=' text-gray-700 font-semibold'>Nivel oral: <span className=' font-normal'>{idioma.nivel_oral}</span> </p>
+                                                    </div>
+                                                ))
+
+                                            )
+                                            :
+                                            (
+                                                <p className=' text-gray-500 text-center'>No hay datos</p>
+                                            )
+                                        }
+                                    </div>
+                                </div>
+
+                                :
+                                <p className=' text-xl mt-5 text-orange-500 text-center'> Cargando la información ...</p>
+                            }
+
+
+
+                            <button
+                                onClick={() => setIsModalPost(false)}
+                                className=' bg-orange-500 px-3 py-2 rounded-lg  shadow-sm text-white font-semibold mt-5'
+                            >
+                                Cerrar
+                            </button>
+
+                        </DialogPanel>
+                    </div>
+                </Dialog>
+
+
+                {/**MODAL PARA LOS DATOS COMPLETOS DEL EMPRESA */}
+                <Dialog open={isModalEmpresa} onClose={() => setIsModalEmpresa(false)} className="relative  z-50 bg-red-500">
+                    <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
+                        <DialogPanel className="w-full lg:w-1/2 p-12 bg-white border-2 border-gray-300 shadow-lg">
+                            <DialogTitle className="font-bold text-lg text-center text-orange-500">Detalles de la empresa</DialogTitle>
+
+                            {!isLoadingEmpresa ?
+
+                                <div>
+                                    <div className=' flex gap-5 mt-10'>
+                                        <div className=' w-1/2'>
+                                            <img src={dataEmpresa.logo} alt="Foto de perfil" className=' h-80'/>
+                                        </div>
+                                        <div className=' w-1/2'>
+                                            <div className=' mb-5'>
+                                                <p className=' text-lg text-orange-500 font-semibold mb-5'>
+                                                    Nombre comercial: <span className=' font-normal'> {dataEmpresa.nombre_comercial} </span>
+                                                </p>
+                                             
+                                                <p className=' text-gray-700 font-semibold'>
+                                                    Descripción: <span className=' font-normal'>{dataEmpresa.descripcion}</span>
+                                                </p>
+
+                                                <p className=' text-gray-700 font-semibold'>
+                                                    Cantidad de empleados: <span className=' font-normal'>{dataEmpresa.cantidad_empleados}</span>
+                                                </p>
+
+                                                <p className=' text-gray-700 font-semibold'>
+                                                    Tamaño: <span className=' font-normal'>{dataEmpresa.tamanio}</span>
+                                                </p>
+
+                                            </div>
+                                            <div>
+                                                    <p className=' text-center mt-4 text-lg text-orange-500'>Sector</p>    
+                                                    {
+                                                        dataEmpresa.sector &&
+                                                        (
+                                                            <div >
+                                
+                                                                <p className=' text-gray-700 font-semibold'>Sector: <span className=' font-normal'>{dataEmpresa.sector.division}</span> </p>
+                                                                <p className=' text-gray-700 font-semibold'>Division: <span className=' font-normal'>{dataEmpresa.sector.sector}</span> </p>
+                                                            </div>
+                                        
+                                                        )
+                                                    }
+                                                </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                :
+                                <p className=' text-xl mt-5 text-orange-500 text-center'> Cargando la información ...</p>
+                            }
+
+
+
+                            <button
+                                onClick={() => setIsModalEmpresa(false)}
+                                className=' bg-orange-500 px-3 py-2 rounded-lg  shadow-sm text-white font-semibold mt-5'
+                            >
+                                Cerrar
+                            </button>
+
+                        </DialogPanel>
+                    </div>
+                </Dialog>
 
                 <div className="flex-1 p-4 mt-16 overflow-auto">
                     <Outlet />

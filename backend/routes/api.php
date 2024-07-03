@@ -92,6 +92,8 @@ Route::get('empresaById/{id}', [EmpresaController::class, 'getEmpresaByIdUser'])
 Route::put('updateEmpresaById/{id}', [EmpresaController::class, 'updateEmpresaByIdUser']);
 Route::post('/empresa-red', [EmpresaRedController::class, 'redEmpresa']);
 Route::get('/empresa-red/{id_empresa}', [EmpresaRedController::class, 'getRedEmpresa']);
+Route::get('/getEmpresaById/{id}', [EmpresaController::class, 'getEmpresaById']);
+Route::get('/getEmpresaByName', [EmpresaController::class, 'getEmpresaByName']);
 
 //Rutas para Idioma
 Route::get('/idioma', [IdiomaController::class, 'getIdiomasAll']);
@@ -124,6 +126,8 @@ Route::post('postulante-red', [PostulanteRedController::class, 'redPostulante'])
 Route::get('postulante-red/{id_postulante}', [PostulanteRedController::class, 'getPostulanteReds']);
 Route::delete('/experiencia/{id}', [PostulanteController::class, 'deleteExperiencia']);
 Route::put('/experiencia/{id}', [PostulanteController::class, 'updateExperiencia']);
+Route::get('/postulanteByName', [PostulanteController::class, 'searchPostulante']);
+Route::get('/postulanteData/{id}', [PostulanteController::class, 'getPostulanteData']);
 
 
 
