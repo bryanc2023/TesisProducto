@@ -194,78 +194,63 @@ const Modal: React.FC<ModalProps> = ({ oferta, onClose, userId }) => {
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white p-4 rounded shadow-lg w-11/12 md:w-1/2 text-center overflow-auto max-h-screen md:max-h-96" style={{ maxHeight: `calc(100vh - 30px)` }}>
-                <button onClick={onClose} className="text-white bg-red-500 rounded-full w-8 h-8 absolute top-4 right-4 z-50 flex items-center justify-center">X</button>
-                <h2 className="text-xl font-bold mb-4">{oferta.cargo}</h2>
-                <div className="flex justify-center items-center mb-4">
-                    <img
-                        src={oferta.n_mostrar_empresa === 1 ? '/images/anonima.png' : oferta.empresa.logo}
-                        alt="Logo"
-                        className="w-44 h-24 shadow-lg mr-4"
-                    />
-                </div>
-                <div className="text-center">
-                    <div>
-                        {oferta.expe.length > 0 && (
-                            <>
-                                <p className="text-gray-700 mb-1"><strong>Título/s solicitados:</strong></p>
-                                <ul>
-                                    {oferta.expe.map((titulo, index) => (
-                                        <li key={index}>
-                                            <p>• {titulo.titulo}</p>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </>
-                        )}
-                    </div>
-                    <p className="text-gray-700 mb-1"><strong>Empresa:</strong> {oferta.n_mostrar_empresa === 1 ? 'Anónima' : oferta.empresa.nombre_comercial}</p>
-                    <p className="text-gray-700 mb-1"><strong>Sueldo:</strong>{oferta.n_mostrar_sueldo === 1 ? 'No descrito' : `${oferta.sueldo}$`}</p>
-                    <p className="text-gray-700 mb-1"><strong>Experiencia en cargos similares:</strong> {oferta.experiencia === 0 ? 'No requerida' : `${oferta.experiencia} año/s`}</p>
-                    <p className="text-gray-700 mb-1"><strong>Carga Horaria:</strong> {oferta.carga_horaria}</p>
-                    <p className="text-gray-700 mb-1"><strong>Fecha Máxima De Postulación:</strong> {formatFechaMaxPos(oferta.fecha_max_pos)}</p>
-                </div>
-                <div className="text-left">
-                    <p className="text-gray-700 mb-1"><strong>Objetivo del cargo:</strong> {oferta.objetivo_cargo}</p>
-                    <div>
-                        <p className="text-gray-700 mb-1"><strong>Funciones:</strong></p>
-                        {renderFunciones()}
-                    </div>
-                    <div>
-                        <p className="text-gray-700 mb-1"><strong>Detalles adicionales:</strong></p>
-                        {renderDetalles()}
-                    </div>
-                    <div>
-                        {oferta.criterios.length > 0 ? (
-                            <>
-                                <p className="text-gray-700 mb-1"><strong>Requisitos adicionales:</strong></p>
-                                <p>La empresa especificó que se requiere los siguientes criterios adicionales:</p>
-                                <ul>
-                                    {oferta.criterios.map((criterio, index) => (
-                                        <li key={index}>
-                                            <p><strong>⁃ {criterio.criterio}:</strong> {renderCriterioValor(criterio)}</p>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </>
-                        ) : (
-                            <p className="text-gray-700 mb-1"></p>
-                        )}
-                    </div>
-                    {oferta.soli_sueldo === 1 && (
-                        <div className="mt-4">
-                            <label htmlFor="sueldoDeseado" className="text-gray-700 block mb-2"><strong>Ingrese el sueldo deseado a ganar en el trabajo:</strong></label>
-                            <input
-                                type="number"
-                                id="sueldoDeseado"
-                                className="w-1/2 p-2 border rounded mr-2"
-                                value={sueldoDeseado || ''}
-                                onChange={(e) => setSueldoDeseado(parseInt(e.target.value))}
+            <div className="bg-white p-4 rounded shadow-lg w-11/12 md:w-3/4 max-w-4xl text-center overflow-auto max-h-screen md:max-h-96" style={{ maxHeight: `calc(100vh - 30px)` }}>
+            <div className= 'flex justify-end'>
+            <button onClick={onClose} className="text-white bg-red-500 rounded-full w-8 h-8 flex items-center justify-center">X</button>
+            </div>
+                <div className="flex justify-center items-start">
+                    <div className="w-full md:w-1/2">
+                        <h2 className="text-xl font-bold mb-4">{oferta.cargo}</h2>
+                        <div className="flex justify-center items-center mb-4">
+                            <img
+                                src={oferta.n_mostrar_empresa === 1 ? '/images/anonima.png' : oferta.empresa.logo}
+                                alt="Logo"
+                                className="w-44 h-24 shadow-lg mr-4"
                             />
                         </div>
-                    )}
+                        <div className="text-left">
+                            <p className="text-gray-700 mb-1"><strong>Empresa:</strong> {oferta.empresa.nombre_comercial}</p>
+                            <p className="text-gray-700 mb-1"><strong>Sueldo:</strong>{oferta.sueldo}</p>
+                            <p className="text-gray-700 mb-1"><strong>Experiencia en cargos similares:</strong> {oferta.experiencia} año/s</p>
+                            <p className="text-gray-700 mb-1"><strong>Carga Horaria:</strong> {oferta.carga_horaria}</p>
+                            <p className="text-gray-700 mb-1"><strong>Fecha Máxima De Postulación:</strong> {formatFechaMaxPos(oferta.fecha_max_pos)}</p>
+                        </div>
+                    </div>
+                    <div className="w-full md:w-1/2">
+                        <div className="text-left">
+                            <p className="text-gray-700 mb-1"><strong>Objetivo del cargo:</strong> {oferta.objetivo_cargo}</p>
+                            <p className="text-gray-700 mb-1"><strong>Funciones:</strong> {renderFunciones()}</p>
+                            <p className="text-gray-700 mb-1"><strong>Detalles adicionales:</strong> {renderDetalles()}</p>
+                            {oferta.criterios.length > 0 && (
+                                <>
+                                    <p className="text-gray-700 mb-1"><strong>Requisitos adicionales:</strong></p>
+                                    <ul>
+                                        {oferta.criterios.map((criterio, index) => (
+                                            <li key={index}>
+                                                <p><strong>⁃ {criterio.criterio}:</strong> {renderCriterioValor(criterio)}</p>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </>
+                            )}
+                            {oferta.soli_sueldo === 1 && (
+                                <div className="mt-4">
+                                    <label htmlFor="sueldoDeseado" className="text-gray-700 block mb-2"><strong>Ingrese el sueldo deseado a ganar en el trabajo:</strong></label>
+                                    <input
+                                        type="number"
+                                        id="sueldoDeseado"
+                                        className="w-full p-2 border rounded"
+                                        value={sueldoDeseado || ''}
+                                        onChange={(e) => setSueldoDeseado(parseInt(e.target.value))}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
-                <button onClick={handlePostular} className="mt-4 bg-blue-500 text-white p-2 rounded">Postular</button>
+                <div className="mt-4 flex justify-center">
+                    <button onClick={handlePostular} className="bg-blue-500 text-white p-2 rounded">Postular</button>
+                </div>
             </div>
         </div>
     );

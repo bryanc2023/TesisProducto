@@ -50,13 +50,26 @@ Route::get('certificados/{id}', [CursoController::class, 'getCertificados']);
 Route::put('certificadoU/{id}', [CursoController::class, 'updateCertificado']);
 Route::delete('certificadoD/{id}', [CursoController::class, 'deleteCertificado']);
 
-
+//Rutas para archivos de tablas satelite
 Route::post('uploadUbi',[UploadController::class,'uploadUbicacion']);
 Route::post('uploadTit',[UploadController::class,'uploadTitulo']);
 Route::post('uploadSec',[UploadController::class,'uploadSector']);
 Route::post('uploadA',[UploadController::class,'uploadArea']);
 Route::post('uploadC',[UploadController::class,'uploadCriterio']);
 Route::post('uploadI',[UploadController::class,'uploadIdioma']);
+Route::get('/ubicacionesR', [UploadController::class, 'getUbicaciones']);
+Route::get('/titulosR', [UploadController::class, 'getTitulos']);
+Route::get('/sectoresR', [UploadController::class, 'getSectores']);
+Route::get('/areasR', [UploadController::class, 'getAreas']);
+Route::get('/criteriosR', [UploadController::class, 'getCriterios']);
+Route::get('/idiomasR', [UploadController::class, 'getIdiomas']);
+Route::post('/updateUbicaciones', [UploadController::class, 'updateUbicaciones']);
+Route::post('/updateTitulos', [UploadController::class, 'updateTitulos']);
+Route::post('/updateSectores', [UploadController::class, 'updateSectores']);
+Route::post('/updateAreas', [UploadController::class, 'updateAreas']);
+Route::post('/updateCriterios', [UploadController::class, 'updateCriterios']);
+Route::post('/updateIdiomas', [UploadController::class, 'updateIdiomas']);
+
 
 Route::get('/ubicaciones', [UbicacionController::class, 'getProvinciasCantones']);
 Route::get('/ubicaciones/cantones/{province}', [UbicacionController::class, 'getCantonesPorProvincia']);
