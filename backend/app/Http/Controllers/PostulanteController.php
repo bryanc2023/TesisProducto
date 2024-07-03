@@ -626,5 +626,45 @@ public function updateCV($userId, Request $request)
         return response()->json(['hasCv' => false, 'message' => 'No has subido tu CV.'], 400);
     }
 }
+  //Buscar postulante por el nombre
+  public function searchPostulante (Request $request) {
+    try {
+
+        $nombreApellido = $request->input('nombre_apellido');
+        
+         $postulantes = Postulante::where('nombres', 'like', '%' . $nombreApellido . '%')
+                ->orWhere('apellidos', 'like', '%' . $nombreApellido . '%')
+                    ->get();
+        
+        if($postulantes->isEmpty()) {
+            return response()->json([
+                'message' => 'No se encontró al usuario',
+
+            ], 404);
+        }
+        return response($postulantes);
+
+
+    } catch (\Throwable $th) {
+        return response()->json([
+            'message' => 'No se pudo buscar al postulante',
+            'error' => $th->getMessage()
+        ], 500);
+    }
+}
+
+//Traer todos los datos del postulante por el ID
+public function getPostulanteData ($idPostulante) {
+    try {
+        $postulante = Postulante::with('idiomas')->findOrFail($idPostulante);
+        return response()->json($postulante);
+
+    } catch (\Throwable $th) {
+        return response()->json([
+            'message' => 'No se pudo traer los datos del postulante',
+            'error' => $th->getMessage()
+        ], 500);
+    }
+}
 }
 
