@@ -632,8 +632,8 @@ public function updateCV($userId, Request $request)
 
         $nombreApellido = $request->input('nombre_apellido');
         
-         $postulantes = Postulante::where('nombres', 'like', '%' . $nombreApellido . '%')
-                ->orWhere('apellidos', 'like', '%' . $nombreApellido . '%')
+         $postulantes = Postulante::where('nombres', 'like', $nombreApellido . '%')
+                ->orWhere('apellidos', 'like', $nombreApellido . '%')
                     ->get();
         
         if($postulantes->isEmpty()) {
@@ -666,5 +666,57 @@ public function getPostulanteData ($idPostulante) {
         ], 500);
     }
 }
+
+
+
+public function getPostulanteById($id_postulante)
+{
+    try {
+        $postulante = DB::table('postulante')
+            ->where('id_postulante', $id_postulante)
+            ->first();
+
+        if (!$postulante) {
+            return response()->json(['message' => 'Postulante no encontrado'], 404);
+        }
+
+        $usuario = DB::table('users')->where('id', $postulante->id_usuario)->first();
+        $ubicacion = DB::table('ubicacion')->where('id', $postulante->id_ubicacion)->first();
+        $formaciones = DB::table('formacion_academica')->where('id_postulante', $id_postulante)->get();
+        $titulos = DB::table('formacion_academica')
+            ->join('titulo', 'formacion_academica.id_titulo', '=', 'titulo.id')
+            ->where('formacion_academica.id_postulante', $id_postulante)
+            ->select('titulo.*')
+            ->get();
+        $idiomas = DB::table('postulante_idioma')
+            ->join('idioma', 'postulante_idioma.id_idioma', '=', 'idioma.id')
+            ->where('postulante_idioma.id_postulante', $id_postulante)
+            ->select('postulante_idioma.*', 'idioma.nombre as idioma_nombre')
+            ->get();
+        $red = DB::table('postulante_red')->where('id_postulante', $id_postulante)->get();
+        $postulaciones = DB::table('postulacion')->where('id_postulante', $id_postulante)->get();
+        $formapro = DB::table('formacion_profesional')->where('id_postulante', $id_postulante)->get();
+        $certificados = DB::table('certificado')->where('id_postulante', $id_postulante)->get();
+
+        return response()->json([
+            'postulante' => $postulante,
+            'usuario' => $usuario,
+            'ubicacion' => $ubicacion,
+            'formaciones' => $formaciones,
+            'titulos' => $titulos,
+            'idiomas' => $idiomas,
+            'red' => $red,
+            'postulaciones' => $postulaciones,
+            'formapro' => $formapro,
+            'certificados' => $certificados,
+            'cv' => $postulante->cv,
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Error al obtener el postulante', 'error' => $e->getMessage()], 500);
+    }
 }
+
+}
+
+
 
