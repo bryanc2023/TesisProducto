@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class EmpresaRed extends Model
 {
     use HasFactory;
-    protected $table = 'empresa_red';
 
+    protected $table = 'empresa_red';
     protected $primaryKey = 'id_empresa_red';
 
     protected $fillable = [
@@ -22,6 +22,4 @@ class EmpresaRed extends Model
     {
         return $this->belongsTo(Empresa::class, 'id_empresa');
     }
-
-    
 }

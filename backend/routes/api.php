@@ -128,6 +128,7 @@ Route::delete('/experiencia/{id}', [PostulanteController::class, 'deleteExperien
 Route::put('/experiencia/{id}', [PostulanteController::class, 'updateExperiencia']);
 Route::get('/postulanteByName', [PostulanteController::class, 'searchPostulante']);
 Route::get('/postulanteData/{id}', [PostulanteController::class, 'getPostulanteData']);
+Route::get('/postulante/{id_postulante}', [PostulanteController::class, 'getPostulanteById']);
 
 
 

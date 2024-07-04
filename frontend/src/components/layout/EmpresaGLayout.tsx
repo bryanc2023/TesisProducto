@@ -1,17 +1,146 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, KeyboardEvent } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronDown, faBars, faTimes,  faUsers, faUser, faFileAlt,faClipboardList, faChartLine } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown, faBars, faTimes, faClipboardList, faFileAlt, faUsers, faChartLine, faUser } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import axios from '../../services/axios';
 import { RootState } from '../../store';
+import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import ListPostulantes from '../Empresa/ListPostulantes';
+import Postulante from '../../../api/Postulante';
+import instance from '../../services/axios';
+import ListEmpresa from '../Empresa/ListEmpresa';
+import PerfilPModal from '../../components/PerfilPModal';
+import PerfilEModal from '../../components/PerfilEModal';
 
-interface Empresa {
-    id_empresa: number;
-    nombre_comercial: string;
-    logo: string;
+interface Postulante {
+    id_postulante: number
+    nombres: string
+    apellidos: string
+    foto: string
 }
+
+interface Idioma {
+    id_idioma: number;
+    idioma_nombre: string;
+    nivel_oral: string;
+    nivel_escrito: string;
+}
+
+interface Formacion {
+    id_titulo: number;
+    institucion: string;
+    estado: string;
+    fecha_ini: Date;
+    fecha_fin: Date;
+    titulo_acreditado: string;
+}
+
+interface Red {
+    id_postulante_red: number;
+    nombre_red: string;
+    enlace: string;
+}
+
+interface FormacionPro {
+    id_formacion_pro: number;
+    empresa: string;
+    puesto: string;
+    fecha_ini: Date;
+    fecha_fin: Date;
+    descripcion_responsabilidades: string;
+    persona_referencia: string;
+    contacto: string;
+    anios_e: number;
+    area: string;
+    mes_e: number;
+}
+
+interface Certificado {
+    id_certificado: number;
+    titulo: string;
+    certificado: string;
+}
+
+export interface PostulanteData {
+    postulante:{
+        id_postulante: number;
+        nombres: string;
+        apellidos: string;
+        fecha_nac: Date;
+        foto: string;
+        edad: number;
+        estado_civil: string;
+        cedula: string;
+        genero: string;
+        informacion_extra: string;
+        cv: string;
+    },
+    idiomas: Idioma[];
+    formaciones: Formacion[];
+    red: Red[];
+    formapro: FormacionPro[];
+    certificados: Certificado[];
+}
+
+
+interface Sector {
+    id: number;
+    sector: string;
+    division: string;
+}
+
+interface Red {
+    nombre_red: string;
+    enlace: string;
+}
+
+
+interface Ubicacion {
+    provincia: string;
+    canton: string;
+}
+
+export interface EmpresaData {
+    
+    nombre_comercial: string;
+    tamanio: string;
+    descripcion: string;
+    logo: string;
+    cantidad_empleados: number;
+    ubicacion: Ubicacion;
+    sector: Sector;    
+    red: Red[];
+}
+
+const initialPostulanteData: PostulanteData = {
+    postulante: {} as PostulanteData['postulante'],
+    idiomas: [],
+    formaciones: [],
+    red: [],
+    formapro: [],
+    certificados: []
+};
+
+
+const initialEmpresaData: EmpresaData = {
+    nombre_comercial: '',
+    tamanio: '',
+    descripcion: '',
+    logo: '',
+    cantidad_empleados: 0,
+    sector: {
+        id: 0, // Inicializa con valores apropiados
+        sector: '',
+        division: ''
+    },
+    ubicacion: {
+        provincia: '',
+        canton: ''
+    },
+    red: []
+};
 
 function EmpresaLayout() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -21,6 +150,31 @@ function EmpresaLayout() {
     const { user } = useSelector((state: RootState) => state.auth);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const dispatch = useDispatch();
+
+    //Controla lo que selecciona el usuario Postulante o empresa
+    const [select, setSelect] = useState(1);
+
+    //Postulantes -----------------------------------------------------------------------------------
+    const [query, setQuery] = useState(''); //Guardara el nombre y apellido del postulante
+    const [postulantes, setPostulantes] = useState<Postulante[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isModal, setIsmodal] = useState(false);
+
+    //modal para ver la información completa del postulante
+    const [isModalPost, setIsModalPost] = useState(false);
+    const [isLoadingPost, setIsLoadingPost] = useState(false);
+    const [dataPost, setDataPost] = useState<PostulanteData>(initialPostulanteData);
+
+    //Empresa -----------------------------------------------------------------------------------
+    const [queryEmpresa, setQueryEmpresa] = useState('');
+    const [empresas, setEmpresas] = useState<Empresa[]>([]);
+    const [isLoadingEmpresas, setIsLoadingEmpresas] = useState(false);
+    const [isModalEmpresas, setIsModalEmpresas] = useState(false);
+
+    //modal para ver la información completa del postulante
+    const [isModalEmpresa, setIsModalEmpresa] = useState(false);
+    const [isLoadingEmpresa, setIsLoadingEmpresa] = useState(false);
+    const [dataEmpresa, setDataEmpresa] = useState<EmpresaData>(initialEmpresaData);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -34,21 +188,6 @@ function EmpresaLayout() {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [dropdownRef]);
-
-    useEffect(() => {
-        const fetchEmpresa = async () => {
-            if (user) {
-                try {
-                    const response = await axios.get<Empresa>(`http://localhost:8000/api/empresaById/${user.id}`);
-                    setEmpresa(response.data);
-                } catch (err) {
-                    console.error('Error fetching empresa data:', err);
-                }
-            }
-        };
-
-        fetchEmpresa();
-    }, [user]);
 
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen);
@@ -68,12 +207,155 @@ function EmpresaLayout() {
         }
     };
 
+    useEffect(() => {
+        const fetchEmpresa = async () => {
+            if (user) {
+                try {
+                    const response = await axios.get<Empresa>(`http://localhost:8000/api/empresaById/${user.id}`);
+                    setEmpresa(response.data);
+                } catch (err) {
+                    console.error('Error fetching empresa data:', err);
+                }
+            }
+        };
+
+        fetchEmpresa();
+    }, [user]);
+
     const getLogoUrl = (logoPath: string) => {
         return logoPath.startsWith('http') ? logoPath : `http://localhost:8000/storage/${logoPath}`;
     };
 
+    //Busca a todos los postulantes
+    const searchPostulante = async () => {
+        try {
+            setIsLoading(true);
+            setIsmodal(true);
+            const { data } = await instance.get('postulanteByName', {
+                params: {
+                  'nombre_apellido': query
+                }
+            });
+
+            setPostulantes(data);
+
+        } catch (error) {
+            setPostulantes([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+      //Datos de la empresa
+      const searchEmpresa = async () => {
+        try {
+            setIsLoadingEmpresas(true);
+            setIsModalEmpresas(true);
+            console.log(queryEmpresa);
+            const { data } = await instance.get('getEmpresaByName', {
+                params: {
+                  'nombre_comercial': queryEmpresa
+                }
+            });
+        
+            setEmpresas(data);
+
+        } catch (error) {
+            console.log(error);
+            setEmpresas([]);
+        } finally {
+            setIsLoadingEmpresas(false);
+        }
+    }
+
+    //Evento para buscar cuando de enter:
+    const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            searchPostulante();
+        }
+    };
+
+    const handleKeyDownEmpresa = (event: KeyboardEvent<HTMLInputElement>) => {
+        if(event.key === 'Enter') {
+            searchEmpresa();
+        }
+    };
+
+    const closeModal = () => {
+        setIsmodal(false);
+    };
+
+    const closeModalEmpresa = () => {
+        setIsModalEmpresas(false);
+    };
+
+    //Comprueba si esta vacio el query para cerrar el modal
+    useEffect(() => {
+        if (!query) {
+            setIsmodal(false);
+        }
+        if(!queryEmpresa) {
+            setIsModalEmpresas(false);
+        }
+    }, [query, queryEmpresa]);
+
+    // Maneja el cambio de selección
+    const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        setSelect(Number(event.target.value));
+    };
+
+    //Use effect para limpiar la consulta
+    useEffect(() => {
+        if (select === 1) {
+            setQueryEmpresa('');  // Limpia el query relacionado con empresas
+            setEmpresas([]);
+            setIsModalEmpresas(false);
+        
+        } else if (select === 2) {
+            setQuery('');  
+            setPostulantes([]);
+            setIsmodal(false);
+        }
+    }, [select]);
+
+    //Función para traer los datos completos del postulante y abrir el modal
+    const getPostulante = async (postulanteData: Postulante) => {
+        try {
+            setIsLoadingPost(true);
+            setIsModalPost(true);
+
+            //Consulto a la API
+            const { data } = await Postulante.getDataPostulante(postulanteData.id_postulante);
+            setDataPost(data);
+            console.log(data);
+
+        } catch (error) {
+            console.log(error);
+
+        } finally {
+            setIsLoadingPost(false);
+        }
+    };
+
+    //Funcion para traer los datos completos de la empresa y abrir el modal
+    const getEmpresa = async (idEmpresa : Empresa['id_empresa']) =>  {
+        try {
+            setIsLoadingEmpresa(true);
+            setIsModalEmpresa(true);
+
+            const { data } = await instance.get(`getEmpresaById/${idEmpresa}`);
+            setDataEmpresa(data);
+            console.log(data);
+
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setIsLoadingEmpresa(false);
+        }
+    };
+
     return (
-        <div className="flex h-screen overflow-hidden" onClick={handleContentClick}>
+        <div className={`flex h-screen overflow-hidden ${(isModalPost || isModalEmpresa) && ' opacity-50'}`} onClick={handleContentClick}>
             {/* Lateral Nav */}
             <nav className={`bg-orange-700 text-white p-4 fixed top-16 bottom-0 lg:relative lg:translate-x-0 transition-transform transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:w-64 z-20`}>
                 <div className="flex flex-col items-center mb-4">
@@ -142,6 +424,118 @@ function EmpresaLayout() {
                     <div>
                         <span>ProaJob Empresa</span>
                     </div>
+
+                    <div className='w-1/2 relative'>
+                        <div className='bg-white rounded-lg text-gray-700 flex gap-1 p-2'>
+                            <MagnifyingGlassIcon className='w-5' />
+                            
+                            {
+                                select === 1 ?
+                                (
+                                    <input
+                                        type='text'
+                                        className='w-full focus:outline-none'
+                                        placeholder='Buscar postulante por el nombre, apellido'
+                                        onChange={(e) => setQuery(e.target.value)}
+                                        onKeyDown={handleKeyDown}
+                                        value={query}
+                                    />
+                                )
+                                :
+                                (
+                                    <input
+                                        type='text'
+                                        className='w-full focus:outline-none'
+                                        placeholder='Buscar empresa por el nombre comercial'
+                                        onChange={(e) => setQueryEmpresa(e.target.value)}
+                                        onKeyDown={handleKeyDownEmpresa}
+                                        value={queryEmpresa}
+                                    />
+                                )
+                                
+                            }
+              
+                            <select
+                                className='focus:outline-none'
+                                value={select}
+                                onChange={handleSelectChange}
+                            >
+                                <option value={1}>Postulantes</option>
+                                <option value={2}>Empresas</option>
+                            </select>
+
+                        </div>
+
+                        {/** Contenedor  para los resultados de la búsqueda de postulante*/
+                        
+                            isModal &&
+                            <div className='absolute w-full'>
+                                <div className='bg-white rounded-md p-2 mt-5 shadow-xl'>
+                                    <div className='flex justify-between text-gray-700 items-center mb-5'>
+
+                                        <p className='font-bold text-lg'>Lista de resultados</p>
+                                        <button onClick={closeModal}>
+                                            <XMarkIcon className='w-4' />
+                                        </button>
+                                    </div>
+
+                                    {
+                                        isLoading ?
+                                            <p className='text-center text-gray-700'>Cargando resultados...</p>
+                                            :
+                                            postulantes?.length > 0 ?
+                                                postulantes?.map(postulante => (
+                                                    <ListPostulantes
+                                                        key={postulante.id_postulante}
+                                                        postulante={postulante}
+                                                        getPostulante={getPostulante}
+                                                    />
+                                                ))
+                                                :
+                                                <p className='text-center font-bold text-red-500'>
+                                                    --------- No hay resultados ---------
+                                                </p>
+                                    }
+
+                                </div>
+                            </div>
+                        }
+
+                        {/** Contenedor  para los resultados de la búsqueda de empresas*/
+                            isModalEmpresas && 
+                            <div className='absolute w-full'>
+                                <div className='bg-white rounded-md p-2 mt-5 shadow-xl'>
+                                    <div className='flex justify-between text-gray-700 items-center mb-5'>
+
+                                        <p className='font-bold text-lg'>Lista de resultados</p>
+                                        <button onClick={closeModalEmpresa}>
+                                            <XMarkIcon className='w-4' />
+                                        </button>
+                                    </div>
+
+                                    {
+                                        isLoadingEmpresas ?
+                                            <p className='text-center text-gray-700'>Cargando resultados...</p>
+                                            :
+                                            empresas?.length > 0 ?
+                                                empresas?.map(empresa => (
+                                                    <ListEmpresa 
+                                                        key={empresa.id_empresa}
+                                                        empresa={empresa}
+                                                        getEmpresa={getEmpresa}
+                                                    />
+                                                ))
+                                                :
+                                                <p className='text-center font-bold text-red-500'>
+                                                    --------- No hay resultados ---------
+                                                </p>
+                                    }
+
+                                </div>
+                            </div>
+                        }
+                    </div>
+
                     <div className="relative" ref={dropdownRef}>
                         <button onClick={toggleDropdown} className="flex items-center focus:outline-none">
                             {empresa && (
@@ -175,6 +569,20 @@ function EmpresaLayout() {
                         <FontAwesomeIcon icon={sidebarOpen ? faTimes : faBars} />
                     </button>
                 </nav>
+
+                <PerfilPModal
+                    isModalPost={isModalPost}
+                    closeModal={() => setIsModalPost(false)}
+                    dataPost={dataPost}
+                    isLoadingPost={isLoadingPost}
+                />
+
+                <PerfilEModal
+                    isModalEmpresa={isModalEmpresa}
+                    closeModalEmpresa={() => setIsModalEmpresa(false)}
+                    dataEmpresa={dataEmpresa}
+                    isLoadingEmpresa={isLoadingEmpresa}
+                />
 
                 <div className="flex-1 p-4 mt-16 overflow-auto">
                     <Outlet />
