@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../../services/axios';
-import { AxiosError } from 'axios';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { RootState } from '../../store';
@@ -12,7 +11,7 @@ import EditCurso from '../../components/Postulante/EditCurso';
 import AddRedModal from '../../components/Postulante/AddRedModal';
 import AddIdiomaModal from '../../components/Postulante/AddIdiomaModal'; // Importa el modal
 import { FaLinkedin, FaFacebook, FaInstagram, FaXTwitter, FaGlobe } from 'react-icons/fa6'; // Importar íconos
-import jsPDF from 'jspdf';
+
 
 Modal.setAppElement('#root');
 

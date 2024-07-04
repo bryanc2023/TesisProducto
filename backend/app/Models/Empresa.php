@@ -47,14 +47,13 @@ class Empresa extends Model
     }
 
     public static function getIdEmpresaPorIdUsuario($idUsuario)
-{
-    $empresa = self::where('id_usuario', $idUsuario)->first();
-    return $empresa ? $empresa->id_empresa : null;
-}
+    {
+        $empresa = self::where('id_usuario', $idUsuario)->first();
+        return $empresa ? $empresa->id_empresa : null;
+    }
 
-public function red()
-{
-    return $this->hasMany(EmpresaRed::class, 'id_empresa_red');
-}
-    
+    public function red()
+    {
+        return $this->hasMany(EmpresaRed::class, 'id_empresa');
+    }
 }

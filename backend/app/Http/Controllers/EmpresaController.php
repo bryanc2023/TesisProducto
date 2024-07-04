@@ -178,4 +178,47 @@ class EmpresaController extends Controller
             return 'No definido';
         }
     }
-}
+    public function getEmpresaByName(Request $request)
+    {
+        try {
+            $nombreComercial = $request->input('nombre_comercial');
+
+            // Realizar la búsqueda con el comodín correcto
+            $empresa = Empresa::where('nombre_comercial', 'like', $nombreComercial.'%')->get();
+
+            // Verificar si no se encontraron empresas
+            if ($empresa->isEmpty()) {
+                return response()->json([
+                    'message' => 'No se encontró a la empresa',
+                ], 404);
+            }
+
+            // Devolver las empresas encontradas
+            return response()->json($empresa);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Error al buscar la empresa',
+                'error' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function getEmpresaById($id_empresa)
+    {
+        try {
+            // Obtén los datos de la empresa junto con sus relaciones
+            $empresa = Empresa::with(['usuario', 'ubicacion', 'sector', 'ofertas', 'red'])->find($id_empresa);
+    
+            if (!$empresa) {
+                return response()->json(['message' => 'Empresa no encontrada'], 404);
+            }
+    
+            return response()->json($empresa);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al obtener la empresa', 'error' => $e->getMessage()], 500);
+        }
+    }
+ }
+
