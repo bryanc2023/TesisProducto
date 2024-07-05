@@ -217,9 +217,9 @@ class PostulacionController extends Controller
 
             $postulacion->save();
             $usuario->notify(new Notificaciones(
-                'El postulante ' . $postulante->nombres . ' ha postulado a la oferta ' . $oferta->cargo, 
                 'Nueva postulacion', 
-                $postulante->nombres
+                'El postulante ' . $postulante->nombres .' '. $postulante->apellidos, ' ha postulado a la oferta ' . $oferta->cargo, 
+                $postulante->nombres.' '. $postulante->apellidos
             ));
             
             // Devolver la respuesta exitosa

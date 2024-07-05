@@ -146,7 +146,7 @@ Route::get('/postulaciones-por-mes', [EmpresaGestoraController::class, 'getPostu
 //Rutas de notificaciones
 Route::get('/notificaciones', [NotificacionesController::class, 'index']);
 Route::post('/notificaciones/{id}', [NotificacionesController::class, 'marcarLeida']);
-Route::post('/notificaciones', [NotificacionesController::class, 'marcarTodasLeidas']);
+Route::post('/notificacionesL', [NotificacionesController::class, 'marcarTodasLeidas']);
 
 
 Route::middleware('auth:api')->group(function () {

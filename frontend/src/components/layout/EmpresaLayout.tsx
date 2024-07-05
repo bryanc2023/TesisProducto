@@ -6,13 +6,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import axios from '../../services/axios';
 import { RootState } from '../../store';
-import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/solid'
+import { BellIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import ListPostulantes from '../Empresa/ListPostulantes';
 import instance from '../../services/axios';
 import ListEmpresa from '../Empresa/ListEmpresa';
 import PerfilPModal from '../../components/PerfilPModal';
 import PerfilEModal from '../../components/PerfilEModal';
 import Postulante from '../../../api/Postulante';
+import { dataNotificable, DataNotifyApi } from '../../types/NotifyType';
 
 interface Empresa {
     id_empresa: number;
@@ -21,10 +22,10 @@ interface Empresa {
 }
 
 interface Postulante {
-    id_postulante: number
-    nombres: string
-    apellidos: string
-    foto: string
+    id_postulante: number;
+    nombres: string;
+    apellidos: string;
+    foto: string;
 }
 
 interface Idioma {
@@ -70,7 +71,7 @@ interface Certificado {
 }
 
 export interface PostulanteData {
-    postulante:{
+    postulante: {
         id_postulante: number;
         nombres: string;
         apellidos: string;
@@ -101,21 +102,19 @@ interface Red {
     enlace: string;
 }
 
-
 interface Ubicacion {
     provincia: string;
     canton: string;
 }
 
 interface EmpresaData {
-    
     nombre_comercial: string;
     tamanio: string;
     descripcion: string;
     logo: string;
     cantidad_empleados: number;
     ubicacion: Ubicacion;
-    sector: Sector;    
+    sector: Sector;
     red: Red[];
 }
 
@@ -135,7 +134,7 @@ const initialEmpresaData: EmpresaData = {
     logo: '',
     cantidad_empleados: 0,
     sector: {
-        id: 0, // Inicializa con valores apropiados
+        id: 0,
         sector: '',
         division: ''
     },
@@ -152,38 +151,46 @@ function EmpresaLayout() {
     const [empresa, setEmpresa] = useState<Empresa | null>(null);
     const { user } = useSelector((state: RootState) => state.auth);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const notifyRef = useRef<HTMLDivElement>(null);
+    const searchRef = useRef<HTMLDivElement>(null);
 
-    //Controla lo que selecciona el usuario Postulante o empresa
-    const [select, setSelect] = useState(1)
+    const [select, setSelect] = useState(1);
 
-    //Postulantes -----------------------------------------------------------------------------------
-    const [query, setQuery] = useState('') //Guardara el nombre y apellido del postulante
-    const [postulantes, setPostulantes] = useState<Postulante[]>([])
-    const [isLoading, setIsLoading] = useState(false)
-    const [isModal, setIsmodal] = useState(false)
+    const [query, setQuery] = useState('');
+    const [postulantes, setPostulantes] = useState<Postulante[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isModal, setIsmodal] = useState(false);
 
-    //modal para ver la información completa del postulante
-    const [isModalPost, setIsModalPost] = useState(false)
-    const [isLoadingPost, setIsLoadingPost] = useState(false)
-    const [dataPost, setDataPost] = useState<PostulanteData>(initialPostulanteData)
+    const [isModalPost, setIsModalPost] = useState(false);
+    const [isLoadingPost, setIsLoadingPost] = useState(false);
+    const [dataPost, setDataPost] = useState<PostulanteData>(initialPostulanteData);
 
-    //Empresa -----------------------------------------------------------------------------------
-    const [queryEmpresa, setQueryEmpresa] = useState('')
-    const [empresas, setEmpresas] = useState<Empresa[]>([])
-    const [isLoadingEmpresas, setIsLoadingEmpresas] = useState(false)
-    const [isModalEmpresas, setIsModalEmpresas] = useState(false)
+    const [queryEmpresa, setQueryEmpresa] = useState('');
+    const [empresas, setEmpresas] = useState<Empresa[]>([]);
+    const [isLoadingEmpresas, setIsLoadingEmpresas] = useState(false);
+    const [isModalEmpresas, setIsModalEmpresas] = useState(false);
 
-    //modal para ver la información completa del postulante
-    const [isModalEmpresa, setIsModalEmpresa] = useState(false)
-    const [isLoadingEmpresa, setIsLoadingEmpresa] = useState(false)
-    const [dataEmpresa, setDataEmpresa] = useState<EmpresaData>(initialEmpresaData)
+    const [isModalEmpresa, setIsModalEmpresa] = useState(false);
+    const [isLoadingEmpresa, setIsLoadingEmpresa] = useState(false);
+    const [dataEmpresa, setDataEmpresa] = useState<EmpresaData>(initialEmpresaData);
+
+    const [notificaciones, setNotificaciones] = useState<dataNotificable[]>([]);
+    const [loadNotificaciones, setLoadNotificaiones] = useState(false);
+    const [isModalNotify, setIsModalNotify] = useState(false);
 
     const dispatch = useDispatch();
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+            if (
+                dropdownRef.current && !dropdownRef.current.contains(event.target as Node) &&
+                notifyRef.current && !notifyRef.current.contains(event.target as Node) &&
+                searchRef.current && !searchRef.current.contains(event.target as Node)
+            ) {
                 setDropdownOpen(false);
+                setIsModalNotify(false);
+                setIsmodal(false);
+                setIsModalEmpresas(false);
             }
         };
 
@@ -191,7 +198,7 @@ function EmpresaLayout() {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [dropdownRef]);
+    }, []);
 
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen);
@@ -226,51 +233,44 @@ function EmpresaLayout() {
         return logoPath.startsWith('http') ? logoPath : `http://localhost:8000/storage/${logoPath}`;
     };
 
-    //Busca a todos los postulantes
     const searchPostulante = async () => {
         try {
-            setIsLoading(true)
-            setIsmodal(true)
+            setIsLoading(true);
+            setIsmodal(true);
             const { data } = await instance.get('postulanteByName', {
                 params: {
                     'nombre_apellido': query
                 }
             });
 
-            setPostulantes(
-                data
-            )
-
+            setPostulantes(data);
         } catch (error) {
             setPostulantes([]);
         } finally {
-            setIsLoading(false)
+            setIsLoading(false);
         }
-    }
+    };
 
-    //Datos de la emprsa
     const searchEmpresa = async () => {
         try {
-            setIsLoadingEmpresas(true)
-            setIsModalEmpresas(true)
-            
+            setIsLoadingEmpresas(true);
+            setIsModalEmpresas(true);
+
             const { data } = await instance.get('getEmpresaByName', {
                 params: {
                     'nombre_comercial': queryEmpresa
                 }
             });
 
-            setEmpresas(data)
-
+            setEmpresas(data);
         } catch (error) {
-            console.log(error)
-            setEmpresas([])
+            console.log(error);
+            setEmpresas([]);
         } finally {
-            setIsLoadingEmpresas(false)
+            setIsLoadingEmpresas(false);
         }
-    }
+    };
 
-    //Evento para buscar cuando de enter:
     const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
             searchPostulante();
@@ -279,87 +279,132 @@ function EmpresaLayout() {
 
     const handleKeyDownEmpresa = (event: KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
-            searchEmpresa()
+            searchEmpresa();
         }
-    }
+    };
 
     const closeModal = () => {
-        setIsmodal(false)
-    }
+        setIsmodal(false);
+    };
 
     const closeModalEmpresa = () => {
-        setIsModalEmpresas(false)
-    }
+        setIsModalEmpresas(false);
+    };
 
-    //Comprueba si esta vacio el query para cerrar el modal
     useEffect(() => {
         if (!query) {
-            setIsmodal(false)
+            setIsmodal(false);
         }
         if (!queryEmpresa) {
-            setIsModalEmpresas(false)
+            setIsModalEmpresas(false);
         }
-    }, [query, queryEmpresa])
+    }, [query, queryEmpresa]);
 
-    // Maneja el cambio de selección
     const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setSelect(Number(event.target.value));
     };
 
-    //Use effect para limpiar la consulta
     useEffect(() => {
         if (select === 1) {
-            setQueryEmpresa('');  // Limpia el query relacionado con empresas
-            setEmpresas([])
-            setIsModalEmpresas(false)
-
+            setQueryEmpresa('');
+            setEmpresas([]);
+            setIsModalEmpresas(false);
         } else if (select === 2) {
             setQuery('');
             setPostulantes([]);
             setIsmodal(false);
         }
-
     }, [select]);
 
-    //Función para traer los datos completos del postulante y abrir el modal
     const getPostulante = async (postulanteData: Postulante) => {
         try {
-            setIsLoadingPost(true)
-            setIsModalPost(true)
+            setIsLoadingPost(true);
+            setIsModalPost(true);
 
-            //Consulto a la API
-            const { data } = await Postulante.getDataPostulante(postulanteData.id_postulante)
-            setDataPost(data)
-         
-
+            const { data } = await Postulante.getDataPostulante(postulanteData.id_postulante);
+            setDataPost(data);
         } catch (error) {
-            console.log(error)
-
+            console.log(error);
         } finally {
-            setIsLoadingPost(false)
+            setIsLoadingPost(false);
         }
-    }
+    };
 
-    //Funcion para traer los datos completos de la empresa y abrir el modal
     const getEmpresa = async (idEmpresa: Empresa['id_empresa']) => {
         try {
-            setIsLoadingEmpresa(true)
-            setIsModalEmpresa(true)
+            setIsLoadingEmpresa(true);
+            setIsModalEmpresa(true);
 
-            const { data } = await instance.get(`getEmpresaById/${idEmpresa}`)
-            setDataEmpresa(data)
-            
-
+            const { data } = await instance.get(`getEmpresaById/${idEmpresa}`);
+            setDataEmpresa(data);
         } catch (error) {
-            console.log(error)
+            console.log(error);
         } finally {
-            setIsLoadingEmpresa(false)
+            setIsLoadingEmpresa(false);
         }
-    }
+    };
+
+    const getNotificaciones = async () => {
+        try {
+            setLoadNotificaiones(true);
+            const { data } = await instance.get<DataNotifyApi[]>('notificaciones');
+            const notify = data.map(notification => ({
+                ...notification.data,
+                id: notification.id
+            }));
+
+            setNotificaciones(notify);
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+        } finally {
+            setLoadNotificaiones(false);
+        }
+    };
+
+    const marcarLeida = async (id: string) => {
+        try {
+            await instance.post(`/notificaciones/${id}`);
+            setNotificaciones(notificaciones.filter(notificacion => notificacion.id !== id));
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+        }
+    };
+
+    const marcarTodasLeidas = async () => {
+        try {
+            await instance.post('/notificacionesL');
+            setNotificaciones([]);
+        } catch (error) {
+            console.error('Error marking all notifications as read:', error);
+        }
+    };
+
+    const openModalNotify = () => {
+        setIsModalNotify(true);
+    };
+
+    useEffect(() => {
+        getNotificaciones();
+    }, []);
+
+    useEffect(() => {
+        if (query.trim() !== '') {
+            searchPostulante();
+        } else {
+            setPostulantes([]);
+        }
+    }, [query]);
+
+    useEffect(() => {
+        if (queryEmpresa.trim() !== '') {
+            searchEmpresa();
+        } else {
+            setEmpresas([]);
+        }
+    }, [queryEmpresa]);
 
     return (
-        <div className={`flex h-screen overflow-hidden ${(isModalPost || isModalEmpresa) && ' opacity-50'}`} onClick={handleContentClick}>
-            {/* Lateral Nav */}
+        <div className={`flex h-screen overflow-hidden ${(isModalPost || isModalEmpresa) && 'opacity-50'}`} onClick={handleContentClick}>
             <nav className={`bg-orange-700 text-white p-4 fixed top-16 bottom-0 lg:relative lg:translate-x-0 transition-transform transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:w-64 z-20`}>
                 <div className="flex flex-col items-center mb-4">
                     {empresa && (
@@ -399,43 +444,35 @@ function EmpresaLayout() {
                 </ul>
             </nav>
 
-            {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-auto">
-                {/* Top Nav */}
                 <nav className="bg-orange-700 text-white p-4 flex justify-between items-center gap-2 w-full fixed top-0 left-0 right-0 z-30">
                     <div>
                         <span className=' font-bold'>ProaJob Empresa</span>
                     </div>
 
-                    <div className=' w-1/2 relative'>
+                    <div className=' w-1/2 relative' ref={searchRef}>
                         <div className=' bg-white rounded-lg text-gray-700 flex gap-1 p-2'>
                             <MagnifyingGlassIcon className=' w-5' />
 
-                            {
-                                select === 1 ?
-                                    (
-                                        <input
-                                            type='text'
-                                            className=' w-full focus:outline-none'
-                                            placeholder='Buscar postulante por el nombre, apellido'
-                                            onChange={(e) => setQuery(e.target.value)}
-                                            onKeyDown={handleKeyDown}
-                                            value={query}
-                                        />
-                                    )
-                                    :
-                                    (
-                                        <input
-                                            type='text'
-                                            className=' w-full focus:outline-none'
-                                            placeholder='Buscar postulante por el nombre de la empresa'
-                                            onChange={(e) => setQueryEmpresa(e.target.value)}
-                                            onKeyDown={handleKeyDownEmpresa}
-                                            value={queryEmpresa}
-                                        />
-                                    )
-
-                            }
+                            {select === 1 ? (
+                                <input
+                                    type='text'
+                                    className=' w-full focus:outline-none'
+                                    placeholder='Buscar postulante por el nombre, apellido'
+                                    onChange={(e) => setQuery(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    value={query}
+                                />
+                            ) : (
+                                <input
+                                    type='text'
+                                    className=' w-full focus:outline-none'
+                                    placeholder='Buscar postulante por el nombre de la empresa'
+                                    onChange={(e) => setQueryEmpresa(e.target.value)}
+                                    onKeyDown={handleKeyDownEmpresa}
+                                    value={queryEmpresa}
+                                />
+                            )}
 
                             <select
                                 className='focus:outline-none'
@@ -445,85 +482,117 @@ function EmpresaLayout() {
                                 <option value={1}>Postulantes</option>
                                 <option value={2}>Empresas</option>
                             </select>
-
                         </div>
 
-                        {/** Contenedor  para los resultados de la busqueda de postulante */
-
-                            isModal &&
+                        {isModal && (
                             <div className=' absolute w-full'>
                                 <div className=' bg-white rounded-md p-2 mt-5 shadow-xl'>
                                     <div className=' flex justify-between text-gray-700 items-center mb-5'>
-
                                         <p className=' font-bold text-lg'> Lista de resultados </p>
                                         <button onClick={closeModal}>
                                             <XMarkIcon className=' w-4' />
                                         </button>
                                     </div>
 
-
-                                    {
-                                        isLoading ?
-                                            <p className=' text-center text-white'>cargando resultados</p>
-                                            :
-                                            postulantes?.length > 0 ?
-                                                postulantes?.map(postulante => (
-                                                    <ListPostulantes
-                                                        key={postulante.id_postulante}
-                                                        postulante={postulante}
-                                                        getPostulante={getPostulante}
-                                                    />
-                                                ))
-                                                :
-                                                <p className=' text-center font-bold text-red-500 '>
-                                                    --------- No hay resultados ---------
-                                                </p>
-
-                                    }
-
+                                    {isLoading ? (
+                                        <p className=' text-center text-white'>cargando resultados</p>
+                                    ) : postulantes?.length > 0 ? (
+                                        postulantes?.map(postulante => (
+                                            <ListPostulantes
+                                                key={postulante.id_postulante}
+                                                postulante={postulante}
+                                                getPostulante={getPostulante}
+                                            />
+                                        ))
+                                    ) : (
+                                        <p className=' text-center font-bold text-red-500 '>
+                                            --------- No hay resultados ---------
+                                        </p>
+                                    )}
                                 </div>
                             </div>
-                        }
+                        )}
 
-                        {/** Contenedor  para los resultados de la busqueda de empresas */
-                            isModalEmpresas &&
+                        {isModalEmpresas && (
                             <div className=' absolute w-full'>
                                 <div className=' bg-white rounded-md p-2 mt-5 shadow-xl'>
                                     <div className=' flex justify-between text-gray-700 items-center mb-5'>
-
                                         <p className=' font-bold text-lg'> Lista de resultados </p>
                                         <button onClick={closeModalEmpresa}>
                                             <XMarkIcon className=' w-4' />
                                         </button>
                                     </div>
 
-
-                                    {
-                                        isLoadingEmpresas ?
-                                            <p className=' text-center text-white'>cargando resultados</p>
-                                            :
-                                            empresas?.length > 0 ?
-                                                empresas?.map(empresa => (
-                                                    <ListEmpresa
-                                                        key={empresa.id_empresa}
-                                                        empresa={empresa}
-                                                        getEmpresa={getEmpresa}
-
-                                                    />
-                                                ))
-                                                :
-                                                <p className=' text-center font-bold text-red-500 '>
-                                                    --------- No hay resultados ---------
-                                                </p>
-
-                                    }
-
+                                    {isLoadingEmpresas ? (
+                                        <p className=' text-center text-white'>cargando resultados</p>
+                                    ) : empresas?.length > 0 ? (
+                                        empresas?.map(empresa => (
+                                            <ListEmpresa
+                                                key={empresa.id_empresa}
+                                                empresa={empresa}
+                                                getEmpresa={getEmpresa}
+                                            />
+                                        ))
+                                    ) : (
+                                        <p className=' text-center font-bold text-red-500 '>
+                                            --------- No hay resultados ---------
+                                        </p>
+                                    )}
                                 </div>
                             </div>
-                        }
+                        )}
                     </div>
 
-                    <div className="relative" ref={dropdownRef}>
+                    <div className="relative flex gap-2 items-center" ref={dropdownRef}>
+                        <div className=' relative' ref={notifyRef}>
+                            <button onClick={() => openModalNotify()}>
+                                <BellIcon
+                                    className=' w-6'
+                                />
+                                {notificaciones.length > 0 && (
+                                    <span className="bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2">
+                                        {notificaciones.length}
+                                    </span>
+                                )}
+                            </button>
+
+                            {isModalNotify && (
+                                <div className=' absolute bg-white top-10 w-80 -left-56 p-5 shadow-xl rounded-lg'>
+                                    <div className=' flex  justify-between text-orange-500'>
+                                        <h3 className=' text-center text-lg font-semibold '>Notificaciones</h3>
+                                        <button onClick={() => setIsModalNotify(false)}>
+                                            <XMarkIcon
+                                                className=' w-6'
+                                            />
+                                        </button>
+                                    </div>
+                                    {notificaciones.length > 0 ? (
+                                        notificaciones.map(notificacion => (
+                                            <div key={notificacion.id} className=' bg-gray-50 p-2 my-2 rounded-lg'>
+                                                <p className=' font-semibold text-gray-700'>{notificacion.mensaje}</p>
+                                                
+                                                <p className=' text-gray-500'>{notificacion.asunto}</p>
+                                                <p className=' text-gray-500'>{notificacion.destinatario}</p>
+                                                <button 
+                                                    className="text-blue-500 text-sm"
+                                                    onClick={() => marcarLeida(notificacion.id)}
+                                                >
+                                                    Marcar como leída
+                                                </button>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className=' text-center text-gray-500'>No hay notificaciones</p>
+                                    )}
+                                    <button 
+                                        className="bg-blue-500 text-white py-2 px-4 rounded mt-2 w-full"
+                                        onClick={marcarTodasLeidas}
+                                    >
+                                        Marcar todas como leídas
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                         <button onClick={toggleDropdown} className="flex items-center focus:outline-none">
                             {empresa && (
                                 <img
@@ -536,7 +605,7 @@ function EmpresaLayout() {
                             <FontAwesomeIcon icon={faChevronDown} className="ml-2" />
                         </button>
                         {dropdownOpen && (
-                            <ul className="absolute right-0 mt-2 w-48 bg-white text-black shadow-lg rounded-md overflow-hidden z-20">
+                            <ul className="absolute right-0 mt-2 w-48 bg-white text-black shadow-lg rounded-md overflow-hidden z-20" style={{ top: '100%', right: '0' }}>
                                 <li className="px-4 py-2 hover:bg-gray-200 rounded-md">
                                     <Link to="/employer/profile">Profile</Link>
                                 </li>
@@ -551,6 +620,7 @@ function EmpresaLayout() {
                                 </li>
                             </ul>
                         )}
+
                     </div>
                     <button className="lg:hidden flex items-center focus:outline-none" onClick={toggleSidebar}>
                         <FontAwesomeIcon icon={sidebarOpen ? faTimes : faBars} />

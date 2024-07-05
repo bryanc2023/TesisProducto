@@ -15,8 +15,26 @@ class NotificacionesController extends Controller
 
     public function index()
     {
-        $notificaciones = auth()->user()->unreadNotifications;
-        return response()->json($notificaciones);
+        try {
+            $notificaciones = auth()->user()->unreadNotifications;
+       
+            if ($notificaciones->isEmpty()) {
+                return response()->json(['message' => 'No hay notificaciones'], 404);
+            }
+
+            return response()->json($notificaciones);
+
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'message' => 'Error al obtener las notificaciones',
+                    'error' => $th->getMessage()
+                ],
+                
+                500
+            );
+        }
+ 
     }
 
     public function marcarLeida($id)
