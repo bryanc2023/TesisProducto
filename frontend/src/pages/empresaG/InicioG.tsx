@@ -96,7 +96,7 @@ function VerOfertasPPage() {
 
     return (
         <div className="w-full p-4">
-            <div className="mb-4 text-center">
+             <div className="mb-4 text-center max-w-screen-lg mx-auto">
                 <h1 className="text-3xl font-bold mb-4 flex justify-center items-center text-orange-500 ml-2">
                     GESTIÓN DE OFERTAS
                     <FiEdit className="text-orange-500 ml-2" />
@@ -108,18 +108,20 @@ function VerOfertasPPage() {
                     {/* Tarjeta para filtros y botón de mostrar todas */}
                     <div className="bg-gray-100 p-4 rounded-lg shadow-md max-w-xl text-center flex-grow">
                         {/* Sección de filtro por fecha */}
-                        <div className="flex items-center mb-4 space-x-5">
-                            <label htmlFor="selectFecha" className="mr-2 font-semibold text-orange-500">Selecciona una fecha de publicación:</label>
+                        <div className="bg-gray-100 p-4 rounded-lg shadow-md max-w-xl mx-auto text-center flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-5">
+                            <label htmlFor="selectFecha" className="block sm:inline-block sm:mr-2 font-semibold text-orange-500 text-center sm:text-left">
+                                Selecciona una fecha de publicación:
+                            </label>
                             <input
                                 type="date"
                                 id="selectFecha"
-                                className="px-2 py-1 border border-gray-300 rounded"
+                                className="px-2 py-1 border border-gray-300 rounded w-full sm:w-auto"
                                 value={selectedFecha}
                                 onChange={(e) => setSelectedFecha(e.target.value)}
                             />
                             <button
                                 onClick={handleFilterByFecha}
-                                className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+                                className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 w-full sm:w-auto"
                             >
                                 Filtrar
                             </button>
@@ -145,7 +147,7 @@ function VerOfertasPPage() {
                         <h1 className="text-2xl font-semibold text-blue-500">OFERTAS PUBLICADAS:</h1>
                     </div>
                    
-                    <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+                    <div className="mb-4 text-center max-w-screen-lg mx-auto">
                         <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                             <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
