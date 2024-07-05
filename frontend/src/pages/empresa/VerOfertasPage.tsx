@@ -104,24 +104,25 @@ function VerOfertasPPage() {
                 <p>En esta sección te mostramos todas las ofertas creadas hasta el momento, puedes seleccionar una fecha de publicación para filtrar la lista de ofertas publicadas manejarte de mejor manera</p>
     
                 <div className="flex justify-center items-center mt-4 space-x-4">
-                    <div className="bg-gray-100 p-4 rounded-lg shadow-md max-w-xl text-center flex-grow">
-                        <div className="flex items-center mb-4 space-x-5">
-                            <label htmlFor="selectFecha" className="mr-2 font-semibold text-orange-500">Selecciona una fecha de publicación:</label>
-                            <input
-                                type="date"
-                                id="selectFecha"
-                                className="px-2 py-1 border border-gray-300 rounded"
-                                value={selectedFecha}
-                                onChange={(e) => setSelectedFecha(e.target.value)}
-                            />
-                            <button
-                                onClick={handleFilterByFecha}
-                                className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-                            >
-                                Filtrar
-                            </button>
-                        </div>
-                    </div>
+                <div className="bg-gray-100 p-4 rounded-lg shadow-md max-w-xl mx-auto text-center flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-5">
+                    <label htmlFor="selectFecha" className="block sm:inline-block sm:mr-2 font-semibold text-orange-500 text-center sm:text-left">
+                        Selecciona una fecha de publicación:
+                    </label>
+                    <input
+                        type="date"
+                        id="selectFecha"
+                        className="px-2 py-1 border border-gray-300 rounded w-full sm:w-auto"
+                        value={selectedFecha}
+                        onChange={(e) => setSelectedFecha(e.target.value)}
+                    />
+                    <button
+                        onClick={handleFilterByFecha}
+                        className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 w-full sm:w-auto"
+                    >
+                        Filtrar
+                    </button>
+                </div>
+
     
                     <div className="bg-gray-100 p-4 rounded-lg shadow-md max-w-xl text-center">
                         <Link to="/add-oferta" className="bg-orange-500 text-white py-2 px-4 rounded hover:bg-orange-600 flex items-center justify-center">
