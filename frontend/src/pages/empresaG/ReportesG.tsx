@@ -184,7 +184,7 @@ const Reportes: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="mb-4 text-center max-w-screen-lg mx-auto">
       <h2 className="text-2xl font-bold mb-4">Generar Reportes</h2>
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Reporte</label>

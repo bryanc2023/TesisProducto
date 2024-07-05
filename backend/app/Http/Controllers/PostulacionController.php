@@ -9,9 +9,12 @@ use App\Models\Postulacion;
 use App\Models\Postulante;
 use App\Models\Titulo;
 use App\Models\Ubicacion;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Notifications\Notificaciones;
+use Illuminate\Support\Facades\Notification;
 
 class PostulacionController extends Controller
 {
@@ -24,8 +27,11 @@ class PostulacionController extends Controller
                 'sueldo' => 'nullable|integer',
             ]);
 
-
-
+            // Buscar el id de usuario de la empresa
+            $oferta = Oferta::findOrFail($request->id_oferta);
+            $empresa = Empresa::findOrFail($oferta->id_empresa);
+            $usuario = User::findOrFail($empresa->id_usuario);
+          
             $postulante = Postulante::where('id_usuario', $request->id_postulante)->first();
             if (!$postulante) {
                 return response()->json(['error' => 'Postulante no encontrado'], 404);
@@ -210,7 +216,12 @@ class PostulacionController extends Controller
             $postulacion->total_evaluacion = $matchingTitlesCount + $matchingCriteriaCount + $matchingFormacionesCount + $matchingSueldo;
 
             $postulacion->save();
-
+            $usuario->notify(new Notificaciones(
+                'El postulante ' . $postulante->nombres . ' ha postulado a la oferta ' . $oferta->cargo, 
+                'Nueva postulacion', 
+                $postulante->nombres
+            ));
+            
             // Devolver la respuesta exitosa
             return response()->json([
                 'message' => 'Postulacion registrada exitosamente',
@@ -239,6 +250,7 @@ class PostulacionController extends Controller
         return response()->json(['message' => 'Postulante:', 'Postulante' => $postulante], 201);
     }
 
+    
 
     public function getPostulacionPostulante($id, Request $request)
 {

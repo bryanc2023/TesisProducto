@@ -18,6 +18,7 @@ use App\Http\Controllers\PostulanteRedController;
 use App\Http\Controllers\EmpresaRedController;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\EmpresaGestoraController;
+use App\Http\Controllers\NotificacionesController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -142,6 +143,10 @@ Route::get('/ofertas-por-mes', [EmpresaGestoraController::class, 'getOfertasPorM
 Route::get('/usuarios-registrados-por-mes', [EmpresaGestoraController::class, 'getUsuariosRegistradosPorMes']);
 Route::get('/postulaciones-por-mes', [EmpresaGestoraController::class, 'getPostulacionesPorMes']);
 
+//Rutas de notificaciones
+Route::get('/notificaciones', [NotificacionesController::class, 'index']);
+Route::post('/notificaciones/{id}', [NotificacionesController::class, 'marcarLeida']);
+Route::post('/notificaciones', [NotificacionesController::class, 'marcarTodasLeidas']);
 
 
 Route::middleware('auth:api')->group(function () {

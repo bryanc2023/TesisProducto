@@ -13,6 +13,4 @@ class UserController extends Controller
         return response()->json(compact('users'),200);
     }
 
-   
-
 }

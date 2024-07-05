@@ -96,18 +96,15 @@ function VerOfertasPPage() {
 
     return (
         <div className="w-full p-4">
-            <div className="mb-4 text-center">
+            <div className="mb-4 text-center max-w-screen-lg mx-auto">
                 <h1 className="text-3xl font-bold mb-4 flex justify-center items-center text-orange-500 ml-2">
                     GESTIÓN DE OFERTAS
                     <FiEdit className="text-orange-500 ml-2" />
                 </h1>
                 <p>En esta sección te mostramos todas las ofertas creadas hasta el momento, puedes seleccionar una fecha de publicación para filtrar la lista de ofertas publicadas manejarte de mejor manera</p>
-
-                {/* Sección de filtro por fecha y tarjeta para botón de agregar nueva oferta y mostrar todas */}
+    
                 <div className="flex justify-center items-center mt-4 space-x-4">
-                    {/* Tarjeta para filtros y botón de mostrar todas */}
                     <div className="bg-gray-100 p-4 rounded-lg shadow-md max-w-xl text-center flex-grow">
-                        {/* Sección de filtro por fecha */}
                         <div className="flex items-center mb-4 space-x-5">
                             <label htmlFor="selectFecha" className="mr-2 font-semibold text-orange-500">Selecciona una fecha de publicación:</label>
                             <input
@@ -125,27 +122,23 @@ function VerOfertasPPage() {
                             </button>
                         </div>
                     </div>
-
-                    {/* Tarjeta para botón de agregar nueva oferta */}
+    
                     <div className="bg-gray-100 p-4 rounded-lg shadow-md max-w-xl text-center">
                         <Link to="/add-oferta" className="bg-orange-500 text-white py-2 px-4 rounded hover:bg-orange-600 flex items-center justify-center">
                             <FiPlus className="mr-2" /> Publicar Nueva Oferta
                         </Link>
                     </div>
                 </div>
-
-
-
             </div>
             {ofertas.length > 0 ? (
                 <>
                     <hr className="my-4" />
-                    <div className="flex items-center justify-center mb-4">
+                    <div className="flex items-center justify-center mb-4 max-w-screen-lg mx-auto">
                         <FaBriefcase className="text-blue-500 text-2xl mr-2" />
                         <h1 className="text-2xl font-semibold text-blue-500">OFERTAS PUBLICADAS:</h1>
                     </div>
-                   
-                    <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+    
+                    <div className="relative overflow-x-auto shadow-md sm:rounded-lg max-w-screen-lg mx-auto">
                         <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                             <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
@@ -174,8 +167,7 @@ function VerOfertasPPage() {
                                                 onClick={() => handleVerDetalles(oferta)}
                                                 className="flex items-center text-blue-600 hover:text-blue-900"
                                             >
-                                                <FiEye className="w-4 h-4 mr-1" /> {/* Reemplaza FiEye con el ícono que desees */}
-                                                Ver
+                                                <FiEye className="w-4 h-4 mr-1" /> Ver
                                             </button>
                                         </td>
                                     </tr>
@@ -183,11 +175,9 @@ function VerOfertasPPage() {
                             </tbody>
                         </table>
                     </div>
-
-
-                    {/* Paginación */}
+    
                     {ofertas.length > ofertasPerPage && (
-                        <div className="mt-4 flex justify-end">
+                        <div className="mt-4 flex justify-end max-w-screen-lg mx-auto">
                             <nav className="relative z-0 inline-flex shadow-sm rounded-md">
                                 <a
                                     href="#"
@@ -218,16 +208,13 @@ function VerOfertasPPage() {
                             </nav>
                         </div>
                     )}
-
                 </>
             ) : (
                 <div className="text-center mt-4">
                     <p className="text-lg text-gray-600">Aún no has publicado ninguna oferta.</p>
                 </div>
             )}
-
-
-            {/* Mostrar detalles de la oferta seleccionada */}
+    
             {selectedOferta && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center overflow-x-auto bg-black bg-opacity-50">
                     <div className="bg-white rounded-lg p-8 max-w-3xl w-full overflow-y-auto">
@@ -237,8 +224,7 @@ function VerOfertasPPage() {
                         <p><strong>Área: </strong>{selectedOferta.areas.nombre_area}</p>
                         <p><strong>Carga Horaria: </strong>{selectedOferta.carga_horaria}</p>
                         <p><strong>Experiencia Mínima: </strong>{selectedOferta.experiencia}</p>
-
-                        {/* Mostrar criterios si existen */}
+    
                         {selectedOferta.criterios.length > 0 && (
                             <>
                                 <h3 className="text-lg font-semibold mt-4 mb-2">Criterios:</h3>
@@ -251,8 +237,7 @@ function VerOfertasPPage() {
                                 </ul>
                             </>
                         )}
-
-                        {/* Mostrar experiencia si existe */}
+    
                         {selectedOferta.expe.length > 0 && (
                             <>
                                 <h3 className="text-lg font-semibold mt-4 mb-2">Experiencia:</h3>
@@ -265,13 +250,11 @@ function VerOfertasPPage() {
                                 </ul>
                             </>
                         )}
-
-                        {/* Mostrar 'Ninguno' si no hay criterios ni experiencia */}
+    
                         {selectedOferta.criterios.length === 0 && selectedOferta.expe.length === 0 && (
                             <p className="mt-4">Ningún criterio o experiencia especificada para esta oferta.</p>
                         )}
-
-                        {/* Botón para cerrar el modal */}
+    
                         <button
                             onClick={handleCloseModal}
                             className="bg-gray-300 text-gray-700 py-2 px-4 mt-4 rounded hover:bg-gray-400"
@@ -283,6 +266,7 @@ function VerOfertasPPage() {
             )}
         </div>
     );
+    
 }
 
 export default VerOfertasPPage;

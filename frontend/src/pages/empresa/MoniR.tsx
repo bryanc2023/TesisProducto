@@ -113,7 +113,7 @@ const RecruitmentDashboard = () => {
     };
 
     return (
-        <div className="w-full p-4">
+        <div className="mb-4 text-center max-w-screen-lg mx-auto">
             <h1 className="text-3xl font-bold mb-4 flex justify-center items-center text-orange-500 ml-2">
                 Monitoreo del proceso de reclutamiento
                 <FiMonitor className="text-orange-500 ml-2" />
