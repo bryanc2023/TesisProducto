@@ -348,7 +348,7 @@ function EmpresaLayout() {
 
             const { data } = await instance.get(`getEmpresaById/${idEmpresa}`)
             setDataEmpresa(data)
-            console.log(data)
+            
 
         } catch (error) {
             console.log(error)
