@@ -76,7 +76,9 @@ const VerOfertasAll = () => {
     const fetchAreas = async () => {
         try {
             const response = await axios.get('areas');
-            setAreas(response.data.areas);
+            if (response.data.areas) {
+                setAreas(response.data.areas);
+            }
         } catch (error) {
             console.error('Error fetching areas:', error);
         }
@@ -85,17 +87,19 @@ const VerOfertasAll = () => {
     const fetchOfertas = async () => {
         try {
             const response = await axios.get('ofertas');
-            setOfertas(response.data.ofertas);
+            if (response.data.ofertas) {
+                setOfertas(response.data.ofertas);
+            }
         } catch (error) {
             console.error('Error fetching ofertas:', error);
         }
     };
 
-    const filteredOfertas = ofertas.filter((oferta) =>
+    const filteredOfertas = ofertas?.filter((oferta) =>
         (searchTerm === '' || oferta.cargo.toLowerCase().includes(searchTerm.toLowerCase())) &&
         (selectedArea === '' || oferta.areas.nombre_area === selectedArea) &&
         (fechaMaxPosFilter === '' || oferta.fecha_max_pos === fechaMaxPosFilter)
-    );
+    ) || [];
 
     const indexOfLastOferta = currentPage * ofertasPerPage;
     const indexOfFirstOferta = indexOfLastOferta - ofertasPerPage;
