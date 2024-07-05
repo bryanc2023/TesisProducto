@@ -145,7 +145,7 @@ const Estadisticas: React.FC = () => {
     }, []);
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="mb-4 text-center max-w-screen-lg mx-auto">
             <h2 className="text-2xl font-bold mb-4">Estadísticas de la App de Gestión de Ofertas de Trabajo</h2>
             <div className="mb-8">
                 <h3 className="text-xl font-semibold mb-2">Ofertas Publicadas por Mes</h3>

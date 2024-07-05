@@ -259,7 +259,7 @@ const PostulantesList: React.FC = () => {
 
 
     return (
-        <div className="w-full p-4">
+        <div className="mb-4 text-center max-w-screen-lg mx-auto">
 
             <div className="w-full p-4">
                 <div className="mb-4 text-center">

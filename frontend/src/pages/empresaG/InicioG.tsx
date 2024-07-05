@@ -96,7 +96,7 @@ function VerOfertasPPage() {
 
     return (
         <div className="w-full p-4">
-            <div className="mb-4 text-center">
+             <div className="mb-4 text-center max-w-screen-lg mx-auto">
                 <h1 className="text-3xl font-bold mb-4 flex justify-center items-center text-orange-500 ml-2">
                     GESTIÓN DE OFERTAS
                     <FiEdit className="text-orange-500 ml-2" />
@@ -145,7 +145,7 @@ function VerOfertasPPage() {
                         <h1 className="text-2xl font-semibold text-blue-500">OFERTAS PUBLICADAS:</h1>
                     </div>
                    
-                    <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+                    <div className="mb-4 text-center max-w-screen-lg mx-auto">
                         <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                             <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>

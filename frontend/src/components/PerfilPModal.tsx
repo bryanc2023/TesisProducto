@@ -19,7 +19,7 @@ interface PerfilPModalProps {
 }
 
 const PerfilPModal: React.FC<PerfilPModalProps> = ({ isModalPost, closeModal, dataPost, isLoadingPost }) => {
-    console.log('desde el ', dataPost);
+  
     return (
         <Dialog open={isModalPost} onClose={closeModal} className="relative z-50">
             <div className="fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-50">
