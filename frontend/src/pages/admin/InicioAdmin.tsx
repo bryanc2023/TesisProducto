@@ -4,7 +4,16 @@ import axios from "../../services/axios";
 import Modal from '../../components/Admin/CargaModal'; 
 import * as XLSX from 'xlsx';
 
-const uploadEndpoints = {
+interface UploadFields {
+    ubicacion: string;
+    titulo: string;
+    sector: string;
+    area: string;
+    criterio: string;
+    idioma: string;
+}
+
+const uploadEndpoints: UploadFields = {
     ubicacion: 'uploadUbi',
     titulo: 'uploadTit',
     sector: 'uploadSec',
@@ -24,7 +33,7 @@ const fields = [
 
 function InicioAdmin() {
     const navigate = useNavigate();
-    const [files, setFiles] = useState<{ [key: string]: File | null }>({
+    const [files, setFiles] = useState<{ [K in keyof UploadFields]: File | null }>({
         ubicacion: null,
         titulo: null,
         sector: null,
@@ -32,7 +41,7 @@ function InicioAdmin() {
         criterio: null,
         idioma: null,
     });
-    const [loading, setLoading] = useState<{ [key: string]: boolean }>({
+    const [loading, setLoading] = useState<{ [K in keyof UploadFields]: boolean }>({
         ubicacion: false,
         titulo: false,
         sector: false,
@@ -43,16 +52,16 @@ function InicioAdmin() {
     const [modalOpen, setModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState({ title: '', message: '', success: false });
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof UploadFields) => {
         const file = e.target.files ? e.target.files[0] : null;
         setFiles({ ...files, [field]: file });
     };
 
-    const handlePreview = (field: string) => {
+    const handlePreview = (field: keyof UploadFields) => {
         navigate('/vista-previa', { state: { field } });
     };
 
-    const handleSubmit = async (e: React.FormEvent, field: string) => {
+    const handleSubmit = async (e: React.FormEvent, field: keyof UploadFields) => {
         e.preventDefault();
         const file = files[field];
         if (file) {
@@ -90,18 +99,18 @@ function InicioAdmin() {
     return (
         <div className="p-4">
             {fields.map(({ name, label }) => (
-                <form key={name} onSubmit={(e) => handleSubmit(e, name)} className="mb-4 p-4 border border-gray-300 rounded shadow-md bg-white">
+                <form key={name} onSubmit={(e) => handleSubmit(e, name as keyof UploadFields)} className="mb-4 p-4 border border-gray-300 rounded shadow-md bg-white">
                     <h2 className="text-xl font-bold mb-2">{label}</h2>
                     <input 
                         type="file" 
-                        onChange={(e) => handleFileChange(e, name)} 
+                        onChange={(e) => handleFileChange(e, name as keyof UploadFields)} 
                         accept=".xlsx, .xls" 
                         className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     />
                     <div className="flex space-x-4 mt-2">
                         <button 
                             type="button" 
-                            onClick={() => handlePreview(name)} 
+                            onClick={() => handlePreview(name as keyof UploadFields)} 
                             className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                         >
                             Vista Previa
@@ -109,9 +118,9 @@ function InicioAdmin() {
                         <button 
                             type="submit" 
                             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                            disabled={loading[name]} // Disable button while loading
+                            disabled={loading[name as keyof UploadFields]} // Disable button while loading
                         >
-                            {loading[name] ? (
+                            {loading[name as keyof UploadFields] ? (
                                 <div className="flex items-center">
                                     <svg className="animate-spin mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
