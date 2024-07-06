@@ -223,7 +223,7 @@ class UploadController extends Controller
             $data = $request->input('data');
             foreach ($data as $item) {
                 $item['updated_at'] = now();
-                Criterio::updateOrCreate(['id' => $item['id']], $item);
+                Criterio::updateOrCreate(['id_criterio' => $item['id_criterio']], $item);
             }
             return response()->json(['message' => 'Criterios actualizados correctamente'], 200);
         } catch (Exception $e) {

@@ -78,4 +78,13 @@ class Postulante extends Model
     {
         return $this->hasMany(Certificado::class, 'id_postulante', 'id_postulante');
     }
+     /**
+     * Check if the postulante has a CV.
+     *
+     * @return bool
+     */
+    public function hasCv()
+    {
+        return !is_null($this->cv) && $this->cv !== '';
+    }
 }
