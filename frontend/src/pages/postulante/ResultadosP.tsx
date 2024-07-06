@@ -106,7 +106,7 @@ function ResultadosP() {
     };
 
     return (
-        <div className="w-full p-4">
+        <div className="mb-4 text-center max-w-screen-lg mx-auto">
             <div className="flex items-center justify-center mb-4">
                 <FaInfo className="text-blue-500 ml-2" />
                 <h1 className="text-2xl font-semibold text-blue-500">CONSULTA DE RESULTADOS</h1>
