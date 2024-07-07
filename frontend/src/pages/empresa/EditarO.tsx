@@ -49,6 +49,16 @@ interface Criterio {
   valor: string | '';
 }
 
+
+interface CriterioS {
+  id_criterio: number;
+  criterio: string;
+  pivot:{
+    valor:string;
+    prioridad:number;
+  };
+}
+
 interface Area {
   id: number;
   nombre_area: string;
@@ -58,6 +68,7 @@ interface SelectedCriterio extends Criterio {
   valor: string | '',
   prioridad: number;
 }
+
 
 interface idioma {
   id: number;
@@ -114,6 +125,7 @@ function EditarO() {
 
         // Rellenar los valores del formulario con los datos de la oferta
         setValue('cargo', oferta.cargo);
+        setValue('id_area',oferta.id_area);
         setDefaultAreaId(oferta.areas.id);
         setDefaultArea(oferta.areas.nombre_area);
         if (oferta.experiencia > 0) {
@@ -152,16 +164,24 @@ function EditarO() {
         setRequireEducation(false);
         setSelectedTitles([]);
       }
-        setRequireCriterio(!!oferta.criterios.length);
-       
-        setSelectedCriterios(oferta.criterios);
 
-        if (oferta.n_mostrar_sueldo !== undefined) {
-          setValue('mostrar_sueldo', oferta.n_mostrar_sueldo);
-        }
-        if (oferta.n_mostrar_empresa !== undefined) {
-          setValue('mostrar_empresa', oferta.n_mostrar_empresa);
-        }
+      if (oferta.criterios.length > 0){
+        setRequireCriterio(true);
+        setSelectedCriterios(oferta.criterios.map((criterio:CriterioS) => ({
+          id_criterio: criterio.id_criterio,
+          criterio: criterio.criterio,
+          valor: criterio.pivot.valor,
+          prioridad: criterio.pivot.prioridad,
+        })));
+      }else{
+        setRequireCriterio(false);
+        setSelectedCriterios([]);
+      }
+
+   
+      setValue('mostrar_sueldo', oferta.n_mostrar_sueldo ? true : false);
+      setValue('mostrar_empresa', oferta.n_mostrar_empresa ? true : false);
+      setValue('solicitar_sueldo', oferta.solicitar_sueldo ? true : false);
       } catch (error) {
         console.error('Error fetching oferta:', error);
       }
@@ -315,6 +335,11 @@ function EditarO() {
   const handleEliminarCriterio = (id: number) => {
     const updatedCriterios = selectedCriterios.filter(c => c.id_criterio !== id);
     setSelectedCriterios(updatedCriterios);
+    if (id === 3) {
+      setSolicitarSueldo(false);
+    } else {
+      setSolicitarSueldo(true);
+    }
   };
 
   const handleTituloChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -368,44 +393,40 @@ function EditarO() {
   };
 
   const onSubmit = handleSubmit(async (values) => {
-    if (user) {
-      try {
-        const usuario = user.id;
-        const dataToSend = {
-          ...values,
-          usuario: usuario,
-          experiencia: showExperiencia ? values.experiencia : 0,
-          correo_contacto: showCorreo ? values.correo_contacto : null,
-          numero_contacto: showNumeroContacto ? values.numero_contacto : null,
-          solicitar_sueldo: soliSueldo ? soliSueldo : 0,
-          titulos: selectedTitles,
-          criterios: selectedCriterios,
-        };
-
-        console.log('Usuario:', usuario);
-        console.log('Datos del formulario:', dataToSend);
-        console.log('Títulos seleccionados:', selectedTitles);
-        console.log('Criterios seleccionados:', selectedCriterios);
-
-        const response = await axios.put(`update-oferta/${id}`, dataToSend, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        Swal.fire({
-          title: '¡Actualizada!',
-          text: 'La oferta ha sido actualizada exitosamente',
-          icon: 'success',
-          confirmButtonText: 'Ok'
-        }).then(() => {
-          navigate("/verOfertasE");
-        });
-      } catch (error) {
-        console.log(error);
-      }
+    try {
+      const criteriosValidos = selectedCriterios.filter(criterio => criterio.id_criterio > 0 && criterio.prioridad !== null);
+      const dataToSend = {
+        ...values,
+        experiencia: showExperiencia ? values.experiencia : 0,
+        correo_contacto: showCorreo ? values.correo_contacto : null,
+        numero_contacto: showNumeroContacto ? values.numero_contacto : null,
+        mostrar_sueldo: values.mostrar_sueldo ? 1 : 0,
+        titulos: selectedTitles,
+        criterios: criteriosValidos,
+      };
+  
+      console.log('Datos del formulario:', dataToSend);
+  
+      const response = await axios.put(`update-oferta/${id}`, dataToSend, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      Swal.fire({
+        title: '¡Actualizada!',
+        text: 'La oferta ha sido actualizada exitosamente',
+        icon: 'success',
+        confirmButtonText: 'Ok'
+      }).then(() => {
+        navigate("/verOfertasE");
+      });
+    } catch (error) {
+      console.log(error);
     }
   });
+  
+
 
   const criterioDescripcion = criterios.find(c => c.id_criterio === selectedCriterioId)?.descripcion || '';
 
@@ -982,19 +1003,24 @@ function EditarO() {
                     <div className="mt-4">
                       <h4 className="font-semibold">Criterios Seleccionados:</h4>
                       <ul>
-                        {selectedCriterios.map(criterio => (
-                          <li key={criterio.id_criterio} className="flex items-center justify-between mb-2">
-                            <span>{criterio.valor ? `${criterio.criterio} = ${criterio.valor}  ` : `${criterio.criterio}`}</span>
-                            <button
-                              type="button"
-                              className="text-red-500"
-                              onClick={() => handleEliminarCriterio(criterio.id_criterio)}
-                            >
-                              x
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
+  {selectedCriterios.map(criterio => (
+    <li key={criterio.id_criterio} className="flex items-center justify-between mb-2">
+      <span>
+        {criterio.valor 
+          ? `${criterio.criterio ?? criterio.criterio} = ${criterio.valor}  ` 
+          : `${criterio.criterio ?? criterio.criterio}`}
+      </span>
+      <button
+        type="button"
+        className="text-red-500"
+        onClick={() => handleEliminarCriterio(criterio.id_criterio)}
+      >
+        x
+      </button>
+    </li>
+  ))}
+</ul>
+
                     </div>
                   )}
                 </div>
@@ -1013,7 +1039,7 @@ function EditarO() {
               type="submit"
               className="bg-blue-500 text-white p-2 rounded-lg mt-4"
             >
-              Publicar Oferta
+              Actualizar Oferta
             </button>
           </div>
 

@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react';
 import axios from '../../services/axios';
 import { RootState } from '../../store';
 import { useSelector } from 'react-redux';
-import { FiEdit, FiPlus, FiEye } from 'react-icons/fi';
-import { FaBriefcase,FaCalendarAlt } from 'react-icons/fa';
+import { FiEdit, FiPlus, FiEye, FiTrash2 } from 'react-icons/fi';
+import { FaBriefcase, FaCalendarAlt } from 'react-icons/fa';
+import Swal from 'sweetalert2';
 
 
 interface Oferta {
@@ -62,6 +63,15 @@ function VerOfertasPPage() {
         fetchOfertas();
     }, []);
 
+    const formatDate = (dateString: string) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Los meses empiezan desde 0
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    };
+
     const fetchOfertas = async () => {
         if (user) {
             try {
@@ -98,6 +108,36 @@ function VerOfertasPPage() {
         }
     };
 
+
+    const handleDeleteOferta = async (id: number) => {
+        const result = await Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'No podrás revertir esta acción',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+        });
+
+        if (result.isConfirmed) {
+           
+            try {
+                await axios.delete(`/oferta/${id}`);
+                Swal.fire({
+                    title: 'Oferta Eliminada',
+                    text: 'La oferta ha sido eliminada exitosamente.',
+                    icon: 'success',
+                    confirmButtonText: 'Ok'
+                  }).then(() => {
+                    window.location.reload();
+                  });
+            } catch (error) {
+                Swal.fire('Error', 'Hubo un error al eliminar la oferta.', 'error');
+            }
+        
+        }
+    };
+
     // Calcula las ofertas a mostrar en la página actual
     const indexOfLastOferta = currentPage * ofertasPerPage;
     const indexOfFirstOferta = indexOfLastOferta - ofertasPerPage;
@@ -106,7 +146,7 @@ function VerOfertasPPage() {
     const renderCriterioValor = (criterio: Criterio) => {
         if (criterio && criterio.pivot && criterio.pivot.valor) {
             const valorArray = criterio.pivot.valor.split(",");
-    
+
             switch (criterio.criterio) {
                 case 'Experiencia':
                     return criterio.pivot.valor ? "Los años mínimos indicados" : "Los años mínimos indicados";
@@ -144,9 +184,9 @@ function VerOfertasPPage() {
                 case 'Sueldo':
                     return criterio.pivot.valor ? "Indicar el sueldo prospecto a ganar" : "Indicar el sueldo prospecto a ganar";
                 case 'Género':
-                    default:
-                        return  "No especificado";
-                }
+                default:
+                    return "No especificado";
+            }
         }
     };
 
@@ -215,7 +255,7 @@ function VerOfertasPPage() {
                                         <td className={`py-4 px-6 ${oferta.estado === 'Culminada' ? 'bg-green-100' : (oferta.estado === 'En espera' ? 'bg-blue-100' : '')}`}>
                                             {oferta.estado}
                                         </td>
-                                        <td className="py-4 px-6">{oferta.fecha_publi}</td>
+                                        <td className="py-4 px-6">{formatDate(oferta.fecha_publi)}</td>
                                         <td className="py-4 px-6">{oferta.areas.nombre_area}</td>
                                         <td className="py-4 px-6">{oferta.carga_horaria}</td>
                                         <td className="py-4 px-6">{oferta.experiencia === 0 ? 'No requerida' : `${oferta.experiencia} año/s`}</td>
@@ -232,6 +272,12 @@ function VerOfertasPPage() {
                                             >
                                                 <FiEdit className="w-4 h-4 mr-1" /> Editar
                                             </Link>
+                                            <button
+                                                onClick={() => handleDeleteOferta(oferta.id_oferta)}
+                                                className="flex items-center text-red-600 hover:text-red-900"
+                                            >
+                                                <FiTrash2 className="w-4 h-4 mr-1" /> Eliminar
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
@@ -278,78 +324,85 @@ function VerOfertasPPage() {
                 </div>
             )}
 
-           
-{selectedOferta && (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-x-auto bg-black bg-opacity-50">
-        <div className="bg-white rounded-lg p-8 max-w-5xl w-full overflow-y-auto relative">
-            <div className="absolute top-4 right-4 text-sm text-gray-500">
-                <p><FaCalendarAlt className="inline-block mr-1" /><strong>Fecha de Publicación:</strong> {selectedOferta.fecha_publi}</p>
-                <p><FaCalendarAlt className="inline-block mr-1" /><strong>Fecha de Máxima de postulación:</strong> {selectedOferta.fecha_max_pos}</p>
-            </div>
-            <h2 className="text-xl mb-4 text-center text-blue-500"><strong>CARGO:</strong> {selectedOferta.cargo}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 bg-gray-100 rounded shadow">
-                    <p><strong>Estado:</strong> {selectedOferta.estado}</p>
-                    <p><strong>Área: </strong>{selectedOferta.areas.nombre_area}</p>
-                    <p><strong>Carga Horaria: </strong>{selectedOferta.carga_horaria}</p>
-                    <p><strong>Experiencia Mínima: </strong>{selectedOferta.experiencia === 0 ? 'Ninguna' : `${selectedOferta.experiencia} año/s`}</p>
-                    <p><strong>Objetivo Cargo: </strong>{selectedOferta.objetivo_cargo}</p>
-                    <p><strong>Sueldo: </strong>{selectedOferta.sueldo === 0 ? 'No especificado' : `${selectedOferta.sueldo} $ ofrecidos`}</p>
-                    {(selectedOferta.correo_contacto || selectedOferta.numero_contacto) && (
-                        <>
-                          <hr className="my-4" />
-                            <p><strong className="text-lg font-semibold mt-4 mb-2 text-orange-500">Datos de contacto extra:</strong></p>
-                            {selectedOferta.correo_contacto && (
-                                <p><strong>Correo contacto: </strong>{selectedOferta.correo_contacto}</p>
+
+            {selectedOferta && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center overflow-x-auto bg-black bg-opacity-50">
+                    <div className="bg-white rounded-lg p-8 max-w-5xl w-full overflow-y-auto relative">
+                        <div className="absolute top-4 right-4 text-sm text-gray-500">
+                            <p>
+                                <FaCalendarAlt className="inline-block mr-1" />
+                                <strong>Fecha de Publicación:</strong> {formatDate(selectedOferta.fecha_publi)}
+                            </p>
+                            <p>
+                                <FaCalendarAlt className="inline-block mr-1" />
+                                <strong>Fecha de Máxima de postulación:</strong> {formatDate(selectedOferta.fecha_max_pos)}
+                            </p>
+
+                        </div>
+                        <h2 className="text-xl mb-4 text-center text-blue-500"><strong>CARGO:</strong> {selectedOferta.cargo}</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="p-4 bg-gray-100 rounded shadow">
+                                <p><strong>Estado:</strong> {selectedOferta.estado}</p>
+                                <p><strong>Área: </strong>{selectedOferta.areas.nombre_area}</p>
+                                <p><strong>Carga Horaria: </strong>{selectedOferta.carga_horaria}</p>
+                                <p><strong>Experiencia Mínima: </strong>{selectedOferta.experiencia === 0 ? 'Ninguna' : `${selectedOferta.experiencia} año/s`}</p>
+                                <p><strong>Objetivo Cargo: </strong>{selectedOferta.objetivo_cargo}</p>
+                                <p><strong>Sueldo: </strong>{selectedOferta.sueldo === 0 ? 'No especificado' : `${selectedOferta.sueldo} $ ofrecidos`}</p>
+                                {(selectedOferta.correo_contacto || selectedOferta.numero_contacto) && (
+                                    <>
+                                        <hr className="my-4" />
+                                        <p><strong className="text-lg font-semibold mt-4 mb-2 text-orange-500">Datos de contacto extra:</strong></p>
+                                        {selectedOferta.correo_contacto && (
+                                            <p><strong>Correo contacto: </strong>{selectedOferta.correo_contacto}</p>
+                                        )}
+                                        {selectedOferta.numero_contacto && (
+                                            <p><strong>Número contacto: </strong>{selectedOferta.numero_contacto}</p>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                            <div className="p-4 bg-gray-100 rounded shadow">
+                                <p><strong>Funciones: </strong>{selectedOferta.funciones}</p>
+                                <p><strong>Detalles adicionales: </strong>{selectedOferta.detalles_adicionales}</p>
+                            </div>
+                            <div className="p-4 bg-gray-100 rounded shadow">
+                                {selectedOferta.criterios.length > 0 && (
+                                    <>
+                                        <h3 className="text-lg font-semibold mt-4 mb-2 text-orange-500">Criterios de evaluación:</h3>
+                                        <ul className="list-disc pl-6">
+                                            {selectedOferta.criterios.map((criterio) => (
+                                                <li key={criterio.id_criterio}>
+                                                    <strong>{criterio.criterio}:</strong> {renderCriterioValor(criterio)}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                        <div className="mt-4 p-4 bg-gray-100 rounded shadow">
+                            {selectedOferta.expe.length > 0 && (
+                                <>
+                                    <h3 className="text-lg font-semibold mt-4 mb-2 text-orange-500">Experiencia requerida para esta oferta:</h3>
+                                    <ul className="list-disc pl-6">
+                                        {selectedOferta.expe.map((experiencia) => (
+                                            <li key={experiencia.id}>
+                                                <strong>{experiencia.titulo}</strong> - {experiencia.nivel_educacion} en {experiencia.campo_amplio}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </>
                             )}
-                            {selectedOferta.numero_contacto && (
-                                <p><strong>Número contacto: </strong>{selectedOferta.numero_contacto}</p>
-                            )}
-                        </>
-                    )}
+                        </div>
+                        <button
+                            onClick={handleCloseModal}
+                            className="bg-gray-300 text-gray-700 py-2 px-4 mt-4 rounded hover:bg-gray-400"
+                        >
+                            Cerrar Detalles
+                        </button>
+                    </div>
                 </div>
-                <div className="p-4 bg-gray-100 rounded shadow">
-                    <p><strong>Funciones: </strong>{selectedOferta.funciones}</p>
-                    <p><strong>Detalles adicionales: </strong>{selectedOferta.detalles_adicionales}</p>
-                </div>
-                <div className="p-4 bg-gray-100 rounded shadow">
-                    {selectedOferta.criterios.length > 0 && (
-                        <>
-                            <h3 className="text-lg font-semibold mt-4 mb-2 text-orange-500">Criterios de evaluación:</h3>
-                            <ul className="list-disc pl-6">
-                                {selectedOferta.criterios.map((criterio) => (
-                                    <li key={criterio.id_criterio}>
-                                        <strong>{criterio.criterio}:</strong> {renderCriterioValor(criterio)}
-                                    </li>
-                                ))}
-                            </ul>
-                        </>
-                    )}
-                </div>
-            </div>
-            <div className="mt-4 p-4 bg-gray-100 rounded shadow">
-                {selectedOferta.expe.length > 0 && (
-                    <>
-                        <h3 className="text-lg font-semibold mt-4 mb-2 text-orange-500">Experiencia requerida para esta oferta:</h3>
-                        <ul className="list-disc pl-6">
-                            {selectedOferta.expe.map((experiencia) => (
-                                <li key={experiencia.id}>
-                                    <strong>{experiencia.titulo}</strong> - {experiencia.nivel_educacion} en {experiencia.campo_amplio}
-                                </li>
-                            ))}
-                        </ul>
-                    </>
-                )}
-            </div>
-            <button
-                onClick={handleCloseModal}
-                className="bg-gray-300 text-gray-700 py-2 px-4 mt-4 rounded hover:bg-gray-400"
-            >
-                Cerrar Detalles
-            </button>
-        </div>
-    </div>
-)}
+            )}
 
 
         </div>

@@ -122,6 +122,8 @@ Route::get('/areas', [AreaController::class, 'getAreas']);
 Route::get('/criterios', [CriterioController::class, 'getCriterios']);
 Route::post('add-oferta', [OfertaController::class, 'registerOferta']);
 Route::get('oferta/{id}', [OfertaController::class, 'getOfertaById']);
+Route::put('update-oferta/{id}', [OfertaController::class, 'updateOferta']);
+Route::delete('/oferta/{id}', [OfertaController::class, 'deleteOferta']);
 Route::put('/updatePostulanteById/{id}', [PostulanteController::class, 'updatePostulanteByIdUser']);
 Route::put('/updateIdioma/{id_postulante}/{id_idioma}', [IdiomaController::class, 'updateIdioma']);
 Route::put('/updatePostulanteById/{id}', [PostulanteController::class, 'updatePostulanteByIdUser']);
