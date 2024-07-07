@@ -7,6 +7,36 @@ import { RootState } from '../../store';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FiEdit } from 'react-icons/fi';
 
+
+interface Experiencia {
+  id: number;
+  nivel_educacion: string;
+  campo_amplio: string;
+  titulo: string;
+}
+
+interface Oferta {
+  // Define aquí todas las propiedades de la oferta que necesitas
+  cargo: string;
+  id_area: number;
+  experiencia: number;
+  objetivo_cargo: string;
+  sueldo: number;
+  funciones: string;
+  fecha_max_pos: string;
+  carga_horaria: string;
+  modalidad: string;
+  detalles_adicionales: string;
+  correo_contacto: string | null;
+  numero_contacto: string | null;
+  expe: Experiencia[];
+  criterios: any[]; // Define mejor el tipo de los criterios si puedes
+  areas: {
+    id: number;
+    nombre_area: string;
+  };
+}
+
 interface Titulo {
   id: number;
   titulo: string;
@@ -69,6 +99,8 @@ function EditarO() {
   const [cantons, setCantons] = useState<canton[]>([]);
   const [selectedProvince, setSelectedProvince] = useState('');
   const [selectedCanton, setSelectedCanton] = useState('');
+  const [defaultAreaId, setDefaultAreaId] = useState('');
+  const [defaultArea, setDefaultArea] = useState('');
 
   const handleCheckboxChange = (event: any) => {
     setShowExperiencia(event.target.checked);
@@ -82,7 +114,8 @@ function EditarO() {
 
         // Rellenar los valores del formulario con los datos de la oferta
         setValue('cargo', oferta.cargo);
-        setValue('id_area', oferta.areas.id);
+        setDefaultAreaId(oferta.areas.id);
+        setDefaultArea(oferta.areas.nombre_area);
         if (oferta.experiencia > 0) {
           setShowExperiencia(true);
           setValue('experiencia', oferta.experiencia);
@@ -98,11 +131,37 @@ function EditarO() {
         setValue('modalidad', oferta.modalidad || '');
         setValue('detalles_adicionales', oferta.detalles_adicionales || '');
         setShowCorreo(!!oferta.correo_contacto);
+        if (oferta.correo_contacto) {
+          setValue('correo_contacto', oferta.correo_contacto);
+        }
         setShowNumeroContacto(!!oferta.numero_contacto);
-        setRequireEducation(!!oferta.titulos.length);
+        if (oferta.numero_contacto) {
+          setValue('numero_contacto', oferta.numero_contacto);
+        }
+  // Manejar la educación requerida y los títulos
+
+      // Manejar la educación requerida y los títulos
+      if (oferta.expe.length > 0) {
+        setRequireEducation(true);
+        const titles: Titulo[] = oferta.expe.map((expe: Experiencia) => ({
+          id: expe.id,
+          titulo: expe.titulo
+        }));
+        setSelectedTitles(titles);
+      } else {
+        setRequireEducation(false);
+        setSelectedTitles([]);
+      }
         setRequireCriterio(!!oferta.criterios.length);
-        setSelectedTitles(oferta.titulos);
+       
         setSelectedCriterios(oferta.criterios);
+
+        if (oferta.n_mostrar_sueldo !== undefined) {
+          setValue('mostrar_sueldo', oferta.n_mostrar_sueldo);
+        }
+        if (oferta.n_mostrar_empresa !== undefined) {
+          setValue('mostrar_empresa', oferta.n_mostrar_empresa);
+        }
       } catch (error) {
         console.error('Error fetching oferta:', error);
       }
@@ -110,6 +169,7 @@ function EditarO() {
 
     fetchOferta();
   }, [id, setValue]);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -478,14 +538,14 @@ function EditarO() {
               <span className="text-red-500 ml-1">*</span>
               <span className="text-gray-600 text-sm ml-2">(Campo obligatorio)</span>
             </label>
-            <select className="w-full p-2 border rounded" id="id_area" {...register('id_area', { required: 'Área es requerida' })}>
-              <option value="">Seleccione</option>
-              {areas.map(area => (
-                <option key={area.id} value={area.id}>
-                  {area.nombre_area}
-                </option>
-              ))}
-            </select>
+            <select className="w-full p-2 border rounded" id="id_area" {...register('id_area', { required: 'Área es requerida' })} defaultValue={defaultAreaId}>
+  <option value={defaultAreaId}>{defaultArea}</option>
+  {areas.map(area => (
+    <option key={area.id} value={area.id}>
+      {area.nombre_area}
+    </option>
+  ))}
+</select>
             {errors.id_area && <p className="text-red-500">{String(errors.id_area.message)}</p>}
           </div>
 
