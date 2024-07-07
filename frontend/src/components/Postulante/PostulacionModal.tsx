@@ -185,7 +185,7 @@ const Modal: React.FC<ModalProps> = ({ oferta, onClose, userId }) => {
                 case 'Edad':
                     return valorArray.length > 1 ? valorArray[1].trim() : criterio.pivot.valor;
                 case 'Ubicación':
-                    return valorArray.length > 1 ? valorArray[1].trim() : criterio.pivot.valor;
+                    return valorArray.length > 1 ? `${valorArray[1].trim()}, ${valorArray[2].trim()}` : criterio.pivot.valor;
                 default:
                     return criterio.pivot.valor ? criterio.pivot.valor : "No especificado";
             }

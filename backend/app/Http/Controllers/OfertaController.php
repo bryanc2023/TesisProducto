@@ -126,6 +126,20 @@ class OfertaController extends Controller
         return response()->json(['ofertas' => $ofertas]);
     }
 
+
+    public function getOfertaById($id)
+    {
+        $oferta = Oferta::where('id_oferta', $id)
+            ->with(['areas', 'criterios', 'expe'])
+            ->first();
+
+        if (!$oferta) {
+            return response()->json(['error' => 'Oferta no encontrada'], 404);
+        }
+
+        return response()->json($oferta);
+    }
+
     public function getAllOfertas()
     {
         $ofertas = Oferta::with(['areas', 'criterios', 'empresa', 'expe'])

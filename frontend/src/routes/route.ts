@@ -35,6 +35,7 @@ import VistaPreviaArchivo from "../components/Admin/VistaPreviaArchivo"
 import ConfiguracionAdmin from "../pages/admin/ConfiguracionAdmin"
 import VerCV from "../pages/postulante/VerCV"
 import ConsultoPostuG from "../pages/empresaG/ConsultoPostuG"
+import EditarO from "../pages/empresa/EditarO"
 
 type TypeRoute = {
     path: string;
@@ -228,6 +229,12 @@ export const routes: TypeRoute[] = [
             {
                 path: 'perfildet/:id_postulante',
                 element: PostulanteDetallePage,
+                allowedRoles: ['empresa_oferente'],
+            }
+            ,
+            {
+                path: 'edit-oferta/:id',
+                element: EditarO,
                 allowedRoles: ['empresa_oferente'],
             },
             

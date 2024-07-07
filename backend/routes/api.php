@@ -121,6 +121,7 @@ Route::post('postulante/forma2',[PostulanteController::class,'registroFormaAcaPl
 Route::get('/areas', [AreaController::class, 'getAreas']);
 Route::get('/criterios', [CriterioController::class, 'getCriterios']);
 Route::post('add-oferta', [OfertaController::class, 'registerOferta']);
+Route::get('oferta/{id}', [OfertaController::class, 'getOfertaById']);
 Route::put('/updatePostulanteById/{id}', [PostulanteController::class, 'updatePostulanteByIdUser']);
 Route::put('/updateIdioma/{id_postulante}/{id_idioma}', [IdiomaController::class, 'updateIdioma']);
 Route::put('/updatePostulanteById/{id}', [PostulanteController::class, 'updatePostulanteByIdUser']);
