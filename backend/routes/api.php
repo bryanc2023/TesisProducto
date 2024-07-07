@@ -41,6 +41,8 @@ Route::prefix('auth')->group(function(){
 
 Route::middleware(['jwt.verify'])->get('users',[UserController::class,'index']);
 
+
+Route::middleware(['jwt.verify'])->group(function () {
 //Rutas para usuario
 Route::get('userById/{id}', [UserController::class, 'getUserById']);
 
@@ -149,12 +151,7 @@ Route::post('/notificaciones/{id}', [NotificacionesController::class, 'marcarLei
 Route::post('/notificacionesL', [NotificacionesController::class, 'marcarTodasLeidas']);
 
 
-Route::middleware('auth:api')->group(function () {
-  // Aquí van las rutas protegidas por JWT
 
- 
-  
-});
 
 Route::get('empresa/{idEmpresa}/ofertas', [OfertaController::class, 'getOfertasByEmpresa']);
 Route::get('/ofertas', [OfertaController::class, 'getAllOfertas']);
@@ -170,3 +167,10 @@ Route::get('existe-aprobado', [PostulacionController::class, 'existePostulacionA
 
 
 Route::get('perfildet/{id}', [PostulanteController::class, 'getPerfilEmpresa']);
+});
+Route::middleware('auth:api')->group(function () {
+  // Aquí van las rutas protegidas por JWT
+
+ 
+  
+});

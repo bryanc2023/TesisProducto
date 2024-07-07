@@ -15,12 +15,22 @@ interface Oferta {
         nombre_area: string;
     };
     fecha_publi: string;
+    objetivo_cargo: string;
     modalidad: string;
+    sueldo: number;
+    funciones: string;
     carga_horaria: string;
     experiencia: number;
     mostrar_empresa: number;
     criterios: Criterio[];
     expe: Experiencia[];
+    fecha_max_pos: string;
+    detalles_adicionales: string;
+    correo_contacto: string;
+    numero_contacto: string;
+    n_mostrar_sueldo: boolean;
+    n_mostrar_empresa: boolean;
+    soli_sueldo: boolean;
     // Define otros campos de la oferta según sea necesario
 }
 
@@ -216,55 +226,69 @@ function VerOfertasPPage() {
                 </div>
             )}
     
-            {selectedOferta && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center overflow-x-auto bg-black bg-opacity-50">
-                    <div className="bg-white rounded-lg p-8 max-w-3xl w-full overflow-y-auto">
-                        <h2 className="text-xl font-semibold mb-4"><center>{selectedOferta.cargo}</center></h2>
-                        <p><strong>Estado:</strong> {selectedOferta.estado}</p>
-                        <p><strong>Fecha de Publicación:</strong> {selectedOferta.fecha_publi}</p>
-                        <p><strong>Área: </strong>{selectedOferta.areas.nombre_area}</p>
-                        <p><strong>Carga Horaria: </strong>{selectedOferta.carga_horaria}</p>
-                        <p><strong>Experiencia Mínima: </strong>{selectedOferta.experiencia}</p>
-    
-                        {selectedOferta.criterios.length > 0 && (
-                            <>
-                                <h3 className="text-lg font-semibold mt-4 mb-2">Criterios:</h3>
-                                <ul className="list-disc pl-6">
-                                    {selectedOferta.criterios.map((criterio) => (
-                                        <li key={criterio.id_criterio}>
-                                            <strong>{criterio.criterio}:</strong> {criterio.pivot.valor}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </>
-                        )}
-    
-                        {selectedOferta.expe.length > 0 && (
-                            <>
-                                <h3 className="text-lg font-semibold mt-4 mb-2">Experiencia:</h3>
-                                <ul className="list-disc pl-6">
-                                    {selectedOferta.expe.map((experiencia) => (
-                                        <li key={experiencia.id}>
-                                            <strong>{experiencia.titulo}</strong> - {experiencia.nivel_educacion} en {experiencia.campo_amplio}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </>
-                        )}
-    
-                        {selectedOferta.criterios.length === 0 && selectedOferta.expe.length === 0 && (
-                            <p className="mt-4">Ningún criterio o experiencia especificada para esta oferta.</p>
-                        )}
-    
-                        <button
-                            onClick={handleCloseModal}
-                            className="bg-gray-300 text-gray-700 py-2 px-4 mt-4 rounded hover:bg-gray-400"
-                        >
-                            Cerrar Detalles
-                        </button>
-                    </div>
+    {selectedOferta && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-x-auto bg-black bg-opacity-50">
+        <div className="bg-white rounded-lg p-8 max-w-5xl w-full overflow-y-auto relative">
+            <div className="absolute top-4 right-4 text-sm text-gray-500">
+                <p><strong>Fecha de Publicación:</strong> {selectedOferta.fecha_publi}</p>
+                <p><strong>Fecha de Máxima de postulación:</strong> {selectedOferta.fecha_max_pos}</p>
+            </div>
+            <h2 className="text-xl mb-4 text-center text-blue-500"><strong>CARGO:</strong> {selectedOferta.cargo}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <p><strong>Estado:</strong> {selectedOferta.estado}</p>
+                    <p><strong>Área: </strong>{selectedOferta.areas.nombre_area}</p>
+                    <p><strong>Carga Horaria: </strong>{selectedOferta.carga_horaria}</p>
+                    <p><strong>Experiencia Mínima: </strong>{selectedOferta.experiencia === 0 ? 'Ninguna' : `${selectedOferta.experiencia} año/s`}</p>
+                    <p><strong>Objetivo Cargo: </strong>{selectedOferta.objetivo_cargo}</p>
+                    <p><strong>Sueldo: </strong>{selectedOferta.sueldo === 0? 'No especificado': `${selectedOferta.sueldo} $ ofrecidos`}</p>
+                    <p><strong>Correo contacto: </strong>{selectedOferta.correo_contacto}</p>
+                    <p><strong>Número contacto: </strong>{selectedOferta.numero_contacto}</p>
                 </div>
-            )}
+                <div>
+                    <p><strong>Funciones: </strong>{selectedOferta.funciones}</p>
+                    <p><strong>Detalles adicionales: </strong>{selectedOferta.detalles_adicionales}</p>
+                </div>
+                <div>
+                    {selectedOferta.criterios.length > 0 && (
+                        <>
+                            <h3 className="text-lg font-semibold mt-4 mb-2 text-orange-500">Criterios de evaluación:</h3>
+                            <ul className="list-disc pl-6">
+                                {selectedOferta.criterios.map((criterio) => (
+                                    <li key={criterio.id_criterio}>
+                                        <strong>{criterio.criterio}:</strong> {criterio.pivot.valor}
+                                    </li>
+                                ))}
+                            </ul>
+                        </>
+                    )}
+                </div>
+            </div>
+            <div className="mt-4">
+                {selectedOferta.expe.length > 0 && (
+                    <>
+                        <h3 className="text-lg font-semibold mt-4 mb-2 text-orange-500">Experiencia requerida para esta oferta:</h3>
+                        <ul className="list-disc pl-6">
+                            {selectedOferta.expe.map((experiencia) => (
+                                <li key={experiencia.id}>
+                                    <strong>{experiencia.titulo}</strong> - {experiencia.nivel_educacion} en {experiencia.campo_amplio}
+                                </li>
+                            ))}
+                        </ul>
+                    </>
+                )}
+            </div>
+            <button
+                onClick={handleCloseModal}
+                className="bg-gray-300 text-gray-700 py-2 px-4 mt-4 rounded hover:bg-gray-400"
+            >
+                Cerrar Detalles
+            </button>
+        </div>
+    </div>
+)}
+
+
         </div>
     );
     
