@@ -53,6 +53,7 @@ function AgregarO() {
   const [selectedTitulo, setSelectedTitulo] = useState('');
   const [selectedTituloId, setSelectedTituloId] = useState<number>();
   const [requireEducation, setRequireEducation] = useState(false);
+  const [soliSueldo, setSolicitarSueldo] = useState(false);
   const [requireCriterio, setRequireCriterio] = useState(false);
   const [selectedTitles, setSelectedTitles] = useState<Titulo[]>([]);
   const [showCorreo, setShowCorreo] = useState(false);
@@ -68,7 +69,7 @@ function AgregarO() {
   const [provinces, setProvinces] = useState<string[]>([]);
   const [cantons, setCantons] = useState<canton[]>([]);
   const [selectedProvince, setSelectedProvince] = useState('');
-  const [selectedCanton, setSelectedCanton] = useState<canton[]>([]);
+  const [selectedCanton, setSelectedCanton] = useState('');
 
   const handleCheckboxChange = (event: any) => {
     setShowExperiencia(event.target.checked);
@@ -149,13 +150,16 @@ function AgregarO() {
     fetchTitulos();
   }, [selectedNivel, selectedCampo]);
 
-  const handleProvinceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleProvinceChange = (event: any) => {
     setSelectedProvince(event.target.value);
     setSelectedCanton('');
   };
 
-  const handleCantonChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedCanton(event.target.value);
+  const handleCantonChange = (event: any) => {
+    const cantonValue = event.target.value;
+    setSelectedCanton(cantonValue);
+    setValorCriterio(`${cantonValue},${selectedProvince}`);
+    // Esto asegura que valorCriterio se actualice con el ID y el nombre del cantón
   };
 
   const handleNivelChange = (event: any) => {
@@ -174,6 +178,11 @@ function AgregarO() {
     const id = parseInt(event.target.value);
     setSelectedCriterioId(id);
     setValorCriterio('');
+    if (id === 3) {
+      setSolicitarSueldo(true);
+    } else {
+      setSolicitarSueldo(false);
+    }
   };
 
   const handleAgregarCriterio = () => {
@@ -184,7 +193,7 @@ function AgregarO() {
         if (!exists) {
           const criterioConValor: SelectedCriterio = {
             ...criterioSeleccionado,
-            valor: valorCriterio || '',
+            valor: selectedCriterioId === 3 ? '' : valorCriterio || '',
             prioridad: prioridadCriterio
           };
           setSelectedCriterios([...selectedCriterios, criterioConValor]);
@@ -207,6 +216,7 @@ function AgregarO() {
       });
     }
   };
+
 
   const handleEliminarCriterio = (id: number) => {
     const updatedCriterios = selectedCriterios.filter(c => c.id_criterio !== id);
@@ -273,6 +283,7 @@ function AgregarO() {
           experiencia: showExperiencia ? values.experiencia : 0,
           correo_contacto: showCorreo ? values.correo_contacto : null,
           numero_contacto: showNumeroContacto ? values.numero_contacto : null,
+          solicitar_sueldo: soliSueldo ? soliSueldo : 0,
           titulos: selectedTitles,
           criterios: selectedCriterios,
         };
@@ -302,6 +313,8 @@ function AgregarO() {
     }
   });
 
+  const criterioDescripcion = criterios.find(c => c.id_criterio === selectedCriterioId)?.descripcion || '';
+
   return (
     <>
       <div className="bg-white p-6 rounded-lg shadow-lg ">
@@ -316,7 +329,11 @@ function AgregarO() {
         <h3 className="text-1xl text-red-500 font-bold mb-4">Datos de la oferta:</h3>
         <form onSubmit={onSubmit}>
           <div className="mb-4">
-            <label className="block text-sm font-bold mb-2" htmlFor="cargo">Puesto de trabajo</label>
+            <label className="block text-sm font-bold mb-2" htmlFor="cargo">
+              • Puesto de trabajo
+              <span className="text-red-500 ml-1">*</span>
+              <span className="text-gray-600 text-sm ml-2">(Campo obligatorio)</span>
+            </label>
             <input
               className="w-full p-2 border rounded"
               type="text"
@@ -324,7 +341,7 @@ function AgregarO() {
               placeholder="Cargo"
               {...register('cargo', { required: 'Puesto es requerido' })}
             />
-            {errors.cargo && <p className="text-red-500">{errors.cargo.message}</p>}
+            {errors.cargo && <p className="text-red-500">{String(errors.cargo.message)}</p>}
           </div>
           <div className="mb-4">
             <div className="flex items-center">
@@ -423,7 +440,10 @@ function AgregarO() {
           )}
 
           <div className="mb-4">
-            <label className="block text-sm font-bold mb-2" htmlFor="id_area">Área del puesto de trabajo</label>
+            <label className="block text-sm font-bold mb-2" htmlFor="id_area"> •  Área del puesto de trabajo
+              <span className="text-red-500 ml-1">*</span>
+              <span className="text-gray-600 text-sm ml-2">(Campo obligatorio)</span>
+            </label>
             <select className="w-full p-2 border rounded" id="id_area" {...register('id_area', { required: 'Área es requerida' })}>
               <option value="">Seleccione</option>
               {areas.map(area => (
@@ -432,7 +452,7 @@ function AgregarO() {
                 </option>
               ))}
             </select>
-            {errors.id_area && <p className="text-red-500">{errors.id_area.message}</p>}
+            {errors.id_area && <p className="text-red-500">{String(errors.id_area.message)}</p>}
           </div>
 
 
@@ -448,65 +468,74 @@ function AgregarO() {
             <hr className="my-4" />
             {showExperiencia && (
               <>
-              <div id="experienciaContainer" className="flex-col bg-gray-200 rounded-lg shadow-md items-center p-10">
-                <label className="block text-sm font-bold mb-2" htmlFor="experiencia">
-                  Años de Experiencia requerida
-                </label>
-                <input
-                  className="w-full p-2 border rounded"
-                  type="number"
-                  id="experiencia"
-                  placeholder="Número de  años de experiencia en puestos similares"
-                  {...register('experiencia', {
-                    required: 'Experiencia es requerida',
-                    validate: validateNoNegative,
-                  })}
-                />
-                {errors.experiencia && (
-                  <p className="text-red-500">{errors.experiencia.message}</p>
-                )}
-              </div>
-          <hr className="my-4" />
-          </>
+                <div id="experienciaContainer" className="flex-col bg-gray-200 rounded-lg shadow-md items-center p-10">
+                  <label className="block text-sm font-bold mb-2" htmlFor="experiencia">
+                    Años de Experiencia requerida
+                  </label>
+                  <input
+                    className="w-full p-2 border rounded"
+                    type="number"
+                    id="experiencia"
+                    placeholder="Número de  años de experiencia en puestos similares"
+                    {...register('experiencia', {
+                      required: 'Experiencia es requerida',
+                      validate: validateNoNegative,
+                    })}
+                  />
+                  {errors.experiencia && (
+                    <p className="text-red-500">{String(errors.experiencia.message)}</p>
+                  )}
+                </div>
+                <hr className="my-4" />
+              </>
 
             )}
           </div>
 
 
           <div className="mb-4">
-            <label className="block text-sm font-bold mb-2" htmlFor="objetivo_cargo">Objetivo del puesto de trabajo</label>
+            <label className="block text-sm font-bold mb-2" htmlFor="objetivo_cargo">• Objetivo del puesto de trabajo
+              <span className="text-red-500 ml-1">*</span>
+              <span className="text-gray-600 text-sm ml-2">(Campo obligatorio)</span>
+            </label>
             <textarea
               className="w-full p-2 border rounded"
               id="objetivo_cargo"
               placeholder="Describa en breves palabras el objetivo del puesto de trabajo"
               {...register('objetivo_cargo', { required: 'Objetivo del Cargo es requerido' })}
             />
-            {errors.objetivo_cargo && <p className="text-red-500">{errors.objetivo_cargo.message}</p>}
+            {errors.objetivo_cargo && <p className="text-red-500">{String(errors.objetivo_cargo.message)}</p>}
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-bold mb-2" htmlFor="sueldo">Sueldo a ofrecer</label>
+            <label className="block text-sm font-bold mb-2" htmlFor="sueldo">• Sueldo a ofrecer</label>
             <input
               className="w-full p-2 border rounded"
               type="number"
               id="sueldo"
               placeholder="Ingrese el sueldo a ofrecer al postulante"
-              {...register('sueldo', { required: 'Sueldo es requerido', validate: validateNoNegative })}
+              {...register('sueldo', { validate: validateNoNegative })}
             />
-            {errors.sueldo && <p className="text-red-500">{errors.sueldo.message}</p>}
+            {errors.sueldo && <p className="text-red-500">{String(errors.sueldo.message)}</p>}
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-bold mb-2" htmlFor="funciones">Funciones del puesto:</label>
+            <label className="block text-sm font-bold mb-2" htmlFor="funciones">• Funciones del puesto:
+              <span className="text-red-500 ml-1">*</span>
+              <span className="text-gray-600 text-sm ml-2">(Campo obligatorio)</span>
+            </label>
             <textarea
               className="w-full p-2 border rounded"
               id="funciones"
               placeholder="Describa a manera breve las funciones o actividades a realizarse en el puesto. Cada función sepárela con una coma . Ejemplo: Funcion 1, Funcion2"
               {...register('funciones', { required: 'Funciones son requeridas' })}
             />
-            {errors.funciones && <p className="text-red-500">{errors.funciones.message}</p>}
+            {errors.funciones && <p className="text-red-500">{String(errors.funciones.message)}</p>}
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-bold mb-2" htmlFor="fecha_max_pos">Fecha Máxima de Postulación</label>
+            <label className="block text-sm font-bold mb-2" htmlFor="fecha_max_pos"> • Fecha Máxima de Postulación
+              <span className="text-red-500 ml-1">*</span>
+              <span className="text-gray-600 text-sm ml-2">(Campo obligatorio)</span>
+            </label>
             <input
               className="w-full p-2 border rounded"
               type="date"
@@ -514,10 +543,13 @@ function AgregarO() {
               placeholder="Fecha Máxima de Postulación"
               {...register('fecha_max_pos', { required: 'Fecha Máxima de Postulación es requerida', validate: validateFechaMaxPost })}
             />
-            {errors.fecha_max_pos && <p className="text-red-500">{errors.fecha_max_pos.message}</p>}
+            {errors.fecha_max_pos && <p className="text-red-500">{String(errors.fecha_max_pos.message)}</p>}
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-bold mb-2" htmlFor="carga_horaria">Carga Horaria</label>
+            <label className="block text-sm font-bold mb-2" htmlFor="carga_horaria"> • Carga Horaria
+              <span className="text-red-500 ml-1">*</span>
+              <span className="text-gray-600 text-sm ml-2">(Campo obligatorio)</span>
+            </label>
             <select
               className="w-full p-2 border rounded"
               id="carga"
@@ -526,10 +558,13 @@ function AgregarO() {
               <option value="Tiempo Completo">Tiempo Completo</option>
               <option value="Tiempo Parcial">Tiempo Parcial</option>
             </select>
-            {errors.carga_horaria && <p className="text-red-500">{errors.carga_horaria.message}</p>}
+            {errors.carga_horaria && <p className="text-red-500">{String(errors.carga_horaria.message)}</p>}
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-bold mb-2" htmlFor="modalidad">Modalidad</label>
+            <label className="block text-sm font-bold mb-2" htmlFor="modalidad">• Modalidad
+              <span className="text-red-500 ml-1">*</span>
+              <span className="text-gray-600 text-sm ml-2">(Campo obligatorio)</span>
+            </label>
             <select
               className="w-full p-2 border rounded"
               id="modalidad"
@@ -539,30 +574,20 @@ function AgregarO() {
               <option value="Virtual">Virtual</option>
               <option value="Hibrida">Hibrida</option>
             </select>
-            {errors.modalidad && <p className="text-red-500">{errors.modalidad.message}</p>}
+            {errors.modalidad && <p className="text-red-500">{String(errors.modalidad.message)}</p>}
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-bold mb-2" htmlFor="detalles_adicionales">Detalles Adicionales</label>
+            <label className="block text-sm font-bold mb-2" htmlFor="detalles_adicionales">• Detalles Adicionales</label>
             <textarea
               className="w-full p-2 border rounded"
               id="detalles_adicionales"
               placeholder="Detalles Adicionales que desee agregar a la oferta. Cada Detalle sepárela con una coma . Ejemplo: Detalle 1, Detalle 2"
-              {...register('detalles_adicionales', { required: 'Detalles Adicionales son requeridos' })}
+              {...register('detalles_adicionales')}
             ></textarea>
-            {errors.detalles_adicionales && <p className="text-red-500">{errors.detalles_adicionales.message}</p>}
+            {errors.detalles_adicionales && <p className="text-red-500">{String(errors.detalles_adicionales.message)}</p>}
           </div>
           <hr className="my-4" />
-          <div className="flex items-center">
-            <input
-              className="mr-2 leading-tight"
-              type="checkbox"
-              id="solicitar_sueldo"
-              {...register('solicitar_sueldo')}
-            />
-            <label className="block text-sm font-bold mb-2 text-blue-500" htmlFor="solicitar_sueldo">
-              Solicitar al postulante el sueldo que espera ganar en este puesto.
-            </label>
-          </div>
+
           <hr className="my-4" />
           <div className="bg-white p-6 rounded-lg shadow-lg py-8" >
             <h3 className="text-1xl text-red-500 font-bold mb-4">Datos de contacto extra:</h3>
@@ -580,7 +605,7 @@ function AgregarO() {
             </div>
             {showCorreo && (
               <>
-                 <hr className="my-4" />
+                <hr className="my-4" />
                 <div className="flex-col bg-gray-200 rounded-lg shadow-md items-center p-10">
                   <label className="block text-sm font-bold mb-2" htmlFor="correo_contacto">Correo de Contacto</label>
                   <input
@@ -608,7 +633,7 @@ function AgregarO() {
             </div>
             {showNumeroContacto && (
               <>
-                 <hr className="my-4" />
+                <hr className="my-4" />
                 <div className="flex-col bg-gray-200 rounded-lg shadow-md items-center p-10">
                   <label className="block text-sm font-bold mb-2" htmlFor="numero_contacto">Número de Contacto</label>
                   <input
@@ -675,7 +700,7 @@ function AgregarO() {
 
             {requireCriterio && (
               <>
-                 <hr className="my-4" />
+                <hr className="my-4" />
                 <div className="flex-col bg-gray-200 rounded-lg shadow-md items-center p-10">
                   <label className="block text-sm font-bold mb-2" htmlFor="id_criterio">Criterio</label>
                   <div className="flex">
@@ -694,6 +719,7 @@ function AgregarO() {
                     {selectedCriterioId && (
                       <>
                         {selectedCriterioId === 4 ? (
+                          <>
                           <select
                             className="w-1/3 p-2 border rounded mr-2"
                             id="valor g"
@@ -705,7 +731,19 @@ function AgregarO() {
                             <option value="Femenino">Femenino</option>
                             <option value="Otro">Otro</option>
                           </select>
+                          <select
+                               className="w-1/4 p-1 border rounded mr-2"
+                               id="prioridad"
+                               value={prioridadCriterio || ''}
+                               onChange={(e) => setPrioridadCriterio(parseInt(e.target.value))}>
+                               <option value="">Seleccione una prioridad...</option>
+                               <option value="1">Alta</option>
+                               <option value="2">Media</option>
+                               <option value="3">Baja</option>
+                             </select>
+                          </>
                         ) : selectedCriterioId === 5 ? (
+                          <>
                           <select
                             className="w-1/3 p-2 border rounded mr-2"
                             id="valor e"
@@ -717,7 +755,19 @@ function AgregarO() {
                             <option value="Soltero">Soltero/a</option>
                             <option value="Viudo">Viudo/a</option>
                           </select>
+                          <select
+                               className="w-1/4 p-1 border rounded mr-2"
+                               id="prioridad"
+                               value={prioridadCriterio || ''}
+                               onChange={(e) => setPrioridadCriterio(parseInt(e.target.value))}>
+                               <option value="">Seleccione una prioridad...</option>
+                               <option value="1">Alta</option>
+                               <option value="2">Media</option>
+                               <option value="3">Baja</option>
+                             </select>
+                          </>
                         ) : selectedCriterioId === 6 ? (
+                          <>
                           <select
                             className="w-1/3 p-2 border rounded mr-2"
                             id="valor e"
@@ -732,7 +782,19 @@ function AgregarO() {
                               </option>
                             ))}
                           </select>
+                               <select
+                               className="w-1/4 p-1 border rounded mr-2"
+                               id="prioridad"
+                               value={prioridadCriterio || ''}
+                               onChange={(e) => setPrioridadCriterio(parseInt(e.target.value))}>
+                               <option value="">Seleccione una prioridad...</option>
+                               <option value="1">Alta</option>
+                               <option value="2">Media</option>
+                               <option value="3">Baja</option>
+                             </select>
+                             </>
                         ) : selectedCriterioId === 7 ? (
+                          <>
                           <select
                             className="w-1/3 p-2 border rounded mr-2"
                             id="valor e"
@@ -744,10 +806,24 @@ function AgregarO() {
                             <option value="Adulto,(26-35 años)">26 - 35 años</option>
                             <option value="Mayor,(Más de 36 años)">36 años en adelante</option>
                           </select>
+                                <select
+                                className="w-1/4 p-1 border rounded mr-2"
+                                id="prioridad"
+                                value={prioridadCriterio || ''}
+                                onChange={(e) => setPrioridadCriterio(parseInt(e.target.value))}>
+                                <option value="">Seleccione una prioridad...</option>
+                                <option value="1">Alta</option>
+                                <option value="2">Media</option>
+                                <option value="3">Baja</option>
+                              </select>
+                              </>
+
                         ) : selectedCriterioId === 8 ? (
 
                           <>
-                            <select id="province" className="w-1/3 p-2 border rounded mr-2" onChange={handleProvinceChange}>
+
+                            <select id="province" className="w-1/3 p-2 border rounded mr-2" onChange={handleProvinceChange}
+                              value={selectedProvince}>
                               <option value="">Provincia..</option>
                               {provinces.map((province, index) => (
                                 <option key={index} value={province}>
@@ -758,8 +834,8 @@ function AgregarO() {
                             <select
                               className="w-1/3 p-2 border rounded mr-2"
                               id="valor e"
-                              value={valorCriterio}
-                              onChange={(e) => setValorCriterio(e.target.value)}
+                              value={selectedCanton}
+                              onChange={handleCantonChange}
                               disabled={!selectedProvince}
                             >
                               <option value="">Canton..</option>
@@ -770,13 +846,7 @@ function AgregarO() {
                               ))}
 
                             </select>
-                          </>
-                        ) : (
-                          <div></div>
-                        )}
-                      </>
-                    )}
-                    <select
+                            <select
                       className="w-1/4 p-1 border rounded mr-2"
                       id="prioridad"
                       value={prioridadCriterio || ''}
@@ -786,7 +856,26 @@ function AgregarO() {
                       <option value="2">Media</option>
                       <option value="3">Baja</option>
                     </select>
+                          </>
+                        ) : (
+                          <select
+                          className="w-1/4 p-1 border rounded mr-2"
+                          id="prioridad"
+                          value={prioridadCriterio || ''}
+                          onChange={(e) => setPrioridadCriterio(parseInt(e.target.value))}>
+                          <option value="">Seleccione una prioridad...</option>
+                          <option value="1">Alta</option>
+                          <option value="2">Media</option>
+                          <option value="3">Baja</option>
+                        </select>
+                        )}
+                      </>
+                    )}
+              
                   </div>
+                  {criterioDescripcion && (
+                    <p className="mt-2 text-gray-600"><strong>¿Qué se evalua?</strong> {criterioDescripcion}</p>
+                  )}
                   <button
                     type="button"
                     className="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -816,22 +905,22 @@ function AgregarO() {
                 </div>
                 <hr className="my-4" />
               </>)}
-            
+
           </div>
           <div className="flex justify-center">
-    <button
-        onClick={() => navigate('/verOfertasE')}
-        className="bg-red-500 text-white p-2 rounded-lg mt-4 mr-4"
-    >
-        Cancelar
-    </button>
-    <button
-        type="submit"
-        className="bg-blue-500 text-white p-2 rounded-lg mt-4"
-    >
-        Publicar Oferta
-    </button>
-</div>
+            <button
+              onClick={() => navigate('/verOfertasE')}
+              className="bg-red-500 text-white p-2 rounded-lg mt-4 mr-4"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="bg-blue-500 text-white p-2 rounded-lg mt-4"
+            >
+              Publicar Oferta
+            </button>
+          </div>
 
         </form>
       </div>
