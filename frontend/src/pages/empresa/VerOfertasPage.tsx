@@ -4,7 +4,7 @@ import axios from '../../services/axios';
 import { RootState } from '../../store';
 import { useSelector } from 'react-redux';
 import { FiEdit, FiPlus, FiEye } from 'react-icons/fi';
-import { FaBriefcase } from 'react-icons/fa';
+import { FaBriefcase,FaCalendarAlt } from 'react-icons/fa';
 
 
 interface Oferta {
@@ -103,6 +103,52 @@ function VerOfertasPPage() {
     const indexOfFirstOferta = indexOfLastOferta - ofertasPerPage;
     const currentOfertas = ofertas.slice(indexOfFirstOferta, indexOfLastOferta);
 
+    const renderCriterioValor = (criterio: Criterio) => {
+        if (criterio && criterio.pivot && criterio.pivot.valor) {
+            const valorArray = criterio.pivot.valor.split(",");
+    
+            switch (criterio.criterio) {
+                case 'Experiencia':
+                    return criterio.pivot.valor ? "Los años mínimos indicados" : "Los años mínimos indicados";
+                case 'Titulo':
+                    return criterio.pivot.valor ? "Alguno de los títulos mencionados" : "Alguno de los títulos mencionados";
+                case 'Sueldo':
+                    return criterio.pivot.valor ? "Sueldo prospecto del postulante" : "Indicar el sueldo prospecto a ganar";
+                case 'Género':
+                    return criterio.pivot.valor ? criterio.pivot.valor : "No especificado";
+                case 'Estado Civil':
+                    switch (criterio.pivot.valor) {
+                        case "Casado":
+                            return "Casado/a";
+                        case "Soltero":
+                            return "Soltero/a";
+                        default:
+                            return "Viudo/a";
+                    }
+                case 'Idioma':
+                    return valorArray.length > 1 ? valorArray[1].trim() : criterio.pivot.valor;
+                case 'Edad':
+                    return valorArray.length > 1 ? valorArray[1].trim() : criterio.pivot.valor;
+                case 'Ubicación':
+                    return valorArray.length > 1 ? `${valorArray[1].trim()}, ${valorArray[2].trim()}` : criterio.pivot.valor;
+                default:
+                    return criterio.pivot.valor ? criterio.pivot.valor : "No especificado";
+            }
+        } else {
+
+            switch (criterio.criterio) {
+                case 'Experiencia':
+                    return criterio.pivot.valor ? "Los años mínimos indicados" : "Los años mínimos indicados";
+                case 'Titulo':
+                    return criterio.pivot.valor ? "Alguno de los títulos mencionados" : "Alguno de los títulos mencionados";
+                case 'Sueldo':
+                    return criterio.pivot.valor ? "Indicar el sueldo prospecto a ganar" : "Indicar el sueldo prospecto a ganar";
+                case 'Género':
+                    default:
+                        return  "No especificado";
+                }
+        }
+    };
 
     return (
         <div className="w-full p-4">
@@ -112,28 +158,28 @@ function VerOfertasPPage() {
                     <FiEdit className="text-orange-500 ml-2" />
                 </h1>
                 <p>En esta sección te mostramos todas las ofertas creadas hasta el momento, puedes seleccionar una fecha de publicación para filtrar la lista de ofertas publicadas manejarte de mejor manera</p>
-    
-                <div className="flex justify-center items-center mt-4 space-x-4">
-                <div className="bg-gray-100 p-4 rounded-lg shadow-md max-w-xl mx-auto text-center flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-5">
-                    <label htmlFor="selectFecha" className="block sm:inline-block sm:mr-2 font-semibold text-orange-500 text-center sm:text-left">
-                        Selecciona una fecha de publicación:
-                    </label>
-                    <input
-                        type="date"
-                        id="selectFecha"
-                        className="px-2 py-1 border border-gray-300 rounded w-full sm:w-auto"
-                        value={selectedFecha}
-                        onChange={(e) => setSelectedFecha(e.target.value)}
-                    />
-                    <button
-                        onClick={handleFilterByFecha}
-                        className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 w-full sm:w-auto"
-                    >
-                        Filtrar
-                    </button>
-                </div>
 
-    
+                <div className="flex justify-center items-center mt-4 space-x-4">
+                    <div className="bg-gray-100 p-4 rounded-lg shadow-md max-w-xl mx-auto text-center flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-5">
+                        <label htmlFor="selectFecha" className="block sm:inline-block sm:mr-2 font-semibold text-orange-500 text-center sm:text-left">
+                            Selecciona una fecha de publicación:
+                        </label>
+                        <input
+                            type="date"
+                            id="selectFecha"
+                            className="px-2 py-1 border border-gray-300 rounded w-full sm:w-auto"
+                            value={selectedFecha}
+                            onChange={(e) => setSelectedFecha(e.target.value)}
+                        />
+                        <button
+                            onClick={handleFilterByFecha}
+                            className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 w-full sm:w-auto"
+                        >
+                            Filtrar
+                        </button>
+                    </div>
+
+
                     <div className="bg-gray-100 p-4 rounded-lg shadow-md max-w-xl text-center">
                         <Link to="/add-oferta" className="bg-orange-500 text-white py-2 px-4 rounded hover:bg-orange-600 flex items-center justify-center">
                             <FiPlus className="mr-2" /> Publicar Nueva Oferta
@@ -148,7 +194,7 @@ function VerOfertasPPage() {
                         <FaBriefcase className="text-blue-500 text-2xl mr-2" />
                         <h1 className="text-2xl font-semibold text-blue-500">OFERTAS PUBLICADAS:</h1>
                     </div>
-    
+
                     <div className="relative overflow-x-auto shadow-md sm:rounded-lg max-w-screen-lg mx-auto">
                         <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                             <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -180,13 +226,19 @@ function VerOfertasPPage() {
                                             >
                                                 <FiEye className="w-4 h-4 mr-1" /> Ver
                                             </button>
+                                            <Link
+                                                to={`/edit-oferta/${oferta.id_oferta}`}
+                                                className="flex items-center text-green-600 hover:text-green-900"
+                                            >
+                                                <FiEdit className="w-4 h-4 mr-1" /> Editar
+                                            </Link>
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
-    
+
                     {ofertas.length > ofertasPerPage && (
                         <div className="mt-4 flex justify-end max-w-screen-lg mx-auto">
                             <nav className="relative z-0 inline-flex shadow-sm rounded-md">
@@ -225,38 +277,49 @@ function VerOfertasPPage() {
                     <p className="text-lg text-gray-600">Aún no has publicado ninguna oferta.</p>
                 </div>
             )}
-    
-    {selectedOferta && (
+
+           
+{selectedOferta && (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-x-auto bg-black bg-opacity-50">
         <div className="bg-white rounded-lg p-8 max-w-5xl w-full overflow-y-auto relative">
             <div className="absolute top-4 right-4 text-sm text-gray-500">
-                <p><strong>Fecha de Publicación:</strong> {selectedOferta.fecha_publi}</p>
-                <p><strong>Fecha de Máxima de postulación:</strong> {selectedOferta.fecha_max_pos}</p>
+                <p><FaCalendarAlt className="inline-block mr-1" /><strong>Fecha de Publicación:</strong> {selectedOferta.fecha_publi}</p>
+                <p><FaCalendarAlt className="inline-block mr-1" /><strong>Fecha de Máxima de postulación:</strong> {selectedOferta.fecha_max_pos}</p>
             </div>
             <h2 className="text-xl mb-4 text-center text-blue-500"><strong>CARGO:</strong> {selectedOferta.cargo}</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
+                <div className="p-4 bg-gray-100 rounded shadow">
                     <p><strong>Estado:</strong> {selectedOferta.estado}</p>
                     <p><strong>Área: </strong>{selectedOferta.areas.nombre_area}</p>
                     <p><strong>Carga Horaria: </strong>{selectedOferta.carga_horaria}</p>
                     <p><strong>Experiencia Mínima: </strong>{selectedOferta.experiencia === 0 ? 'Ninguna' : `${selectedOferta.experiencia} año/s`}</p>
                     <p><strong>Objetivo Cargo: </strong>{selectedOferta.objetivo_cargo}</p>
-                    <p><strong>Sueldo: </strong>{selectedOferta.sueldo === 0? 'No especificado': `${selectedOferta.sueldo} $ ofrecidos`}</p>
-                    <p><strong>Correo contacto: </strong>{selectedOferta.correo_contacto}</p>
-                    <p><strong>Número contacto: </strong>{selectedOferta.numero_contacto}</p>
+                    <p><strong>Sueldo: </strong>{selectedOferta.sueldo === 0 ? 'No especificado' : `${selectedOferta.sueldo} $ ofrecidos`}</p>
+                    {(selectedOferta.correo_contacto || selectedOferta.numero_contacto) && (
+                        <>
+                          <hr className="my-4" />
+                            <p><strong className="text-lg font-semibold mt-4 mb-2 text-orange-500">Datos de contacto extra:</strong></p>
+                            {selectedOferta.correo_contacto && (
+                                <p><strong>Correo contacto: </strong>{selectedOferta.correo_contacto}</p>
+                            )}
+                            {selectedOferta.numero_contacto && (
+                                <p><strong>Número contacto: </strong>{selectedOferta.numero_contacto}</p>
+                            )}
+                        </>
+                    )}
                 </div>
-                <div>
+                <div className="p-4 bg-gray-100 rounded shadow">
                     <p><strong>Funciones: </strong>{selectedOferta.funciones}</p>
                     <p><strong>Detalles adicionales: </strong>{selectedOferta.detalles_adicionales}</p>
                 </div>
-                <div>
+                <div className="p-4 bg-gray-100 rounded shadow">
                     {selectedOferta.criterios.length > 0 && (
                         <>
                             <h3 className="text-lg font-semibold mt-4 mb-2 text-orange-500">Criterios de evaluación:</h3>
                             <ul className="list-disc pl-6">
                                 {selectedOferta.criterios.map((criterio) => (
                                     <li key={criterio.id_criterio}>
-                                        <strong>{criterio.criterio}:</strong> {criterio.pivot.valor}
+                                        <strong>{criterio.criterio}:</strong> {renderCriterioValor(criterio)}
                                     </li>
                                 ))}
                             </ul>
@@ -264,7 +327,7 @@ function VerOfertasPPage() {
                     )}
                 </div>
             </div>
-            <div className="mt-4">
+            <div className="mt-4 p-4 bg-gray-100 rounded shadow">
                 {selectedOferta.expe.length > 0 && (
                     <>
                         <h3 className="text-lg font-semibold mt-4 mb-2 text-orange-500">Experiencia requerida para esta oferta:</h3>
@@ -291,7 +354,7 @@ function VerOfertasPPage() {
 
         </div>
     );
-    
+
 }
 
 export default VerOfertasPPage;
