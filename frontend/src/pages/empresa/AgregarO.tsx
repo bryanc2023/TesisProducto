@@ -221,6 +221,11 @@ function AgregarO() {
   const handleEliminarCriterio = (id: number) => {
     const updatedCriterios = selectedCriterios.filter(c => c.id_criterio !== id);
     setSelectedCriterios(updatedCriterios);
+    if (id === 3) {
+      setSolicitarSueldo(false);
+    } else {
+      setSolicitarSueldo(true);
+    }
   };
 
   const handleTituloChange = (event: React.ChangeEvent<HTMLSelectElement>) => {

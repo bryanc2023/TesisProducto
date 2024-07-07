@@ -103,6 +103,104 @@ class OfertaController extends Controller
 
         return response()->json(['message' => 'Oferta creado exitosamente', 'oferta' => $oferta], 201);
     }
+    public function updateOferta(Request $request, $id)
+    {
+        $oferta = Oferta::where('id_oferta', $id)->first();
+    
+        if (!$oferta) {
+            return response()->json(['error' => 'Oferta no encontrada'], 404);
+        }
+    
+        // Validar los datos recibidos
+        $validatedData = $request->validate([
+            'cargo' => 'required|string|max:255',
+            'id_area' => 'required|integer',
+            'experiencia' => 'integer',
+            'objetivo_cargo' => 'required|string|max:500',
+            'sueldo' => 'nullable|numeric',
+            'correo_contacto' => 'nullable|email|max:255',
+            'numero_contacto' => 'nullable|string|max:20',
+            'detalles_adicionales' => 'nullable|string',
+            'mostrar_sueldo' => 'nullable|boolean',
+            'mostrar_empresa' => 'nullable|boolean',
+            'solicitar_sueldo' => 'nullable|boolean',
+            'fecha_max_pos' => 'required|date',
+            'funciones' => 'required|string',
+            'modalidad' => 'required|string',
+            'carga_horaria' => 'required|string',
+            'titulos' => 'nullable|array',
+            'titulos.*.id' => 'integer',
+            'titulos.*.titulo' => 'string|max:255',
+            'criterios' => 'nullable|array',
+            'criterios.*.id_criterio' => 'integer|exists:criterio,id_criterio',
+            'criterios.*.valor' => 'string|nullable|max:255',
+            'criterios.*.prioridad' => 'integer|between:1,3',
+        ]);
+    
+        // Actualizar la oferta con los datos validados
+        $oferta->update([
+            'cargo' => $validatedData['cargo'],
+            'id_area' => $validatedData['id_area'],
+            'experiencia' => $validatedData['experiencia'],
+            'objetivo_cargo' => $validatedData['objetivo_cargo'],
+            'sueldo' => $validatedData['sueldo'] ?? 0,
+            'correo_contacto' => $validatedData['correo_contacto'],
+            'numero_contacto' => $validatedData['numero_contacto'],
+            'detalles_adicionales' => $validatedData['detalles_adicionales'] ?? 'Ninguno',
+            'n_mostrar_sueldo' => $validatedData['mostrar_sueldo'] ?? 0,
+            'n_mostrar_empresa' => $validatedData['mostrar_empresa'] ?? 0,
+            'soli_sueldo' => $validatedData['solicitar_sueldo'] ?? 0,
+            'fecha_max_pos' => $validatedData['fecha_max_pos'],
+            'funciones' => $validatedData['funciones'],
+            'modalidad' => $validatedData['modalidad'],
+            'carga_horaria' => $validatedData['carga_horaria'],
+        ]);
+    
+        // Actualizar las relaciones (titulos y criterios) si se proporcionan
+        if ($request->has('titulos')) {
+            // Sincronizar los títulos con la tabla `educacion_requerida`
+            $oferta->expe()->sync(array_map(function ($titulo) {
+                return ['id_titulo' => $titulo['id']];
+            }, $request->titulos));
+        }
+    
+        if ($request->has('criterios')) {
+            // Eliminar los criterios existentes
+            CriterioOferta::where('id_oferta', $oferta->id_oferta)->delete();
+    
+            // Insertar los nuevos criterios
+            foreach ($request->criterios as $criterio) {
+                CriterioOferta::create([
+                    'id_criterio' => $criterio['id_criterio'],
+                    'valor' => $criterio['valor'],
+                    'prioridad' => $criterio['prioridad'],
+                    'id_oferta' => $oferta->id_oferta,
+                ]);
+            }
+        }
+    
+        return response()->json(['message' => 'Oferta actualizada exitosamente']);
+    }
+    
+    public function deleteOferta($id)
+{
+    $oferta = Oferta::with(['criterios', 'expe'])->find($id);
+
+    if (!$oferta) {
+        return response()->json(['error' => 'Oferta no encontrada'], 404);
+    }
+
+    // Eliminar los criterios y títulos asociados
+    $oferta->criterios()->detach();
+    $oferta->expe()->detach();
+
+    // Eliminar la oferta
+    $oferta->delete();
+
+    return response()->json(['message' => 'Oferta eliminada exitosamente'], 200);
+}
+
+
 
     public function getOfertasByEmpresa($idEmpresa, Request $request)
     {
