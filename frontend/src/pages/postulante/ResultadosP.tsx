@@ -188,7 +188,7 @@ function ResultadosP() {
                                     <p><span className="font-medium">Ubicación:</span> {selectedPostulacion.ubicacion.provincia}, {selectedPostulacion.ubicacion.canton}</p>
                                     <p><span className="font-medium">Estado:</span> {renderEstadoPostulacion(selectedPostulacion.postulacion.estado_postulacion)}</p>
                                     <p>
-                                        <span className="font-medium">Comentario:</span>{" "}
+                                        <span className="font-medium">Retroalimentación de la empresa:</span>{" "}
                                         {selectedPostulacion.postulacion.comentario ? (
                                             selectedPostulacion.postulacion.comentario
                                         ) : (

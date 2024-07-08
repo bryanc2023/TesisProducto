@@ -37,6 +37,7 @@ import VerCV from "../pages/postulante/VerCV"
 import ConsultoPostuG from "../pages/empresaG/ConsultoPostuG"
 import EditarO from "../pages/empresa/EditarO"
 import GestionUsuarios from "../pages/admin/GestionUsuarios"
+import EditarOG from "../pages/empresaG/EditarOG"
 
 type TypeRoute = {
     path: string;
@@ -324,6 +325,12 @@ export const routes: TypeRoute[] = [
             {
                 path: 'ReportesG',
                 element: ReportesG,
+                allowedRoles: ['empresa_gestora'],
+            },
+            ,
+            {
+                path: 'edit-ofertaG/:id',
+                element: EditarOG,
                 allowedRoles: ['empresa_gestora'],
             },
         ],

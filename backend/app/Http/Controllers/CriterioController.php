@@ -16,4 +16,10 @@ class CriterioController extends Controller
           'criterios' => $criterios
       ]);
     }
+
+    public function index()
+    {
+      $criterios = Criterio::all();
+      return response()->json($criterios);
+    }
 }

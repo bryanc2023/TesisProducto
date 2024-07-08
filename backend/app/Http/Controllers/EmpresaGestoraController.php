@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AreaTrabajo;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Carbon\Carbon; ;
@@ -9,6 +10,7 @@ use App\Models\Oferta;
 use Illuminate\Support\Facades\DB;
 use App\Models\Postulacion;
 use App\Models\Postulante;
+use App\Models\Ubicacion;
 
 class EmpresaGestoraController extends Controller
 {
@@ -101,19 +103,21 @@ class EmpresaGestoraController extends Controller
         return response()->json($users);
     }
 
-public function getOfertasPorMes(Request $request)
+    public function getOfertasPorMes(Request $request)
     {
-        // Consulta para obtener el conteo de ofertas agrupadas por mes y año
+        $year = $request->query('year', date('Y'));
+    
         $ofertasPorMes = Oferta::select(
                 DB::raw('YEAR(fecha_publi) as year'),
                 DB::raw('MONTH(fecha_publi) as month'),
                 DB::raw('COUNT(*) as total')
             )
+            ->whereYear('fecha_publi', $year)
             ->groupBy('year', 'month')
             ->orderBy('year', 'desc')
             ->orderBy('month', 'desc')
             ->get();
-
+    
         return response()->json($ofertasPorMes);
     }
 
@@ -134,43 +138,96 @@ public function getOfertasPorMes(Request $request)
     }
 
     public function getPostulacionesPorMes(Request $request)
-{
-    $startDate = $request->query('startDate') ? Carbon::parse($request->query('startDate'))->startOfDay() : null;
-    $endDate = $request->query('endDate') ? Carbon::parse($request->query('endDate'))->endOfDay() : null;
-    $filterType = $request->query('filterType', 'month');
+    {
+        $year = $request->query('year', date('Y'));
+    
+        $postulaciones = DB::table('postulacion')
+            ->select(
+                DB::raw('YEAR(fecha_postulacion) as year'),
+                DB::raw('MONTH(fecha_postulacion) as month'),
+                DB::raw('COUNT(*) as total')
+            )
+            ->whereYear('fecha_postulacion', $year)
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
+            ->get();
+    
+        return response()->json($postulaciones);
+    }
 
-    $query = DB::table('postulacion')
-        ->select(
-            DB::raw('YEAR(fecha_postulacion) as year'),
-            DB::raw('MONTH(fecha_postulacion) as month'),
-            DB::raw('DAY(fecha_postulacion) as day'),
-            DB::raw('COUNT(*) as total')
+    // Controlador para obtener las áreas
+public function getAreas()
+{
+    $areas = AreaTrabajo::all();
+    return response()->json($areas);
+}
+
+// Controlador para obtener las ubicaciones
+public function getUbicaciones()
+{
+    $ubicaciones = Ubicacion::all();
+    return response()->json($ubicaciones);
+}
+
+// Controlador para obtener los postulantes por ubicación
+public function getPostulantesPorUbicacion(Request $request)
+{
+   
+        $ubicacionId = $request->input('ubicacion');
+    
+        $postulaciones = Postulacion::join('postulante', 'postulacion.id_postulante', '=', 'postulante.id_postulante')
+            ->where('postulante.id_ubicacion', $ubicacionId)
+            ->count();
+    
+        $ofertas = Oferta::join('empresa', 'oferta.id_empresa', '=', 'empresa.id_empresa')
+            ->where('empresa.id_ubicacion', $ubicacionId)
+            ->count();
+    
+        return response()->json([
+            'postulaciones' => $postulaciones,
+            'ofertas' => $ofertas,
+        ]);
+    
+}
+
+// Controlador para obtener los postulantes por área
+public function getPostulantesPorArea(Request $request)
+{
+    $areaId = $request->input('area');
+
+    $postulaciones = Postulacion::join('oferta', 'postulacion.id_oferta', '=', 'oferta.id_oferta')
+        ->where('oferta.id_area', $areaId)
+        ->count();
+
+    $ofertas = Oferta::where('id_area', $areaId)->count();
+
+    return response()->json([
+        'postulaciones' => $postulaciones,
+        'ofertas' => $ofertas,
+    ]);
+}
+
+// Controlador para obtener los postulantes por género
+public function getPostulantesPorGenero(Request $request)
+{
+    $query = Postulante::select(
+            DB::raw('SUM(CASE WHEN genero = "Masculino" THEN 1 ELSE 0 END) as masculino'),
+            DB::raw('SUM(CASE WHEN genero = "Femenino" THEN 1 ELSE 0 END) as femenino'),
+            DB::raw('SUM(CASE WHEN genero NOT IN ("Masculino", "Femenino") THEN 1 ELSE 0 END) as otro')
         );
 
-    if ($startDate) {
-        $query->where('fecha_postulacion', '>=', $startDate);
+    if ($request->has('area') && $request->input('area') != '') {
+        $query->join('postulacion', 'postulante.id_postulante', '=', 'postulacion.id_postulante')
+              ->join('oferta', 'postulacion.id_oferta', '=', 'oferta.id_oferta')
+              ->where('oferta.id_area', $request->input('area'));
     }
 
-    if ($endDate) {
-        $query->where('fecha_postulacion', '<=', $endDate);
-    }
 
-    if ($filterType === 'day') {
-        $query->groupBy('year', 'month', 'day');
-        $query->orderBy('year', 'desc')->orderBy('month', 'desc')->orderBy('day', 'desc');
-    } elseif ($filterType === 'year') {
-        $query->groupBy('year');
-        $query->orderBy('year', 'desc');
-    } else {
-        $query->groupBy('year', 'month');
-        $query->orderBy('year', 'desc')->orderBy('month', 'desc');
-    }
+ 
+    $data = $query->first();
 
-    $query->groupBy('year', 'month', 'day');
-
-    $postulaciones = $query->get();
-
-    return response()->json($postulaciones);
+    return response()->json($data);
 }
 
     
