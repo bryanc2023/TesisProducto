@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, KeyboardEvent, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown, faBars, faTimes, faEnvelope, faUser, faSearch } from '@fortawesome/free-solid-svg-icons';
@@ -6,11 +6,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import axios from '../../services/axios';
 import { RootState } from '../../store';
-import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon, XMarkIcon, BellIcon } from '@heroicons/react/24/solid';
 import ListPostulantes from '../Empresa/ListPostulantes';
 import ListEmpresa from '../Empresa/ListEmpresa';
 import PerfilPModal from '../../components/PerfilPModal';
 import PerfilEModal from '../../components/PerfilEModal';
+import { dataNotificable, DataNotifyApi } from '../../types/NotifyType';
 
 interface Postulante {
     id_postulante: number;
@@ -184,10 +185,18 @@ function PostulanteLayout() {
     const debouncedQuery = useDebounce(query, 300); // Ajusta el delay según sea necesario
     const debouncedQueryEmpresa = useDebounce(queryEmpresa, 300);
 
+    const [notificaciones, setNotificaciones] = useState<dataNotificable[]>([]);
+    const [loadNotificaciones, setLoadNotificaciones] = useState(false);
+    const [isModalNotify, setIsModalNotify] = useState(false);
+    const notifyRef = useRef<HTMLDivElement>(null);
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 setDropdownOpen(false);
+            }
+            if (notifyRef.current && !notifyRef.current.contains(event.target as Node)) {
+                setIsModalNotify(false);
             }
         };
 
@@ -195,7 +204,7 @@ function PostulanteLayout() {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [dropdownRef]);
+    }, [dropdownRef, notifyRef]);
 
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen);
@@ -270,18 +279,7 @@ function PostulanteLayout() {
         }
     }, [queryEmpresa]);
 
-    // Evento para buscar cuando se presiona enter
-    const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter') {
-            searchPostulante();
-        }
-    };
-
-    const handleKeyDownEmpresa = (event: KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter') {
-            searchEmpresa();
-        }
-    };
+   
 
     const closeModal = () => {
         setIsmodal(false);
@@ -369,6 +367,54 @@ function PostulanteLayout() {
         }
     };
 
+    // Obtener notificaciones
+    const getNotificaciones = async () => {
+        try {
+            setLoadNotificaciones(true);
+            const { data } = await axios.get<DataNotifyApi[]>('notificaciones');
+            const notify = data.map(notification => ({
+                ...notification.data,
+                id: notification.id,
+                mensaje: notification.data.mensaje || notification.data.asunto
+            }));
+            console.log( data )
+
+            setNotificaciones(notify);
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+        } finally {
+            setLoadNotificaciones(false);
+        }
+    };
+
+    // Marcar una notificación como leída
+    const marcarLeida = async (id: string) => {
+        try {
+            await axios.post(`/notificaciones/${id}`);
+            setNotificaciones(notificaciones.filter(notificacion => notificacion.id !== id));
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+        }
+    };
+
+    // Marcar todas las notificaciones como leídas
+    const marcarTodasLeidas = async () => {
+        try {
+            await axios.post('/notificacionesL');
+            setNotificaciones([]);
+        } catch (error) {
+            console.error('Error marking all notifications as read:', error);
+        }
+    };
+
+    const openModalNotify = () => {
+        setIsModalNotify(true);
+    };
+
+    useEffect(() => {
+        getNotificaciones();
+    }, []);
+
     return (
         <div className="flex h-screen overflow-hidden" onClick={handleContentClick}>
             {/* Lateral Nav */}
@@ -381,8 +427,8 @@ function PostulanteLayout() {
                     />
                     <span className="mt-2">{user ? `${user.name} ` : 'Nombre del Usuario'}</span>
                 </div>
-                <div className="w-full relative">
-                    <div className='bg-white rounded-lg text-gray-700 flex gap-1 p-2'>
+                <div className="w-full relative mb-5">
+                    <div className='bg-white rounded-lg text-gray-700 flex gap-1 p-2 '>
                         <MagnifyingGlassIcon className='w-5' />
                         {select === 1 ? (
                             <input
@@ -490,7 +536,50 @@ function PostulanteLayout() {
                     <div>
                         <span>ProaJob</span>
                     </div>
-                    <div className="relative">
+                    <div className="relative flex gap-2 items-center">
+                        <div className="relative" ref={notifyRef}>
+                            <button onClick={() => openModalNotify()}>
+                                <BellIcon className="w-6" />
+                                {notificaciones.length > 0 && (
+                                    <span className="bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2">
+                                        {notificaciones.length}
+                                    </span>
+                                )}
+                            </button>
+                            {isModalNotify && (
+                                <div className="absolute bg-white top-10 w-80 -left-56 p-5 shadow-xl rounded-lg">
+                                    <div className="flex justify-between text-orange-500">
+                                        <h3 className="text-center text-lg font-semibold">Notificaciones</h3>
+                                        <button onClick={() => setIsModalNotify(false)}>
+                                            <XMarkIcon className="w-6" />
+                                        </button>
+                                    </div>
+                                    {notificaciones.length > 0 ? (
+                                        notificaciones.map((notificacion) => (
+                                            <div key={notificacion.id} className="bg-gray-50 p-2 my-2 rounded-lg">
+                                                <p className="font-semibold text-gray-700">{notificacion.mensaje}</p>
+                                                <p className="text-gray-500">{notificacion.asunto}</p>
+                                                <p className="text-gray-500">{notificacion.destinatario}</p>
+                                                <button
+                                                    className="text-blue-500 text-sm"
+                                                    onClick={() => marcarLeida(notificacion.id)}
+                                                >
+                                                    Marcar como leída
+                                                </button>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-center text-gray-500">No hay notificaciones</p>
+                                    )}
+                                    <button
+                                        className="bg-blue-500 text-white py-2 px-4 rounded mt-2 w-full"
+                                        onClick={marcarTodasLeidas}
+                                    >
+                                        Marcar todas como leídas
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                         <button onClick={toggleDropdown} className="flex items-center focus:outline-none">
                             <img
                                 src={profileData ? profileData.postulante.foto : 'https://via.placeholder.com/30'}
@@ -501,7 +590,7 @@ function PostulanteLayout() {
                             <FontAwesomeIcon icon={faChevronDown} className="ml-2" />
                         </button>
                         {dropdownOpen && (
-                            <ul className="absolute right-0 mt-2 w-48 bg-white text-black shadow-lg rounded-md overflow-hidden z-20">
+                            <ul className="absolute right-0 mt-2 w-48 bg-white text-black shadow-lg rounded-md overflow-hidden z-20" style={{ top: '100%', right: '0' }}>
                                 <li className="px-4 py-2 hover:bg-gray-200 rounded-md">
                                     <Link to="/perfilP">Mi Perfil</Link>
                                 </li>

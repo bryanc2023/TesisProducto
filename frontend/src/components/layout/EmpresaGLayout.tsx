@@ -418,7 +418,7 @@ function EmpresaLayout() {
                     )}
                     <span className="mt-2">{empresa ? empresa.nombre_comercial : 'Nombre del Usuario'}</span>
                 </div>
-                <div className="w-full relative mt-4" ref={searchRef}>
+                <div className="w-full relative mt-4 " ref={searchRef}>
                     <div className="bg-white rounded-lg text-gray-700 flex gap-1 p-2">
                         <MagnifyingGlassIcon className="w-5" />
                         {select === 1 ? (
