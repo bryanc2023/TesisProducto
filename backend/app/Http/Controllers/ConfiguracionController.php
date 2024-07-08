@@ -46,4 +46,14 @@ class ConfiguracionController extends Controller
     return response()->json(['message' => 'Configuración activada correctamente', 'configuracion' => $configuracion], 200);
 }
 
+public function getActiveConfiguration()
+    {
+        $configuracion = Configuracion::where('vigencia', true)->first();
+        if ($configuracion) {
+            return response()->json($configuracion, 200);
+        } else {
+            return response()->json(['message' => 'No active configuration found'], 404);
+        }
+    }
+
 }

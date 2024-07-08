@@ -327,6 +327,9 @@ class PostulacionController extends Controller
                     'id_empresa' => $item->first()->oferta->id_empresa,
                     'cargo' => $item->first()->oferta->cargo,
                     'fecha_oferta'=>$item->first()->oferta->fecha_publi,
+                    'area'=>$item->first()->oferta->id_area,
+                    'carga_horaria'=>$item->first()->oferta->carga_horaria,
+                    'estado'=>$item->first()->oferta->estado,
                     'postulantes' => $item->map(function ($postulacion) {
                         return [
                             'id_postulante' => $postulacion->postulante->id_postulante,
@@ -369,13 +372,28 @@ class PostulacionController extends Controller
             // Obtener las ofertas de la empresa
             $ofertasQuery = Oferta::where('id_empresa', $empresa->id_empresa);
     
-            if ($request->has('fechaInicio') && $request->has('fechaFin')) {
+            if ($request->has('fechaInicio') && $request->has('fechaFin') && !empty($request->input('fechaInicio')) && !empty($request->input('fechaFin'))) {
                 $fechaInicio = $request->input('fechaInicio');
                 $fechaFin = $request->input('fechaFin');
-                $ofertasQuery->whereBetween('fecha_publi', [$fechaInicio, $fechaFin]);
+                
+                // Ajustar fechas de inicio y fin al primer y último día del mes respectivo
+                $startOfMonth = date('Y-m-01', strtotime($fechaInicio));
+                $endOfMonth = date('Y-m-t', strtotime($fechaFin));
+                $ofertasQuery->whereBetween('fecha_publi', [$startOfMonth, $endOfMonth]);
+            }
+    
+            if ($request->has('area')) {
+                $area = $request->input('area');
+                $ofertasQuery->where('id_area', $area);
+            }
+    
+            if ($request->has('estado')) {
+                $estado = $request->input('estado');
+                $ofertasQuery->where('estado', $estado);
             }
     
             $ofertas = $ofertasQuery->get();
+           
     
             // Inicializar arrays para contar postulantes por estado
             $estadoCounts = [
@@ -420,6 +438,7 @@ class PostulacionController extends Controller
                     'id_oferta' => $oferta->id_oferta,
                     'cargo' => $oferta->cargo,
                     'fecha' => $oferta->fecha_publi,
+                    'estado' => $oferta->estado,
                     'num_postulantes' => $postulaciones->count(),
                     'estado_count' => [
                         'P' => $estadoCounts['P'],

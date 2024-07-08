@@ -176,9 +176,11 @@ Route::get('perfildet/{id}', [PostulanteController::class, 'getPerfilEmpresa']);
 Route::get('/configuraciones', [ConfiguracionController::class, 'index']);
 Route::post('/configuraciones', [ConfiguracionController::class, 'store']);
 Route::post('/configuraciones/{id}/activate', [ConfiguracionController::class, 'activate']);
+Route::get('/configuracion/activa', [ConfiguracionController::class, 'getActiveConfiguration']);
 
 Route::get('/users', [UserController::class, 'index']);
 Route::get('/roles', [UserController::class, 'index2']);
+
 });
 
 
