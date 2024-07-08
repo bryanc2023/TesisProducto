@@ -148,6 +148,12 @@ Route::get('usuarios/empresas', [EmpresaGestoraController::class, 'getEmpresas']
 Route::get('/ofertas-por-mes', [EmpresaGestoraController::class, 'getOfertasPorMes']);
 Route::get('/usuarios-registrados-por-mes', [EmpresaGestoraController::class, 'getUsuariosRegistradosPorMes']);
 Route::get('/postulaciones-por-mes', [EmpresaGestoraController::class, 'getPostulacionesPorMes']);
+Route::get('/areasG', [EmpresaGestoraController::class, 'getAreas']);
+Route::get('/ubicacionesG', [EmpresaGestoraController::class, 'getUbicaciones']);
+Route::get('/postulantes-por-ubicacion', [EmpresaGestoraController::class, 'getPostulantesPorUbicacion']);
+Route::get('/postulantes-por-area', [EmpresaGestoraController::class, 'getPostulantesPorArea']);
+Route::get('/postulantes-por-genero', [EmpresaGestoraController::class, 'getPostulantesPorGenero']);
+
 
 //Rutas de notificaciones
 Route::get('/notificaciones', [NotificacionesController::class, 'index']);
@@ -176,9 +182,14 @@ Route::get('perfildet/{id}', [PostulanteController::class, 'getPerfilEmpresa']);
 Route::get('/configuraciones', [ConfiguracionController::class, 'index']);
 Route::post('/configuraciones', [ConfiguracionController::class, 'store']);
 Route::post('/configuraciones/{id}/activate', [ConfiguracionController::class, 'activate']);
+Route::get('/configuracion/activa', [ConfiguracionController::class, 'getActiveConfiguration']);
 
 Route::get('/users', [UserController::class, 'index']);
 Route::get('/roles', [UserController::class, 'index2']);
+
+Route::get('/criteriosAll', [CriterioController::class, 'index']);
+
+
 });
 
 

@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import axios from '../../services/axios';
 import ModalDetail from '../../components/ModalPostu';
-import PostulanteDetail from '../empresa/PostuDeta';
+import PostulanteDetail from '../../pages/empresa/PostuDeta';
 import { RootState } from '../../store';
 import jszip from 'jszip';
 import FileSaver from 'file-saver';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import { storage } from '../../config/firebaseConfig';
 import { FaInfoCircle, FaUserTie, FaFileAlt, FaCheckCircle } from 'react-icons/fa';
+import Swal from 'sweetalert2';
 
 interface Postulacion {
     id_oferta: number;
@@ -20,6 +21,7 @@ interface Postulacion {
         empresa: {
             nombre_comercial: string;
         };
+
         postulantes: {
             id_postulante: number;
             nombres: string;
@@ -70,6 +72,8 @@ const PostulantesList: React.FC = () => {
     const postulantesPerPage = 5; // Cantidad de postulantes por página
     const [selectedFecha, setSelectedFecha] = useState<string>('');
     const [showDescargaModal, setShowDescargaModal] = useState(false);
+    const [selectedFechaInicio, setSelectedFechaInicio] = useState<string>('');
+    const [selectedFechaFin, setSelectedFechaFin] = useState<string>('');
 
     const openDescargaModal = () => {
         setShowDescargaModal(true);
@@ -181,15 +185,22 @@ const PostulantesList: React.FC = () => {
     }));
 
     // Filtrar las ofertas por fecha seleccionada
-    const ofertasFiltradas = selectedFecha
-        ? allOfertas.filter(oferta => oferta.fecha_oferta === selectedFecha)
+    const ofertasFiltradas = selectedFechaInicio && selectedFechaFin
+        ? allOfertas.filter(oferta => {
+            const fechaOferta = new Date(oferta.fecha_oferta);
+            const fechaInicio = new Date(selectedFechaInicio);
+            const fechaFin = new Date(selectedFechaFin);
+            return fechaOferta >= fechaInicio && fechaOferta <= fechaFin;
+        })
         : [];
+
     // Actualizar las opciones del select basado en las ofertas filtradas
     const ofertaOptions = ofertasFiltradas.map((oferta, index) => (
         <option key={index} value={oferta.id_oferta}>
             OFERTA {index + 1}: {oferta.cargo}
         </option>
     ));
+
 
     const filteredPostulaciones = selectedOfertaId
         ? postulaciones.find(postulacion => postulacion.id_oferta === selectedOfertaId)
@@ -257,6 +268,15 @@ const PostulantesList: React.FC = () => {
     const indexOfFirstPostulante = indexOfLastPostulante - postulantesPerPage;
     const currentPostulantes = filteredPostulaciones ? filteredPostulaciones.oferta.postulantes.slice(indexOfFirstPostulante, indexOfLastPostulante) : [];
 
+    const handleFechaFinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const nuevaFechaFin = e.target.value;
+        if (selectedFechaInicio && new Date(nuevaFechaFin) < new Date(selectedFechaInicio)) {
+            Swal.fire('Error', 'La fecha fin no puede ser menor que la fecha de inicio', 'error');
+        } else {
+            setSelectedFechaFin(nuevaFechaFin);
+        }
+    };
+    
 
     return (
         <div className="mb-4 text-center max-w-screen-lg mx-auto">
@@ -279,44 +299,59 @@ const PostulantesList: React.FC = () => {
                 {showSteps && (
                     <ul className="list-disc pl-8 mb-4" style={{ background: '#f9fafb', padding: '15px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' }}>
                         <p>Puedes descargar las hojas de vida de los postulantes para verlas a detalle, se descargaran en orden de su evaluación correspondiente. O puedes descargarlas manualmente la que te interese</p>
-                        <p><b><i>- Paso 1: </i></b>Seleccione una fecha que dese mostrar las ofertas</p>
+                        <p><b><i>- Paso 1: </i></b>Seleccione una fecha de inicio y de fin de publicación que desees para mostrar las ofertas dentro de ese intervalo de tiempo</p>
                         <p><b><i>- Paso 2: </i></b>Seleccione una oferta</p>
                         <p><b><i>- Paso 3: </i></b>De click en "Descarga de hojas de vida masiva"</p>
                         <p><b><i>- Paso 4: </i></b>Indique la cantidad de hojas de vida (no mayor a las disponibles)</p>
-                        
+
                     </ul>
                 )}
                 <div className="mb-4 bg-white p-4 rounded-lg shadow-lg">
-    <div className="mb-4">
-        <label htmlFor="selectFecha" className="mr-2 font-semibold text-orange-500">Selecciona una fecha:</label>
-        <input
-            type="date"
-            id="selectFecha"
-            className="px-2 py-1 border border-gray-300 rounded"
-            value={selectedFecha}
-            onChange={(e) => setSelectedFecha(e.target.value)}
-        />
-    </div>
-    <div>
-        <label htmlFor="selectOferta" className="mr-2 font-semibold text-orange-500">Selecciona una oferta:</label>
-        <select
-            id="selectOferta"
-            className="px-2 py-1 border border-gray-300 rounded w-full"
-            value={selectedOfertaId || ''}
-            onChange={(e) => setSelectedOfertaId(parseInt(e.target.value) || null)}
-        >
-            <option value="">Seleccione..</option>
-            {ofertaOptions}
-        </select>
+                <div className="mb-4">
+    <label className="block font-semibold text-orange-500 mb-2 text-center">Fecha de Publicación:</label>
+    <div className="flex justify-center space-x-4">
+        <div>
+            <label htmlFor="selectFechaInicio" className="mr-2 font-semibold text-orange-500">Fecha inicio:</label>
+            <input
+                type="date"
+                id="selectFechaInicio"
+                className="px-2 py-1 border border-gray-300 rounded"
+                value={selectedFechaInicio}
+                onChange={(e) => setSelectedFechaInicio(e.target.value)}
+            />
+        </div>
+        <div>
+            <label htmlFor="selectFechaFin" className="mr-2 font-semibold text-orange-500">Fecha fin:</label>
+            <input
+                type="date"
+                id="selectFechaFin"
+                className="px-2 py-1 border border-gray-300 rounded"
+                value={selectedFechaFin}
+                onChange={handleFechaFinChange}
+            />
+        </div>
     </div>
 </div>
+                    <div>
+                        <label htmlFor="selectOferta" className="mr-2 font-semibold text-orange-500">Selecciona una oferta:</label>
+                        <select
+                            id="selectOferta"
+                            className="px-2 py-1 border border-gray-300 rounded w-full"
+                            value={selectedOfertaId || ''}
+                            onChange={(e) => setSelectedOfertaId(parseInt(e.target.value) || null)}
+                        >
+                            <option value="">Seleccione..</option>
+                            {ofertaOptions}
+                        </select>
+                    </div>
+                </div>
 
 
             </div>
 
             {filteredPostulaciones ? (
                 <>
-                  <hr className="my-4" />
+                    <hr className="my-4" />
                     <div className="flex justify-end mb-4">
                         {/* Botón para abrir el modal de descarga masiva */}
                         <button onClick={openDescargaModal} className="bg-blue-900 hover:bg-blue-700 text-white py-2 px-4 rounded">
@@ -412,8 +447,8 @@ const PostulantesList: React.FC = () => {
                                         key={index}
                                         href="#"
                                         onClick={() => setCurrentPage(index + 1)}
-                                        className={`-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium ${currentPage === index + 1 ? 'bg-orange-500 text-white' : 'text-gray-700 hover:bg-blue-500 hover:text-white'}`}
-                                        >
+                                        className={`-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium ${currentPage === index + 1 ? 'bg-neutral-900 text-white' : 'text-gray-700 hover:bg-blue-500 hover:text-white'}`}
+                                    >
                                         {index + 1}
                                     </a>
                                 ))}

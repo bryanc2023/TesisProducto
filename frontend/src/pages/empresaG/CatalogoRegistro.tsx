@@ -1,101 +1,175 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from '../../services/axios';
 
 interface Criterio {
-  nombre: string;
+  id_criterio: number;
+  criterio: string;
   descripcion: string;
-  peso: number;
+  vigencia: number;
+  valor:string;
 }
 
 const CatalogoRegistro: React.FC = () => {
   const [criterios, setCriterios] = useState<Criterio[]>([]);
   const [nuevoCriterio, setNuevoCriterio] = useState<Criterio>({
-    nombre: '',
+    id_criterio: 0,
+    criterio: '',
     descripcion: '',
-    peso: 0,
+    vigencia: 1,
+    valor:'',
   });
+
+  useEffect(() => {
+    const fetchCriterios = async () => {
+      try {
+        const response = await axios.get('/criteriosAll'); // Asegúrate de que esta URL sea correcta
+        if (Array.isArray(response.data)) {
+          setCriterios(response.data);
+        } else {
+          console.error('API response is not an array:', response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching criterios:', error);
+        setCriterios([]); // Asegurarse de que criterios sea un arreglo incluso si hay un error
+      }
+    };
+
+    fetchCriterios();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setNuevoCriterio({ ...nuevoCriterio, [name]: value });
   };
 
-  const handlePesoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { value } = e.target;
-    setNuevoCriterio({ ...nuevoCriterio, peso: parseInt(value, 10) });
+    setNuevoCriterio({ ...nuevoCriterio, valor: value });
   };
 
   const agregarCriterio = () => {
     setCriterios([...criterios, nuevoCriterio]);
-    setNuevoCriterio({ nombre: '', descripcion: '', peso: 0 });
+    setNuevoCriterio({ id_criterio: 0, criterio: '', descripcion: '', vigencia: 1 , valor:''});
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí puedes enviar los datos al backend
-    console.log('Criterios registrados:', criterios);
+    try {
+      await axios.post('/api/criterios', nuevoCriterio); // Asegúrate de que esta URL sea correcta
+      agregarCriterio();
+    } catch (error) {
+      console.error('Error registering criterio:', error);
+    }
+  };
+
+
+  const handleEdit = (id_criterio: number) => {
+    // Lógica para editar el criterio
+    console.log('Editar criterio con ID:', id_criterio);
+  };
+
+  const handleDeactivate = (id_criterio: number) => {
+    // Lógica para desactivar el criterio
+    console.log('Desactivar criterio con ID:', id_criterio);
   };
 
   return (
     <div className="container mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">Registrar Catálogos de Calificación</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">Nombre del Criterio</label>
-          <input
-            type="text"
-            id="nombre"
-            name="nombre"
-            value={nuevoCriterio.nombre}
-            onChange={handleInputChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700">Descripción del Criterio</label>
-          <textarea
-            id="descripcion"
-            name="descripcion"
-            value={nuevoCriterio.descripcion}
-            onChange={handleInputChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="peso" className="block text-sm font-medium text-gray-700">Peso del Criterio</label>
-          <input
-            type="number"
-            id="peso"
-            name="peso"
-            value={nuevoCriterio.peso}
-            onChange={handlePesoChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-            required
-          />
-        </div>
-        <button
-          type="button"
-          onClick={agregarCriterio}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md"
-        >
-          Agregar Criterio
-        </button>
-        <button
-          type="submit"
-          className="bg-green-500 text-white px-4 py-2 rounded-md ml-4"
-        >
-          Registrar Catálogos
-        </button>
-      </form>
-      <h3 className="text-xl font-bold mt-6">Criterios Registrados</h3>
-      <ul className="list-disc list-inside">
-        {criterios.map((criterio, index) => (
-          <li key={index} className="mt-2">
-            <strong>{criterio.nombre}</strong> - {criterio.descripcion} (Peso: {criterio.peso})
-          </li>
-        ))}
-      </ul>
+      <center> <h2 className="text-2xl font-bold mb-4">Catálogo de evaluación de la aplicación</h2></center>
+      <div className="bg-white p-4 rounded shadow mb-8">
+        
+        <center><p>En esta sección puedes visualizar el catálogo de evaluación y modificarlo con el cual se efectua la evaluación de cada oferta en la aplicacion:</p></center>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label htmlFor="criterio" className="block text-sm font-medium text-gray-700">Nombre del Criterio</label>
+            <input
+              type="text"
+              id="criterio"
+              name="criterio"
+              value={nuevoCriterio.criterio}
+              placeholder='Nombre del criterio de evaluación'
+              onChange={handleInputChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700">Descripción del Criterio</label>
+            <textarea
+              id="descripcion"
+              name="descripcion"
+              value={nuevoCriterio.descripcion}
+              placeholder='Describe cual es la condición de la puntuación'
+              onChange={handleInputChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="valor" className="block text-sm font-medium text-gray-700">¿Qué se evalua del postulante?</label>
+            <select
+              id="valor"
+              name="valor"
+              value={nuevoCriterio.valor}
+              onChange={handleSelectChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              required
+            >
+              <option value="">Campo a tomar en cuenta..</option>
+              <option value="Experiencia1">Formacion Profesional</option>
+              <option value="Experiencia2">Cursos</option>
+              <option value="Experiencia3">Idiomas</option>
+              <option value="Experiencia4">Redes</option>
+              <option value="Experiencia5">Presentación</option>
+              <option value="Experiencia5">Area de aplicación similar</option>
+            </select>
+          </div>
+          <button
+            type="button"
+            onClick={agregarCriterio}
+            className="bg-blue-500 text-white px-4 py-2 rounded-md"
+          >
+            Agregar Criterio Al Catálogo
+          </button>
+         
+        </form>
+      </div>
+      <div className="bg-white p-4 rounded shadow mb-8">
+        <h3 className="text-xl font-bold mb-4">Católogo de evaluación:</h3>
+        <table className="min-w-full bg-white">
+          <thead>
+            <tr>
+              <th className="py-2 px-4 border-b">Nombre</th>
+              <th className="py-2 px-4 border-b">Descripción</th>
+              <th className="py-2 px-4 border-b">Vigencia</th>
+              <th className="py-2 px-4 border-b">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            {criterios.map((criterio) => (
+              <tr key={criterio.id_criterio}>
+                <td className="py-2 px-4 border-b">{criterio.criterio}</td>
+                <td className="py-2 px-4 border-b">{criterio.descripcion}</td>
+                <td className="py-2 px-4 border-b">{criterio.vigencia ? 'Vigente' : 'No Vigente'}</td>
+                <td className="py-2 px-4 border-b">
+                    <button
+                      onClick={() => handleEdit(criterio.id_criterio)}
+                      className="bg-yellow-500 text-white px-2 py-1 rounded-md mr-2"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => handleDeactivate(criterio.id_criterio)}
+                      className="bg-red-500 text-white px-2 py-1 rounded-md"
+                    >
+                      Desactivar
+                    </button>
+                  </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
