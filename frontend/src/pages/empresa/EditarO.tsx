@@ -4,8 +4,38 @@ import Swal from 'sweetalert2';
 import axios from '../../services/axios';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { useNavigate } from 'react-router-dom';
-import { FiPlus } from 'react-icons/fi';
+import { useNavigate, useParams } from 'react-router-dom';
+import { FiEdit } from 'react-icons/fi';
+
+
+interface Experiencia {
+  id: number;
+  nivel_educacion: string;
+  campo_amplio: string;
+  titulo: string;
+}
+
+interface Oferta {
+  // Define aquí todas las propiedades de la oferta que necesitas
+  cargo: string;
+  id_area: number;
+  experiencia: number;
+  objetivo_cargo: string;
+  sueldo: number;
+  funciones: string;
+  fecha_max_pos: string;
+  carga_horaria: string;
+  modalidad: string;
+  detalles_adicionales: string;
+  correo_contacto: string | null;
+  numero_contacto: string | null;
+  expe: Experiencia[];
+  criterios: any[]; // Define mejor el tipo de los criterios si puedes
+  areas: {
+    id: number;
+    nombre_area: string;
+  };
+}
 
 interface Titulo {
   id: number;
@@ -19,6 +49,16 @@ interface Criterio {
   valor: string | '';
 }
 
+
+interface CriterioS {
+  id_criterio: number;
+  criterio: string;
+  pivot:{
+    valor:string;
+    prioridad:number;
+  };
+}
+
 interface Area {
   id: number;
   nombre_area: string;
@@ -29,21 +69,21 @@ interface SelectedCriterio extends Criterio {
   prioridad: number;
 }
 
+
 interface idioma {
   id: number;
   nombre: string;
-
 }
 
 interface canton {
   id: number;
   canton: string;
-
 }
 
-function AgregarO() {
+function EditarO() {
+  const { id } = useParams<{ id: string }>(); // Obtener el ID de la oferta de los parámetros de la URL
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors }, reset } = useForm();
+  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm();
   const [niveles, setNiveles] = useState([]);
   const [areas, setAreas] = useState<Area[]>([]);
   const [campos, setCampos] = useState([]);
@@ -70,10 +110,86 @@ function AgregarO() {
   const [cantons, setCantons] = useState<canton[]>([]);
   const [selectedProvince, setSelectedProvince] = useState('');
   const [selectedCanton, setSelectedCanton] = useState('');
+  const [defaultAreaId, setDefaultAreaId] = useState('');
+  const [defaultArea, setDefaultArea] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const handleCheckboxChange = (event: any) => {
     setShowExperiencia(event.target.checked);
   };
+
+  useEffect(() => {
+    const fetchOferta = async () => {
+      try {
+        const response = await axios.get(`oferta/${id}`); // Reemplaza con la URL correcta de tu API
+        const oferta = response.data;
+
+        // Rellenar los valores del formulario con los datos de la oferta
+        setValue('cargo', oferta.cargo);
+        setValue('id_area',oferta.id_area);
+        setDefaultAreaId(oferta.areas.id);
+        setDefaultArea(oferta.areas.nombre_area);
+        if (oferta.experiencia > 0) {
+          setShowExperiencia(true);
+          setValue('experiencia', oferta.experiencia);
+        } else {
+          setShowExperiencia(false);
+          setValue('experiencia', '');
+        }
+        setValue('objetivo_cargo', oferta.objetivo_cargo || '');
+        setValue('sueldo', oferta.sueldo && oferta.sueldo !== 0 ? oferta.sueldo : '');
+        setValue('funciones', oferta.funciones || '');
+        setValue('fecha_max_pos', oferta.fecha_max_pos || '');
+        setValue('carga_horaria', oferta.carga_horaria || '');
+        setValue('modalidad', oferta.modalidad || '');
+        setValue('detalles_adicionales', oferta.detalles_adicionales || '');
+        setShowCorreo(!!oferta.correo_contacto);
+        if (oferta.correo_contacto) {
+          setValue('correo_contacto', oferta.correo_contacto);
+        }
+        setShowNumeroContacto(!!oferta.numero_contacto);
+        if (oferta.numero_contacto) {
+          setValue('numero_contacto', oferta.numero_contacto);
+        }
+  // Manejar la educación requerida y los títulos
+
+      // Manejar la educación requerida y los títulos
+      if (oferta.expe.length > 0) {
+        setRequireEducation(true);
+        const titles: Titulo[] = oferta.expe.map((expe: Experiencia) => ({
+          id: expe.id,
+          titulo: expe.titulo
+        }));
+        setSelectedTitles(titles);
+      } else {
+        setRequireEducation(false);
+        setSelectedTitles([]);
+      }
+
+      if (oferta.criterios.length > 0){
+        setRequireCriterio(true);
+        setSelectedCriterios(oferta.criterios.map((criterio:CriterioS) => ({
+          id_criterio: criterio.id_criterio,
+          criterio: criterio.criterio,
+          valor: criterio.pivot.valor,
+          prioridad: criterio.pivot.prioridad,
+        })));
+      }else{
+        setRequireCriterio(false);
+        setSelectedCriterios([]);
+      }
+
+   
+      setValue('mostrar_sueldo', oferta.n_mostrar_sueldo ? true : false);
+      setValue('mostrar_empresa', oferta.n_mostrar_empresa ? true : false);
+      setValue('solicitar_sueldo', oferta.solicitar_sueldo ? true : false);
+      } catch (error) {
+        console.error('Error fetching oferta:', error);
+      }
+    };
+
+    fetchOferta();
+  }, [id, setValue]);
 
 
   useEffect(() => {
@@ -99,6 +215,8 @@ function AgregarO() {
         setCriterios(response3.data.criterios);
       } catch (error) {
         console.error('Error fetching data:', error);
+      }finally {
+        setLoading(false);
       }
     };
 
@@ -217,7 +335,6 @@ function AgregarO() {
     }
   };
 
-
   const handleEliminarCriterio = (id: number) => {
     const updatedCriterios = selectedCriterios.filter(c => c.id_criterio !== id);
     setSelectedCriterios(updatedCriterios);
@@ -279,57 +396,64 @@ function AgregarO() {
   };
 
   const onSubmit = handleSubmit(async (values) => {
-    if (user) {
-      try {
-        const usuario = user.id;
-        const dataToSend = {
-          ...values,
-          usuario: usuario,
-          experiencia: showExperiencia ? values.experiencia : 0,
-          correo_contacto: showCorreo ? values.correo_contacto : null,
-          numero_contacto: showNumeroContacto ? values.numero_contacto : null,
-          solicitar_sueldo: soliSueldo ? soliSueldo : 0,
-          titulos: selectedTitles,
-          criterios: selectedCriterios,
-        };
-
-        console.log('Usuario:', usuario);
-        console.log('Datos del formulario:', dataToSend);
-        console.log('Títulos seleccionados:', selectedTitles);
-        console.log('Criterios seleccionados:', selectedCriterios);
-
-        const response = await axios.post('add-oferta', dataToSend, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        Swal.fire({
-          title: '¡Publicada!',
-          text: 'La oferta se encuentra publicada',
-          icon: 'success',
-          confirmButtonText: 'Ok'
-        }).then(() => {
-          navigate("/verOfertasE");
-        });
-      } catch (error) {
-        console.log(error);
-      }
+    try {
+      const criteriosValidos = selectedCriterios.filter(criterio => criterio.id_criterio > 0 && criterio.prioridad !== null);
+      const dataToSend = {
+        ...values,
+        experiencia: showExperiencia ? values.experiencia : 0,
+        correo_contacto: showCorreo ? values.correo_contacto : null,
+        numero_contacto: showNumeroContacto ? values.numero_contacto : null,
+        mostrar_sueldo: values.mostrar_sueldo ? 1 : 0,
+        titulos: selectedTitles,
+        criterios: criteriosValidos,
+      };
+  
+      console.log('Datos del formulario:', dataToSend);
+  
+      const response = await axios.put(`update-oferta/${id}`, dataToSend, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      Swal.fire({
+        title: '¡Actualizada!',
+        text: 'La oferta ha sido actualizada exitosamente',
+        icon: 'success',
+        confirmButtonText: 'Ok'
+      }).then(() => {
+        navigate("/verOfertasE");
+      });
+    } catch (error) {
+      console.log(error);
     }
   });
+  
+
 
   const criterioDescripcion = criterios.find(c => c.id_criterio === selectedCriterioId)?.descripcion || '';
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+          <span className="font-bold">Cargando...</span>
+        </div>
+      </div>
+    );
+  }
+  
 
   return (
     <>
       <div className="bg-white p-6 rounded-lg shadow-lg ">
         <div className="text-center mb-4">
           <h3 className="text-2xl font-bold flex justify-center items-center text-blue-900">
-            Publicar Oferta
-            <FiPlus className="text-blue-900 ml-2" />
+            Edición de oferta
+            <FiEdit className="text-blue-900 ml-2" />
           </h3>
         </div>
-        <p>Para publicar una oferta completa los datos necesarios:</p>
+        <p>Edita los datos de la oferta seleccionada:</p>
         <hr className="my-4" />
         <h3 className="text-1xl text-red-500 font-bold mb-4">Datos de la oferta:</h3>
         <form onSubmit={onSubmit}>
@@ -449,14 +573,14 @@ function AgregarO() {
               <span className="text-red-500 ml-1">*</span>
               <span className="text-gray-600 text-sm ml-2">(Campo obligatorio)</span>
             </label>
-            <select className="w-full p-2 border rounded" id="id_area" {...register('id_area', { required: 'Área es requerida' })}>
-              <option value="">Seleccione</option>
-              {areas.map(area => (
-                <option key={area.id} value={area.id}>
-                  {area.nombre_area}
-                </option>
-              ))}
-            </select>
+            <select className="w-full p-2 border rounded" id="id_area" {...register('id_area', { required: 'Área es requerida' })} defaultValue={defaultAreaId}>
+  <option value={defaultAreaId}>{defaultArea}</option>
+  {areas.map(area => (
+    <option key={area.id} value={area.id}>
+      {area.nombre_area}
+    </option>
+  ))}
+</select>
             {errors.id_area && <p className="text-red-500">{String(errors.id_area.message)}</p>}
           </div>
 
@@ -467,6 +591,7 @@ function AgregarO() {
                 type="checkbox"
                 id="experienciaCheckbox"
                 onChange={handleCheckboxChange}
+                checked={showExperiencia}
               />{' '}
               ¿Requiere experiencia?
             </label>
@@ -892,19 +1017,24 @@ function AgregarO() {
                     <div className="mt-4">
                       <h4 className="font-semibold">Criterios Seleccionados:</h4>
                       <ul>
-                        {selectedCriterios.map(criterio => (
-                          <li key={criterio.id_criterio} className="flex items-center justify-between mb-2">
-                            <span>{criterio.valor ? `${criterio.criterio} = ${criterio.valor}  ` : `${criterio.criterio}`}</span>
-                            <button
-                              type="button"
-                              className="text-red-500"
-                              onClick={() => handleEliminarCriterio(criterio.id_criterio)}
-                            >
-                              x
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
+  {selectedCriterios.map(criterio => (
+    <li key={criterio.id_criterio} className="flex items-center justify-between mb-2">
+      <span>
+        {criterio.valor 
+          ? `${criterio.criterio ?? criterio.criterio} = ${criterio.valor}  ` 
+          : `${criterio.criterio ?? criterio.criterio}`}
+      </span>
+      <button
+        type="button"
+        className="text-red-500"
+        onClick={() => handleEliminarCriterio(criterio.id_criterio)}
+      >
+        x
+      </button>
+    </li>
+  ))}
+</ul>
+
                     </div>
                   )}
                 </div>
@@ -923,7 +1053,7 @@ function AgregarO() {
               type="submit"
               className="bg-blue-500 text-white p-2 rounded-lg mt-4"
             >
-              Publicar Oferta
+              Actualizar Oferta
             </button>
           </div>
 
@@ -933,4 +1063,4 @@ function AgregarO() {
   );
 }
 
-export default AgregarO;
+export default EditarO;

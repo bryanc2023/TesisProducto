@@ -66,7 +66,7 @@ const Login = () => {
                 const { user, token, role } = response.payload;
 
                 if (role === 'admin') {
-                    navigate("/inicioAdmin");
+                    navigate("/configuracion");
                 } else if (role === 'postulante') {
                     if (user.first_login_at === null) {
                         navigate("/completar");

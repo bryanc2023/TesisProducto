@@ -161,20 +161,16 @@ const Modal: React.FC<ModalProps> = ({ oferta, onClose, userId }) => {
     const renderCriterioValor = (criterio: Criterio) => {
         if (criterio && criterio.pivot && criterio.pivot.valor) {
             const valorArray = criterio.pivot.valor.split(",");
-
+    
             switch (criterio.criterio) {
                 case 'Experiencia':
-                    return "Los años mínimos indicados";
+                    return criterio.pivot.valor ? "Los años mínimos indicados" : "Los años mínimos indicados";
                 case 'Titulo':
-                    return "Alguno de los títulos mencionados";
+                    return criterio.pivot.valor ? "Alguno de los títulos mencionados" : "Alguno de los títulos mencionados";
                 case 'Sueldo':
-                    return "Indicar el sueldo prospecto a ganar";
-                case 'Edad':
-                    return valorArray.length > 1 ? valorArray[2].trim() : criterio.pivot.valor;
-                case 'Ubicación':
-                    return valorArray.length > 1 ? valorArray[1].trim() : criterio.pivot.valor;
-                case 'Idioma':
-                    return valorArray.length > 1 ? valorArray[1].trim() : criterio.pivot.valor;
+                    return criterio.pivot.valor ? "Indicar el sueldo prospecto a ganar" : "Indicar el sueldo prospecto a ganar";
+                case 'Género':
+                    return criterio.pivot.valor ? criterio.pivot.valor : "No especificado";
                 case 'Estado Civil':
                     switch (criterio.pivot.valor) {
                         case "Casado":
@@ -184,13 +180,33 @@ const Modal: React.FC<ModalProps> = ({ oferta, onClose, userId }) => {
                         default:
                             return "Viudo/a";
                     }
+                case 'Idioma':
+                    return valorArray.length > 1 ? valorArray[1].trim() : criterio.pivot.valor;
+                case 'Edad':
+                    return valorArray.length > 1 ? valorArray[1].trim() : criterio.pivot.valor;
+                case 'Ubicación':
+                    return valorArray.length > 1 ? `${valorArray[1].trim()}, ${valorArray[2].trim()}` : criterio.pivot.valor;
                 default:
-                    return criterio.pivot.valor;
+                    return criterio.pivot.valor ? criterio.pivot.valor : "No especificado";
             }
         } else {
-            return "";
+
+            switch (criterio.criterio) {
+                case 'Experiencia':
+                    return criterio.pivot.valor ? "Los años mínimos indicados" : "Los años mínimos indicados";
+                case 'Titulo':
+                    return criterio.pivot.valor ? "Alguno de los títulos mencionados" : "Alguno de los títulos mencionados";
+                case 'Sueldo':
+                    return criterio.pivot.valor ? "Indicar el sueldo prospecto a ganar" : "Indicar el sueldo prospecto a ganar";
+                case 'Género':
+                    default:
+                        return  "No especificado";
+                }
         }
     };
+    
+    
+    
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">

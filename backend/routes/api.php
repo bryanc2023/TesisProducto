@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\UploadController;
 use App\Http\Controllers\AreaController;
+use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\CriterioController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\IdiomaController;
@@ -41,6 +42,8 @@ Route::prefix('auth')->group(function(){
 
 Route::middleware(['jwt.verify'])->get('users',[UserController::class,'index']);
 
+
+Route::middleware(['jwt.verify'])->group(function () {
 //Rutas para usuario
 Route::get('userById/{id}', [UserController::class, 'getUserById']);
 
@@ -119,6 +122,9 @@ Route::post('postulante/forma2',[PostulanteController::class,'registroFormaAcaPl
 Route::get('/areas', [AreaController::class, 'getAreas']);
 Route::get('/criterios', [CriterioController::class, 'getCriterios']);
 Route::post('add-oferta', [OfertaController::class, 'registerOferta']);
+Route::get('oferta/{id}', [OfertaController::class, 'getOfertaById']);
+Route::put('update-oferta/{id}', [OfertaController::class, 'updateOferta']);
+Route::delete('/oferta/{id}', [OfertaController::class, 'deleteOferta']);
 Route::put('/updatePostulanteById/{id}', [PostulanteController::class, 'updatePostulanteByIdUser']);
 Route::put('/updateIdioma/{id_postulante}/{id_idioma}', [IdiomaController::class, 'updateIdioma']);
 Route::put('/updatePostulanteById/{id}', [PostulanteController::class, 'updatePostulanteByIdUser']);
@@ -149,12 +155,7 @@ Route::post('/notificaciones/{id}', [NotificacionesController::class, 'marcarLei
 Route::post('/notificacionesL', [NotificacionesController::class, 'marcarTodasLeidas']);
 
 
-Route::middleware('auth:api')->group(function () {
-  // Aquí van las rutas protegidas por JWT
 
- 
-  
-});
 
 Route::get('empresa/{idEmpresa}/ofertas', [OfertaController::class, 'getOfertasByEmpresa']);
 Route::get('/ofertas', [OfertaController::class, 'getAllOfertas']);
@@ -170,3 +171,20 @@ Route::get('existe-aprobado', [PostulacionController::class, 'existePostulacionA
 
 
 Route::get('perfildet/{id}', [PostulanteController::class, 'getPerfilEmpresa']);
+
+
+Route::get('/configuraciones', [ConfiguracionController::class, 'index']);
+Route::post('/configuraciones', [ConfiguracionController::class, 'store']);
+Route::post('/configuraciones/{id}/activate', [ConfiguracionController::class, 'activate']);
+
+Route::get('/users', [UserController::class, 'index']);
+Route::get('/roles', [UserController::class, 'index2']);
+});
+
+
+Route::middleware('auth:api')->group(function () {
+  // Aquí van las rutas protegidas por JWT
+
+ 
+  
+});
