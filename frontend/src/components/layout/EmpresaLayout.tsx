@@ -208,13 +208,6 @@ function EmpresaLayout() {
         setSidebarOpen(!sidebarOpen);
     };
 
-    const handleContentClick = () => {
-      
-    };
-
-    const closeSidebar = () => {
-        setSidebarOpen(false);
-    };
 
     useEffect(() => {
         const fetchEmpresa = async () => {
@@ -348,6 +341,7 @@ function EmpresaLayout() {
 
     const getNotificaciones = async () => {
         try {
+      
             setLoadNotificaiones(true);
             const { data } = await instance.get<DataNotifyApi[]>('notificaciones');
             const notify = data.map(notification => ({
@@ -386,6 +380,7 @@ function EmpresaLayout() {
     };
 
     useEffect(() => {
+        console.log('useEffect notificaciones')
         getNotificaciones();
     }, []);
 

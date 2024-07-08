@@ -440,71 +440,79 @@ class PostulacionController extends Controller
     }
     
     public function actualizarPostulaciones(Request $request)
-{
-    // Validación de datos recibidos
-    $request->validate([
-        'id_oferta' => 'required|integer',
-        'id_postulante' => 'required|integer',
-        'comentario' => 'required|string|max:255',
-    ]);
-
-    // Obtener los datos del request
-    $id_oferta = $request->input('id_oferta');
-    $id_postulante = $request->input('id_postulante');
-    $comentario = $request->input('comentario');
-
-
-    try {
-        // Cambiar estado y comentario para todas las postulaciones de la oferta excepto la del postulante seleccionado
-       
-          // Actualizar el estado de la oferta a "Culminada"
-          $oferta = Oferta::find($id_oferta);
-          if ($oferta) {
-              $oferta->estado = 'Culminada';
-              $oferta->save();
-          } else {
-              return response()->json(['message' => 'Oferta no encontrada'], 404);
-          }
-        Postulacion::where('id_oferta', $id_oferta)
-            ->where('id_postulante', '!=', $id_postulante)
-            ->update([
-                'estado_postulacion' => 'R',
-                'comentario' => 'Ha sido seleccionado otro candidato',
-                'fecha_revision' => Carbon::now(),
-            ]);
-
-        // Cambiar estado y guardar comentario para la postulación del postulante seleccionado
-        $postulacion = Postulacion::where('id_oferta', $id_oferta)
-            ->where('id_postulante', $id_postulante)
-            ->first();
-
-  
-
-        if ($postulacion) {
-            
-            $postulacion->estado_postulacion = 'A';
-            $postulacion->comentario = $comentario;
-            $postulacion->fecha_revision = Carbon::now(); 
-           
-
-            try {
-                $postulacion->save();
-                Log::info("Postulacion guardada exitosamente");
-            } catch (\Exception $e) {
-        
-                return response()->json(['message' => 'Error al guardar la postulación', 'error' => $e->getMessage()], 500);
+    {
+        // Validación de datos recibidos
+        $request->validate([
+            'id_oferta' => 'required|integer',
+            'id_postulante' => 'required|integer',
+            'comentario' => 'required|string|max:255',
+        ]);
+    
+        // Obtener los datos del request
+        $id_oferta = $request->input('id_oferta');
+        $id_postulante = $request->input('id_postulante');
+        $comentario = $request->input('comentario');
+    
+        try {
+            // Cambiar estado y comentario para todas las postulaciones de la oferta excepto la del postulante seleccionado
+            $oferta = Oferta::find($id_oferta);
+            if ($oferta) {
+                $oferta->estado = 'Culminada';
+                $oferta->save();
+            } else {
+                return response()->json(['message' => 'Oferta no encontrada'], 404);
             }
-        } else {
-            
-            return response()->json(['message' => 'Postulación no encontrada'], 404);
-        }
+    
+            Postulacion::where('id_oferta', $id_oferta)
+                ->where('id_postulante', '!=', $id_postulante)
+                ->update([
+                    'estado_postulacion' => 'R',
+                    'comentario' => 'Ha sido seleccionado otro candidato',
+                    'fecha_revision' => Carbon::now(),
+                ]);
+    
+            // Cambiar estado y guardar comentario para la postulación del postulante seleccionado
+            $postulacion = Postulacion::where('id_oferta', $id_oferta)
+                ->where('id_postulante', $id_postulante)
+                ->first();
+    
+            if ($postulacion) {
+                $postulacion->estado_postulacion = 'A';
+                $postulacion->comentario = $comentario;
+                $postulacion->fecha_revision = Carbon::now();
+    
+                try {
+                    $postulacion->save();
+                    Log::info("Postulacion guardada exitosamente");
+    
+                    // Crear notificación para el postulante seleccionado
+                    $postulante = Postulante::findOrFail($id_postulante);
+                    $usuario = User::findOrFail($postulante->id_usuario);
+                    $empresa = Empresa::findOrFail($oferta->id_empresa);
 
-        return response()->json(['message' => 'Postulaciones actualizadas correctamente'], 200);
-    } catch (\Exception $e) {
-      
-        return response()->json(['message' => 'Error al actualizar las postulaciones', 'error' => $e->getMessage()], 500);
+                    $usuario->notify(new Notificaciones(
+                        'Postulación Aceptada',
+                        'Has sido seleccionado para la oferta ' . $oferta->cargo . ' de la empresa ' . $empresa->nombre_comercial,
+                         $postulante->nombres . ' ' . $postulante->apellidos
+                        
+                    ));
+    
+                    // Console log
+                    Log::info("Notificación creada para el usuario: " . $usuario->email);
+                } catch (\Exception $e) {
+                    return response()->json(['message' => 'Error al guardar la postulación', 'error' => $e->getMessage()], 500);
+                }
+            } else {
+                return response()->json(['message' => 'Postulación no encontrada'], 404);
+            }
+    
+            return response()->json(['message' => 'Postulaciones actualizadas correctamente'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al actualizar las postulaciones', 'error' => $e->getMessage()], 500);
+        }
     }
-}
+    
+
 
 public function existePostulacionAprobadaParaOferta(Request $request)
 {

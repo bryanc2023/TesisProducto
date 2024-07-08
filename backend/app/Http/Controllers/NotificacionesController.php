@@ -8,7 +8,7 @@ use App\Notifications\Notificaciones;
 
 class NotificacionesController extends Controller
 {
-    public function __construct()
+    public function construct()
     {
         $this->middleware('auth');
     }
@@ -48,4 +48,10 @@ class NotificacionesController extends Controller
         auth()->user()->unreadNotifications->markAsRead();
         return response()->json(['message' => 'Todas las notificaciones marcadas como leídas']);
     }
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    
 }
