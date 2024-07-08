@@ -98,6 +98,10 @@ function InicioAdmin() {
 
     return (
         <div className="p-4">
+                 <center><h1 className="text-2xl font-bold mb-4">Gestión de tablas satélites</h1></center>
+            <p> En esta sección se maneja los datos de las tablas satélites de la aplicación esenciales para el funcionamiento correcto de la aplicación web</p>
+            <hr className="my-4" />
+            <h1 className="text-xl text-orange-400 mb-4">TABLAS SATÉLITES</h1>
             {fields.map(({ name, label }) => (
                 <form key={name} onSubmit={(e) => handleSubmit(e, name as keyof UploadFields)} className="mb-4 p-4 border border-gray-300 rounded shadow-md bg-white">
                     <h2 className="text-xl font-bold mb-2">{label}</h2>

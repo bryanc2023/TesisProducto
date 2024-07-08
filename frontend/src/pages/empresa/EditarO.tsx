@@ -112,6 +112,7 @@ function EditarO() {
   const [selectedCanton, setSelectedCanton] = useState('');
   const [defaultAreaId, setDefaultAreaId] = useState('');
   const [defaultArea, setDefaultArea] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const handleCheckboxChange = (event: any) => {
     setShowExperiencia(event.target.checked);
@@ -214,6 +215,8 @@ function EditarO() {
         setCriterios(response3.data.criterios);
       } catch (error) {
         console.error('Error fetching data:', error);
+      }finally {
+        setLoading(false);
       }
     };
 
@@ -429,6 +432,17 @@ function EditarO() {
 
 
   const criterioDescripcion = criterios.find(c => c.id_criterio === selectedCriterioId)?.descripcion || '';
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+          <span className="font-bold">Cargando...</span>
+        </div>
+      </div>
+    );
+  }
+  
 
   return (
     <>

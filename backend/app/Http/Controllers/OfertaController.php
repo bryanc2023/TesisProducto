@@ -106,11 +106,11 @@ class OfertaController extends Controller
     public function updateOferta(Request $request, $id)
     {
         $oferta = Oferta::where('id_oferta', $id)->first();
-    
+
         if (!$oferta) {
             return response()->json(['error' => 'Oferta no encontrada'], 404);
         }
-    
+
         // Validar los datos recibidos
         $validatedData = $request->validate([
             'cargo' => 'required|string|max:255',
@@ -136,7 +136,7 @@ class OfertaController extends Controller
             'criterios.*.valor' => 'string|nullable|max:255',
             'criterios.*.prioridad' => 'integer|between:1,3',
         ]);
-    
+
         // Actualizar la oferta con los datos validados
         $oferta->update([
             'cargo' => $validatedData['cargo'],
@@ -155,7 +155,7 @@ class OfertaController extends Controller
             'modalidad' => $validatedData['modalidad'],
             'carga_horaria' => $validatedData['carga_horaria'],
         ]);
-    
+
         // Actualizar las relaciones (titulos y criterios) si se proporcionan
         if ($request->has('titulos')) {
             // Sincronizar los títulos con la tabla `educacion_requerida`
@@ -163,11 +163,11 @@ class OfertaController extends Controller
                 return ['id_titulo' => $titulo['id']];
             }, $request->titulos));
         }
-    
+
         if ($request->has('criterios')) {
             // Eliminar los criterios existentes
             CriterioOferta::where('id_oferta', $oferta->id_oferta)->delete();
-    
+
             // Insertar los nuevos criterios
             foreach ($request->criterios as $criterio) {
                 CriterioOferta::create([
@@ -178,27 +178,27 @@ class OfertaController extends Controller
                 ]);
             }
         }
-    
+
         return response()->json(['message' => 'Oferta actualizada exitosamente']);
     }
-    
+
     public function deleteOferta($id)
-{
-    $oferta = Oferta::with(['criterios', 'expe'])->find($id);
+    {
+        $oferta = Oferta::with(['criterios', 'expe'])->find($id);
 
-    if (!$oferta) {
-        return response()->json(['error' => 'Oferta no encontrada'], 404);
+        if (!$oferta) {
+            return response()->json(['error' => 'Oferta no encontrada'], 404);
+        }
+
+        // Eliminar los criterios y títulos asociados
+        $oferta->criterios()->detach();
+        $oferta->expe()->detach();
+
+        // Eliminar la oferta
+        $oferta->delete();
+
+        return response()->json(['message' => 'Oferta eliminada exitosamente'], 200);
     }
-
-    // Eliminar los criterios y títulos asociados
-    $oferta->criterios()->detach();
-    $oferta->expe()->detach();
-
-    // Eliminar la oferta
-    $oferta->delete();
-
-    return response()->json(['message' => 'Oferta eliminada exitosamente'], 200);
-}
 
 
 
@@ -212,11 +212,30 @@ class OfertaController extends Controller
         $query = Oferta::where('id_empresa', $user)
             ->with(['areas', 'criterios', 'expe']);
 
-        // Verifica si se proporcionó la fecha_publi en los parámetros de la solicitud
-        if ($request->has('fecha_publi')) {
-            $fechaPubli = $request->input('fecha_publi');
-            // Agrega la condición para filtrar por fecha de publicación
-            $query->whereDate('fecha_publi', $fechaPubli);
+            if ($request->has('cargo') && !empty($request->input('cargo'))) {
+                $cargo = $request->input('cargo');
+                $query->where('cargo', $cargo);
+            }
+       
+    if ($request->has('fecha_inicio') && $request->has('fecha_fin')&& !empty($request->input('fecha_inicio')) && !empty($request->input('fecha_fin'))) {
+        $fechaInicio = $request->input('fecha_inicio');
+        $fechaFin = $request->input('fecha_fin');
+        $query->whereBetween('fecha_publi', [$fechaInicio, $fechaFin]);
+    }
+
+        if ($request->has('estado') && !empty($request->input('estado'))) {
+            $estado = $request->input('estado');
+            $query->where('estado', $estado);
+        }
+
+        if ($request->has('carga_horaria') && !empty($request->input('carga_horaria'))) {
+            $cargaHoraria = $request->input('carga_horaria');
+            $query->where('carga_horaria', $cargaHoraria);
+        }
+
+        if ($request->has('area') && !empty($request->input('area'))) {
+            $area = $request->input('area');
+            $query->where('id_area', $area);
         }
 
         $ofertas = $query->get();
