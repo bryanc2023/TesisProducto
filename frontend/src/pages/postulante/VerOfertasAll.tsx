@@ -204,7 +204,7 @@ const VerOfertasAll = () => {
                         <div className="relative overflow-x-auto">
                             <div className="flex flex-col gap-4">
                                 {currentOfertas.map((oferta) => (
-                                    <div key={oferta.id_oferta} className="w-full relative bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 p-4 flex justify-between items-center">
+                                    <div key={oferta.id_oferta} className="w-full relative bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 p-4 flex flex-col lg:flex-row items-center">
                                         <div className="flex-1 pr-4">
                                             <div className="text-center mb-2 flex items-center justify-center">
                                                 <FiUser className="text-blue-800 mr-2" size={24} />
@@ -226,12 +226,12 @@ const VerOfertasAll = () => {
                                             </center>
                                         </div>
 
-                                        <div className="relative w-80 h-52 flex items-center justify-center overflow-hidden">
+                                        <div className="relative w-full h-40 lg:w-80 lg:h-52 flex items-center justify-center overflow-hidden mt-4 lg:mt-0">
                                             <div className="absolute inset-0 bg-gradient-to-l from-blue-50 to-transparent"></div>
                                             <img
                                                 src={oferta.n_mostrar_empresa === 1 ? '/images/anonima.png' : oferta.empresa.logo}
                                                 alt="Logo"
-                                                className="w-full h-full object-cover"
+                                                className="w-full h-full object-contain"
                                             />
                                         </div>
                                     </div>

@@ -2,8 +2,9 @@ import React from 'react';
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { FaLinkedin, FaFacebook, FaInstagram, FaXTwitter, FaGlobe } from 'react-icons/fa6'; 
 import { EmpresaData } from './layout/EmpresaGLayout';
+import { IconType } from 'react-icons/lib';
 
-const iconMap = {
+const iconMap: { [key: string]: IconType } = {
     'facebook': FaFacebook,
     'twitter': FaXTwitter,
     'linkedin': FaLinkedin,
@@ -37,10 +38,33 @@ const PerfilEModal: React.FC<PerfilEModalProps> = ({ isModalEmpresa, closeModalE
                                     <h1 className="text-3xl font-semibold">
                                         {dataEmpresa.nombre_comercial || ''}
                                     </h1>
-                                    <p className="text-gray-600">{dataEmpresa.descripcion}</p>
-                                    <p className="text-gray-600">{`Cantidad de empleados: ${dataEmpresa.cantidad_empleados}`}</p>
+                                    
                                     <p className="text-gray-600">{`Tamaño: ${dataEmpresa.tamanio}`}</p>
+                                  
                                 </div>
+                            </div>
+                           
+                            <div className="mt-6 bg-gray-200 p-4 rounded-lg shadow-inner text-black">
+                                <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Detalles del perfil</h2>
+                                {dataEmpresa.ubicacion.provincia ? (
+                                    <div>
+                                       <p className="text-gray-600">{`Cantidad de empleados: ${dataEmpresa.cantidad_empleados}`}</p>
+                                    <p className="text-gray-600">Provincia: <span className="font-normal">{dataEmpresa.ubicacion.provincia}</span></p>
+                                    <p className="text-gray-600">Cantón: <span className="font-normal">{dataEmpresa.ubicacion.canton}</span></p>
+                                    </div>
+                                ) : (
+                                    <p className="text-gray-500 text-center">No hay datos</p>
+                                )}
+                            </div>
+                            <div className="mt-6 bg-gray-200 p-4 rounded-lg shadow-inner text-black">
+                                <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Descripción</h2>
+                                {dataEmpresa.descripcion ? (
+                                    <div>
+                                       <p className="text-gray-600">{dataEmpresa.descripcion}</p>
+                                    </div>
+                                ) : (
+                                    <p className="text-gray-500 text-center">No hay datos</p>
+                                )}
                             </div>
                             <div className="mt-6 bg-gray-200 p-4 rounded-lg shadow-inner text-black">
                                 <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Sector</h2>
@@ -52,12 +76,6 @@ const PerfilEModal: React.FC<PerfilEModalProps> = ({ isModalEmpresa, closeModalE
                                 ) : (
                                     <p className="text-gray-500 text-center">No hay datos</p>
                                 )}
-                            </div>
-
-                            <div className="mt-6 bg-gray-200 p-4 rounded-lg shadow-inner text-black">
-                                <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Ubicación</h2>
-                                <p className="text-black font-semibold">Provincia: <span className="font-normal">{dataEmpresa.ubicacion.provincia}</span></p>
-                                <p className="text-black font-semibold">Cantón: <span className="font-normal">{dataEmpresa.ubicacion.canton}</span></p>
                             </div>
 
                             <div className="mt-6 bg-gray-200 p-4 rounded-lg shadow-inner text-black">

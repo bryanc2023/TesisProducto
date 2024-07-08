@@ -6,7 +6,6 @@ const instance = axios.create({
         'Content-Type': 'application/json'
     }
 });
-
 // Interceptor para añadir el token a cada solicitud
 instance.interceptors.request.use(config => {
     const token = localStorage.getItem('token');
