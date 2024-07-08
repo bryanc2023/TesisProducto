@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\UploadController;
 use App\Http\Controllers\AreaController;
+use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\CriterioController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\IdiomaController;
@@ -170,7 +171,17 @@ Route::get('existe-aprobado', [PostulacionController::class, 'existePostulacionA
 
 
 Route::get('perfildet/{id}', [PostulanteController::class, 'getPerfilEmpresa']);
+
+
+Route::get('/configuraciones', [ConfiguracionController::class, 'index']);
+Route::post('/configuraciones', [ConfiguracionController::class, 'store']);
+Route::post('/configuraciones/{id}/activate', [ConfiguracionController::class, 'activate']);
+
+Route::get('/users', [UserController::class, 'index']);
+Route::get('/roles', [UserController::class, 'index2']);
 });
+
+
 Route::middleware('auth:api')->group(function () {
   // Aquí van las rutas protegidas por JWT
 

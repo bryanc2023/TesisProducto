@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronDown, faBars, faTimes, faCogs, faTable } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown, faBars, faTimes, faCogs, faTable, faUsers } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../store/authSlice';
 
@@ -41,13 +41,19 @@ function AdminLayout() {
                     <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
                         <Link to="/configuracion" className="flex items-center w-full">
                             <FontAwesomeIcon icon={faCogs} className="mr-2" />
-                            <span>Configuración</span>
+                            <span>Gestión configuración</span>
                         </Link>
                     </li>
                     <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
                         <Link to="/InicioAdmin" className="flex items-center w-full">
                             <FontAwesomeIcon icon={faTable} className="mr-2" />
-                            <span>Subida de Tablas Satélite</span>
+                            <span>Gestión tablas satélites</span>
+                        </Link>
+                    </li>
+                    <li className="mb-4 flex items-center hover:bg-gray-700 rounded-md p-2">
+                        <Link to="/gestion-u" className="flex items-center w-full">
+                        <FontAwesomeIcon icon={faUsers} className="mr-2" />
+                            <span>Gestión de usuarios</span>
                         </Link>
                     </li>
                 </ul>
