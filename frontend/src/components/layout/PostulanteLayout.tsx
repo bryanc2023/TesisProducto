@@ -413,7 +413,7 @@ function PostulanteLayout() {
 
     useEffect(() => {
         getNotificaciones();
-    }, [user]);
+    }, []);
 
     return (
         <div className="flex h-screen overflow-hidden" onClick={handleContentClick}>
@@ -427,8 +427,8 @@ function PostulanteLayout() {
                     />
                     <span className="mt-2">{user ? `${user.name} ` : 'Nombre del Usuario'}</span>
                 </div>
-                <div className="w-full relative">
-                    <div className='bg-white rounded-lg text-gray-700 flex gap-1 p-2'>
+                <div className="w-full relative mb-5">
+                    <div className='bg-white rounded-lg text-gray-700 flex gap-1 p-2 '>
                         <MagnifyingGlassIcon className='w-5' />
                         {select === 1 ? (
                             <input
@@ -590,7 +590,7 @@ function PostulanteLayout() {
                             <FontAwesomeIcon icon={faChevronDown} className="ml-2" />
                         </button>
                         {dropdownOpen && (
-                            <ul className="absolute right-0 mt-2 w-48 bg-white text-black shadow-lg rounded-md overflow-hidden z-20">
+                            <ul className="absolute right-0 mt-2 w-48 bg-white text-black shadow-lg rounded-md overflow-hidden z-20" style={{ top: '100%', right: '0' }}>
                                 <li className="px-4 py-2 hover:bg-gray-200 rounded-md">
                                     <Link to="/perfilP">Mi Perfil</Link>
                                 </li>
