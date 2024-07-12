@@ -145,6 +145,7 @@ Route::delete('/formacion_academica/delete', [PostulanteController::class, 'dele
 //Rutas para la Empresa Gestora
 Route::get('usuarios/postulantes', [EmpresaGestoraController::class, 'getPostulantes']);
 Route::get('usuarios/empresas', [EmpresaGestoraController::class, 'getEmpresas']);
+Route::get('usuarios/ofertas', [EmpresaGestoraController::class, 'getOfertas']);
 Route::get('/ofertas-por-mes', [EmpresaGestoraController::class, 'getOfertasPorMes']);
 Route::get('/usuarios-registrados-por-mes', [EmpresaGestoraController::class, 'getUsuariosRegistradosPorMes']);
 Route::get('/postulaciones-por-mes', [EmpresaGestoraController::class, 'getPostulacionesPorMes']);
@@ -153,6 +154,7 @@ Route::get('/ubicacionesG', [EmpresaGestoraController::class, 'getUbicaciones'])
 Route::get('/postulantes-por-ubicacion', [EmpresaGestoraController::class, 'getPostulantesPorUbicacion']);
 Route::get('/postulantes-por-area', [EmpresaGestoraController::class, 'getPostulantesPorArea']);
 Route::get('/postulantes-por-genero', [EmpresaGestoraController::class, 'getPostulantesPorGenero']);
+
 
 
 //Rutas de notificaciones

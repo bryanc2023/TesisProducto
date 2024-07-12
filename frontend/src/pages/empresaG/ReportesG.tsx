@@ -11,34 +11,133 @@ interface ReportData {
   id: number;
   name: string;
   email: string;
-  vigencia: string;
   created_at: string;
-  num_postulaciones?: number;
-  detalles_postulaciones?: {
-    cargo: string;
-  }[];
   empresa?: {
     nombre_comercial: string;
+    sector: string;
+    tamanio: string;
+    ubicacion: string;
     ofertas: {
-      id_oferta: number;
       cargo: string;
-      experiencia: string;
-      fecha_publi: string;
       num_postulantes: number;
     }[];
   };
+  cargo?: string;
+  sueldo?: number;
+  objetivo_cargo?: string;
+  nombre_comercial?: string;
+  experiencia?: number;
+  funciones?: string;
+  carga_horaria?: string;
+  modalidad?: string;
+  estado?: string;
 }
 
 const Reportes: React.FC = () => {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
-  const [reportType, setReportType] = useState('postulantes');
+  const [reportType, setReportType] = useState('empresas');
   const [data, setData] = useState<ReportData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [useFilters, setUseFilters] = useState<boolean>(false);
+
+  // Filtros adicionales para empresas
+  const [provinces, setProvinces] = useState<string[]>([]);
+  const [cantons, setCantons] = useState<string[]>([]);
+  const [selectedProvince, setSelectedProvince] = useState<string>('');
+  const [selectedCanton, setSelectedCanton] = useState<string>('');
+  const [sectores, setSectores] = useState<string[]>([]);
+  const [selectedSector, setSelectedSector] = useState<string>('');
+  const [selectedTamanio, setSelectedTamanio] = useState<string>('');
+
+  // Filtros adicionales para ofertas
+  const [cargo, setCargo] = useState<string>('');
+  const [experiencia, setExperiencia] = useState<string>('');
+  const [cargaHoraria, setCargaHoraria] = useState<string>('');
+  const [modalidad, setModalidad] = useState<string>('');
+  const [estado, setEstado] = useState<string>('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('ubicaciones');
+        setProvinces(response.data.provinces);
+        setCantons(response.data.cantons);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchCantons = async () => {
+      if (selectedProvince) {
+        try {
+          const response = await axios.get(`ubicaciones/cantones/${selectedProvince}`);
+          setCantons(response.data);
+        } catch (error) {
+          console.error('Error fetching cantons:', error);
+        }
+      }
+    };
+
+    fetchCantons();
+  }, [selectedProvince]);
+
+  useEffect(() => {
+    const fetchSectores = async () => {
+      try {
+        const response = await axios.get('sectores');
+        setSectores(response.data.sectores);
+      } catch (error) {
+        console.error('Error fetching sectores:', error);
+      }
+    };
+
+    fetchSectores();
+  }, []);
+
+  const handleProvinceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedProvince(event.target.value);
+    setSelectedCanton('');
+  };
+
+  const handleCantonChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCanton(event.target.value);
+  };
+
+  const handleSectorChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedSector(event.target.value);
+  };
+
+  const handleTamanioChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedTamanio(event.target.value);
+  };
+
+  const handleCargoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCargo(event.target.value);
+  };
+
+  const handleExperienciaChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setExperiencia(event.target.value);
+  };
+
+  const handleCargaHorariaChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setCargaHoraria(event.target.value);
+  };
+
+  const handleModalidadChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setModalidad(event.target.value);
+  };
+
+  const handleEstadoChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setEstado(event.target.value);
+  };
 
   const fetchData = async () => {
     if (useFilters && (!startDate || !endDate || startDate > endDate)) {
@@ -47,12 +146,32 @@ const Reportes: React.FC = () => {
     }
     try {
       setLoading(true);
-      const response = await axios.get(`/usuarios/${reportType}`, {
-        params: useFilters ? {
+      let params: any = {};
+      if (useFilters) {
+        params = {
           startDate: startDate?.toISOString().split('T')[0],
           endDate: endDate?.toISOString().split('T')[0],
-        } : {},
-      });
+        };
+      }
+      if (reportType === 'empresas') {
+        params = {
+          ...params,
+          provincia: selectedProvince || undefined,
+          canton: selectedCanton || undefined,
+          sector: selectedSector || undefined,
+          tamanio: selectedTamanio || undefined,
+        };
+      } else if (reportType === 'ofertas') {
+        params = {
+          ...params,
+          cargo: cargo || undefined,
+          experiencia: experiencia || undefined,
+          carga_horaria: cargaHoraria || undefined,
+          modalidad: modalidad || undefined,
+          estado: estado || undefined,
+        };
+      }
+      const response = await axios.get(`/usuarios/${reportType}`, { params });
       if (Array.isArray(response.data)) {
         setData(response.data);
       } else {
@@ -68,7 +187,7 @@ const Reportes: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, [startDate, endDate, reportType]);
+  }, [startDate, endDate, reportType, selectedProvince, selectedCanton, selectedSector, selectedTamanio, cargo, experiencia, cargaHoraria, modalidad, estado]);
 
   const generatePDF = () => {
     const doc = new jsPDF();
@@ -76,28 +195,35 @@ const Reportes: React.FC = () => {
     doc.setFontSize(10);
     doc.text(`Reporte de ${reportType}`, 14, 22);
 
-    const tableColumn = ["Nombre", "Correo", "Fecha de Creación"];
-    if (reportType === 'postulantes') {
-      tableColumn.push("Número de Postulaciones", "Postulaciones", "Vigencia");
-    } else if (reportType === 'empresas') {
-      tableColumn.push("Empresa", "Ofertas Publicadas");
-    }
+    let tableColumn: string[] = [];
+    let tableRows: any[] = [];
 
-    const tableRows: any[] = [];
-
-    data.forEach(item => {
-      const itemData = [
+    if (reportType === 'empresas') {
+      tableColumn = ["Nombre", "Correo", "Fecha de Creación", "Nombre Comercial", "Sector", "Tamaño", "Ubicación", "Ofertas"];
+      tableRows = data.map(item => [
         item.name,
         item.email,
-        item.created_at
-      ];
-      if (reportType === 'postulantes') {
-        itemData.push(item.num_postulaciones, item.detalles_postulaciones?.map(detalle => detalle.cargo).join(', '), item.vigencia);
-      } else if (reportType === 'empresas' && item.empresa) {
-        itemData.push(item.empresa.nombre_comercial, item.empresa.ofertas.map(oferta => `${oferta.cargo} (Postulantes: ${oferta.num_postulantes})`).join(', '));
-      }
-      tableRows.push(itemData);
-    });
+        item.created_at,
+        item.empresa.nombre_comercial,
+        item.empresa.sector,
+        item.empresa.tamanio,
+        item.empresa.ubicacion,
+        item.empresa.ofertas.map(oferta => `${oferta.cargo} (Postulantes: ${oferta.num_postulantes})`).join(', ')
+      ]);
+    } else if (reportType === 'ofertas') {
+      tableColumn = ["Cargo", "Sueldo", "Objetivo del Cargo", "Nombre de la Empresa", "Experiencia", "Funciones", "Carga Horaria", "Modalidad", "Estado"];
+      tableRows = data.map(item => [
+        item.cargo,
+        item.sueldo,
+        item.objetivo_cargo,
+        item.nombre_comercial,
+        item.experiencia,
+        item.funciones,
+        item.carga_horaria,
+        item.modalidad,
+        item.estado
+      ]);
+    }
 
     (doc as any).autoTable({
       head: [tableColumn],
@@ -116,28 +242,35 @@ const Reportes: React.FC = () => {
     doc.setFontSize(10);
     doc.text(`Reporte de ${reportType}`, 14, 22);
 
-    const tableColumn = ["Nombre", "Correo", "Fecha de Creación"];
-    if (reportType === 'postulantes') {
-      tableColumn.push("Número de Postulaciones", "Postulaciones", "Vigencia");
-    } else if (reportType === 'empresas') {
-      tableColumn.push("Empresa", "Ofertas Publicadas");
-    }
+    let tableColumn: string[] = [];
+    let tableRows: any[] = [];
 
-    const tableRows: any[] = [];
-
-    data.forEach(item => {
-      const itemData = [
+    if (reportType === 'empresas') {
+      tableColumn = ["Nombre", "Correo", "Fecha de Creación", "Nombre Comercial", "Sector", "Tamaño", "Ubicación", "Ofertas"];
+      tableRows = data.map(item => [
         item.name,
         item.email,
-        item.created_at
-      ];
-      if (reportType === 'postulantes') {
-        itemData.push(item.num_postulaciones, item.detalles_postulaciones?.map(detalle => detalle.cargo).join(', '), item.vigencia);
-      } else if (reportType === 'empresas' && item.empresa) {
-        itemData.push(item.empresa.nombre_comercial, item.empresa.ofertas.map(oferta => `${oferta.cargo} (Postulantes: ${oferta.num_postulantes})`).join(', '));
-      }
-      tableRows.push(itemData);
-    });
+        item.created_at,
+        item.empresa.nombre_comercial,
+        item.empresa.sector,
+        item.empresa.tamanio,
+        item.empresa.ubicacion,
+        item.empresa.ofertas.map(oferta => `${oferta.cargo} (Postulantes: ${oferta.num_postulantes})`).join(', ')
+      ]);
+    } else if (reportType === 'ofertas') {
+      tableColumn = ["Cargo", "Sueldo", "Objetivo del Cargo", "Nombre de la Empresa", "Experiencia", "Funciones", "Carga Horaria", "Modalidad", "Estado"];
+      tableRows = data.map(item => [
+        item.cargo,
+        item.sueldo,
+        item.objetivo_cargo,
+        item.nombre_comercial,
+        item.experiencia,
+        item.funciones,
+        item.carga_horaria,
+        item.modalidad,
+        item.estado
+      ]);
+    }
 
     (doc as any).autoTable({
       head: [tableColumn],
@@ -195,6 +328,7 @@ const Reportes: React.FC = () => {
         >
           <option value="postulantes">Postulantes</option>
           <option value="empresas">Empresas</option>
+          <option value="ofertas">Ofertas</option>
         </select>
       </div>
       <div className="mb-4">
@@ -210,23 +344,146 @@ const Reportes: React.FC = () => {
       </div>
       {useFilters && (
         <>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de Inicio</label>
-            <DatePicker
-              selected={startDate}
-              onChange={handleStartDateChange}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-              dateFormat="yyyy/MM/dd"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de Inicio</label>
+              <DatePicker
+                selected={startDate}
+                onChange={handleStartDateChange}
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                dateFormat="yyyy/MM/dd"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de Fin</label>
+              <DatePicker
+                selected={endDate}
+                onChange={handleEndDateChange}
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                dateFormat="yyyy/MM/dd"
+              />
+            </div>
           </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de Fin</label>
-            <DatePicker
-              selected={endDate}
-              onChange={handleEndDateChange}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-              dateFormat="yyyy/MM/dd"
-            />
+        </>
+      )}
+      {reportType === 'empresas' && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Provincia</label>
+              <select
+                value={selectedProvince}
+                onChange={handleProvinceChange}
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="">Seleccione</option>
+                {provinces.map(provincia => (
+                  <option key={provincia} value={provincia}>{provincia}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Cantón</label>
+              <select
+                value={selectedCanton}
+                onChange={handleCantonChange}
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                disabled={!selectedProvince}
+              >
+                <option value="">Seleccione</option>
+                {cantons.map(canton => (
+                  <option key={canton} value={canton}>{canton}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Sector</label>
+              <select
+                value={selectedSector}
+                onChange={handleSectorChange}
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="">Seleccione</option>
+                {sectores.map(sector => (
+                  <option key={sector} value={sector}>{sector}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Tamaño</label>
+              <select
+                value={selectedTamanio}
+                onChange={handleTamanioChange}
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="">Seleccione</option>
+                <option value="Microempresa">Microempresa</option>
+                <option value="Pequeña">Pequeña</option>
+                <option value="Mediana">Mediana</option>
+                <option value="Grande">Grande</option>
+              </select>
+            </div>
+          </div>
+        </>
+      )}
+      {reportType === 'ofertas' && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Cargo</label>
+              <input
+                type="text"
+                value={cargo}
+                onChange={handleCargoChange}
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Experiencia</label>
+              <input
+                type="text"
+                value={experiencia}
+                onChange={handleExperienciaChange}
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Carga Horaria</label>
+              <select
+                value={cargaHoraria}
+                onChange={handleCargaHorariaChange}
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="">Seleccione</option>
+                <option value="Tiempo Completo">Tiempo Completo</option>
+                <option value="Tiempo Parcial">Tiempo Parcial</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Modalidad</label>
+              <select
+                value={modalidad}
+                onChange={handleModalidadChange}
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="">Seleccione</option>
+                <option value="Presencial">Presencial</option>
+                <option value="Virtual">Virtual</option>
+                <option value="Hibrida">Hibrida</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+              <select
+                value={estado}
+                onChange={handleEstadoChange}
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="">Seleccione</option>
+                <option value="Culminada">Culminada</option>
+                <option value="En espera">En espera</option>
+              </select>
+            </div>
           </div>
         </>
       )}
@@ -248,7 +505,7 @@ const Reportes: React.FC = () => {
           <>
             {data.length === 0 ? (
               <p className="text-center text-gray-500">
-                {reportType === 'postulantes' ? 'No se han encontrado postulantes registrados' : 'No se han encontrado empresas registradas'}
+                {reportType === 'postulantes' ? 'No se han encontrado postulantes registrados' : (reportType === 'empresas' ? 'No se han encontrado empresas registradas' : 'No se han encontrado ofertas registradas')}
               </p>
             ) : (
               <>
@@ -256,11 +513,24 @@ const Reportes: React.FC = () => {
                   <table className="min-w-full">
                     <thead>
                       <tr>
-                        <th className="w-2/12 px-4 py-2">Nombre</th>
-                        <th className="w-2/12 px-4 py-2">Correo</th>
-                        <th className="w-2/12 px-4 py-2">Fecha de Creación</th>
+                        {reportType === 'ofertas' && (
+                          <>
+                            <th className="w-2/12 px-4 py-2">Cargo</th>
+                            <th className="w-2/12 px-4 py-2">Sueldo</th>
+                            <th className="w-2/12 px-4 py-2">Objetivo del Cargo</th>
+                            <th className="w-2/12 px-4 py-2">Nombre de la Empresa</th>
+                            <th className="w-2/12 px-4 py-2">Experiencia</th>
+                            <th className="w-2/12 px-4 py-2">Funciones</th>
+                            <th className="w-2/12 px-4 py-2">Carga Horaria</th>
+                            <th className="w-2/12 px-4 py-2">Modalidad</th>
+                            <th className="w-2/12 px-4 py-2">Estado</th>
+                          </>
+                        )}
                         {reportType === 'postulantes' && (
                           <>
+                            <th className="w-2/12 px-4 py-2">Nombre</th>
+                            <th className="w-2/12 px-4 py-2">Correo</th>
+                            <th className="w-2/12 px-4 py-2">Fecha de Creación</th>
                             <th className="w-2/12 px-4 py-2">Número de Postulaciones</th>
                             <th className="w-5/12 px-4 py-2">Postulaciones</th>
                             <th className="w-2/12 px-4 py-2">Vigencia</th>
@@ -268,8 +538,14 @@ const Reportes: React.FC = () => {
                         )}
                         {reportType === 'empresas' && (
                           <>
-                            <th className="w-2/12 px-4 py-2">Empresa</th>
-                            <th className="w-4/12 px-4 py-2">Ofertas Publicadas</th>
+                            <th className="w-2/12 px-4 py-2">Nombre</th>
+                            <th className="w-2/12 px-4 py-2">Correo</th>
+                            <th className="w-2/12 px-4 py-2">Fecha de Creación</th>
+                            <th className="w-2/12 px-4 py-2">Nombre Comercial</th>
+                            <th className="w-2/12 px-4 py-2">Sector</th>
+                            <th className="w-2/12 px-4 py-2">Tamaño</th>
+                            <th className="w-2/12 px-4 py-2">Ubicación</th>
+                            <th className="w-2/12 px-4 py-2">Ofertas</th>
                           </>
                         )}
                       </tr>
@@ -277,11 +553,24 @@ const Reportes: React.FC = () => {
                     <tbody>
                       {data.map((item) => (
                         <tr key={item.id}>
-                          <td className="border px-4 py-2">{item.name}</td>
-                          <td className="border px-4 py-2">{item.email}</td>
-                          <td className="border px-4 py-2">{item.created_at}</td>
+                          {reportType === 'ofertas' && (
+                            <>
+                              <td className="border px-4 py-2">{item.cargo}</td>
+                              <td className="border px-4 py-2">{item.sueldo}</td>
+                              <td className="border px-4 py-2">{item.objetivo_cargo}</td>
+                              <td className="border px-4 py-2">{item.nombre_comercial}</td>
+                              <td className="border px-4 py-2">{item.experiencia}</td>
+                              <td className="border px-4 py-2">{item.funciones}</td>
+                              <td className="border px-4 py-2">{item.carga_horaria}</td>
+                              <td className="border px-4 py-2">{item.modalidad}</td>
+                              <td className="border px-4 py-2">{item.estado}</td>
+                            </>
+                          )}
                           {reportType === 'postulantes' && (
                             <>
+                              <td className="border px-4 py-2">{item.name}</td>
+                              <td className="border px-4 py-2">{item.email}</td>
+                              <td className="border px-4 py-2">{item.created_at}</td>
                               <td className="border px-4 py-2">{item.num_postulaciones}</td>
                               <td className="border px-4 py-2">{item.detalles_postulaciones?.map(detalle => detalle.cargo).join(', ')}</td>
                               <td className="border px-4 py-2">{item.vigencia}</td>
@@ -289,8 +578,16 @@ const Reportes: React.FC = () => {
                           )}
                           {reportType === 'empresas' && item.empresa && (
                             <>
+                              <td className="border px-4 py-2">{item.name}</td>
+                              <td className="border px-4 py-2">{item.email}</td>
+                              <td className="border px-4 py-2">{item.created_at}</td>
                               <td className="border px-4 py-2">{item.empresa.nombre_comercial}</td>
-                              <td className="border px-4 py-2">{item.empresa.ofertas.map(oferta => `${oferta.cargo} (Postulantes: ${oferta.num_postulantes})`).join(', ')}</td>
+                              <td className="border px-4 py-2">{item.empresa.sector}</td>
+                              <td className="border px-4 py-2">{item.empresa.tamanio}</td>
+                              <td className="border px-4 py-2">{item.empresa.ubicacion}</td>
+                              <td className="border px-4 py-2">
+                                {item.empresa.ofertas.map(oferta => `${oferta.cargo} (Postulantes: ${oferta.num_postulantes})`).join(', ')}
+                              </td>
                             </>
                           )}
                         </tr>

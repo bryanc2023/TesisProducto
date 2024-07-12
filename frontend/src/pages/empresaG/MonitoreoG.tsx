@@ -38,7 +38,6 @@ const Estadisticas: React.FC = () => {
         detallesPostulaciones: []
     });
 
-
     useEffect(() => {
         const fetchData = async () => {
           try {
@@ -200,8 +199,6 @@ const Estadisticas: React.FC = () => {
         }
     };
 
-
-
     useEffect(() => {
         const fetchPostulantesPorGenero = async () => {
             try {
@@ -249,8 +246,6 @@ const Estadisticas: React.FC = () => {
             }
         };
 
-        
-
         if (selectedArea) {
             fetchPostulantesPorGenero();
             fetchPostulacionesOfertasPorArea();
@@ -260,7 +255,6 @@ const Estadisticas: React.FC = () => {
     useEffect(() => {
         const fetchPostulacionesOfertasPorUbicacion = async () => {
             try {
-               
                 const response2 = await axios.get(`ubicaciones/${selectedProvince}/${selectedCanton}`);
                 const ubicacionId = response2.data.ubicacion_id;
                 const response = await axios.get('/postulantes-por-ubicacion', {
@@ -307,6 +301,53 @@ const Estadisticas: React.FC = () => {
                     ))}
                 </select>
             </div>
+            <div className="mb-4">
+                <label htmlFor="selectArea" className="block text-sm font-bold mb-2">Selecciona el Área:</label>
+                <select
+                    id="selectArea"
+                    className="px-2 py-1 border border-gray-300 rounded w-full"
+                    value={selectedArea}
+                    onChange={(e) => setSelectedArea(e.target.value)}
+                >
+                    <option value="">Todas</option>
+                    {areas.map(area => (
+                        <option key={area.id} value={area.id}>
+                            {area.nombre_area}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            <div className="mb-4">
+                <label htmlFor="province" className="block text-sm font-bold mb-2">Provincia:</label>
+                <select
+                    id="province"
+                    className="px-2 py-1 border border-gray-300 rounded w-full"
+                    onChange={handleProvinceChange}
+                >
+                    <option value="">Seleccione</option>
+                    {provinces.map((province, index) => (
+                        <option key={index} value={province}>
+                            {province}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            <div className="mb-4">
+                <label htmlFor="canton" className="block text-sm font-bold mb-2">Cantón:</label>
+                <select
+                    id="canton"
+                    className="px-2 py-1 border border-gray-300 rounded w-full"
+                    disabled={!selectedProvince}
+                    onChange={handleCantonChange}
+                >
+                    <option value="">Seleccione</option>
+                    {cantons.map((canton, index) => (
+                        <option key={index} value={canton}>
+                            {canton}
+                        </option>
+                    ))}
+                </select>
+            </div>
             <div className="mb-8">
                 <h3 className="text-xl font-semibold mb-2">Ofertas Publicadas por Mes</h3>
                 <Bar data={barData} />
@@ -344,65 +385,14 @@ const Estadisticas: React.FC = () => {
                         ))}
                     </tbody>
                 </table>
-
             </div>
             <div>
-            <hr className="my-4" />
-            <div className="bg-white p-4 rounded shadow mb-8">
-                <center>
-                    <p className="mb-4">En esta sección puedes visualizar datos puntuales de áreas y ubicaciones de ofertas, postulaciones y postulantes:</p>
-                </center>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                    <div>
-                        <label htmlFor="selectArea" className="block text-sm font-bold mb-2">Selecciona el Área:</label>
-                        <select
-                            id="selectArea"
-                            className="px-2 py-1 border border-gray-300 rounded w-full"
-                            value={selectedArea}
-                            onChange={(e) => setSelectedArea(e.target.value)}
-                        >
-                            <option value="">Todas</option>
-                            {areas.map(area => (
-                                <option key={area.id} value={area.id}>
-                                    {area.nombre_area}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label htmlFor="province" className="block text-sm font-bold mb-2">Provincia:</label>
-                        <select
-                            id="province"
-                            className="px-2 py-1 border border-gray-300 rounded w-full"
-                            onChange={handleProvinceChange}
-                        >
-                            <option value="">Seleccione</option>
-                            {provinces.map((province, index) => (
-                                <option key={index} value={province}>
-                                    {province}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label htmlFor="canton" className="block text-sm font-bold mb-2">Cantón:</label>
-                        <select
-                            id="canton"
-                            className="px-2 py-1 border border-gray-300 rounded w-full"
-                            disabled={!selectedProvince}
-                            onChange={handleCantonChange}
-                        >
-                            <option value="">Seleccione</option>
-                            {cantons.map((canton, index) => (
-                                <option key={index} value={canton}>
-                                    {canton}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-                {selectedArea && selectedCanton && (
-                    <>
+                <hr className="my-4" />
+                <div className="bg-white p-4 rounded shadow mb-8">
+                    <center>
+                        <p className="mb-4">En esta sección puedes visualizar datos puntuales de áreas y ubicaciones de ofertas, postulaciones y postulantes:</p>
+                    </center>
+                    {selectedArea && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                             <div>
                                 <h3 className="text-xl font-semibold mb-2">Postulaciones y Ofertas en el Área determinada</h3>
@@ -413,16 +403,17 @@ const Estadisticas: React.FC = () => {
                                 <Bar data={ubicacionData} />
                             </div>
                         </div>
+                    )}
+                    {selectedCanton && (
                         <div>
                             <h3 className="text-xl font-semibold mb-2">Distribución de Postulantes por Género</h3>
                             <div className="w-1/2 mx-auto">
                                 <Pie data={genderData} />
                             </div>
                         </div>
-                    </>
-                )}
+                    )}
                 </div>
-        </div>
+            </div>
         </div>
     );
 };

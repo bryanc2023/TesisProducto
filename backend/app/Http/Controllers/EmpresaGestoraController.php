@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\AreaTrabajo;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Empresa;
 use Carbon\Carbon; ;
 use App\Models\Oferta;
 use Illuminate\Support\Facades\DB;
 use App\Models\Postulacion;
 use App\Models\Postulante;
 use App\Models\Ubicacion;
+use Illuminate\Support\Facades\Log; 
 
 class EmpresaGestoraController extends Controller
 {
@@ -58,50 +60,83 @@ class EmpresaGestoraController extends Controller
     
 
 
-    
     public function getEmpresas(Request $request)
     {
         $startDate = $request->query('startDate') ? Carbon::parse($request->query('startDate'))->startOfDay() : null;
         $endDate = $request->query('endDate') ? Carbon::parse($request->query('endDate'))->endOfDay() : null;
-
-        $roleId = 3; // Role ID para 'empresa'
-
-        $query = User::where('role_id', $roleId)->whereHas('empresa');
-
+        $provincia = $request->query('provincia');
+        $canton = $request->query('canton');
+        $sector = $request->query('sector');
+        $tamanio = $request->query('tamanio');
+    
+        $query = Empresa::with(['usuario', 'ubicacion', 'sector', 'ofertas.postulaciones']);
+    
+        if ($provincia) {
+            $query->whereHas('ubicacion', function($q) use ($provincia) {
+                $q->where('provincia', $provincia);
+            });
+        }
+    
+        if ($canton) {
+            $query->whereHas('ubicacion', function($q) use ($canton) {
+                $q->where('canton', $canton);
+            });
+        }
+    
+        if ($sector) {
+            $query->whereHas('sector', function($q) use ($sector) {
+                $q->where('sector', $sector);
+            });
+        }
+    
+        if ($tamanio) {
+            $query->where('tamanio', $tamanio);
+        }
+    
         if ($startDate) {
-            $query->where('created_at', '>=', $startDate);
+            $query->whereHas('usuario', function ($q) use ($startDate) {
+                $q->where('created_at', '>=', $startDate);
+            });
         }
-
+    
         if ($endDate) {
-            $query->where('created_at', '<=', $endDate);
+            $query->whereHas('usuario', function ($q) use ($endDate) {
+                $q->where('created_at', '<=', $endDate);
+            });
         }
-
-        $users = $query->get()->map(function ($user) {
-            $empresa = $user->empresa;
-            $ofertas = $empresa ? $empresa->ofertas->map(function ($oferta) {
+    
+        $empresas = $query->get()->map(function ($empresa) {
+            $ofertas = $empresa->ofertas->map(function ($oferta) {
                 return [
                     'id_oferta' => $oferta->id_oferta,
                     'cargo' => $oferta->cargo,
                     'experiencia' => $oferta->experiencia,
                     'fecha_publi' => $oferta->fecha_publi,
-                    'num_postulantes' => $oferta->postulaciones->count(), // Conteo de postulaciones
+                    'num_postulantes' => $oferta->postulaciones->count(),
                 ];
-            }) : [];
-
+            });
+    
             return [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'created_at' => $user->created_at->format('Y-m-d'),
-                'empresa' => $empresa ? [
+                'id' => $empresa->id_empresa,
+                'name' => $empresa->usuario ? $empresa->usuario->name : 'N/A',
+                'email' => $empresa->usuario ? $empresa->usuario->email : 'N/A',
+                'created_at' => $empresa->usuario ? $empresa->usuario->created_at->format('Y-m-d') : 'N/A',
+                'empresa' => [
                     'nombre_comercial' => $empresa->nombre_comercial,
+                    'sector' => $empresa->sector ? $empresa->sector->sector : 'N/A',
+                    'tamanio' => $empresa->tamanio,
+                    'ubicacion' => $empresa->ubicacion ? $empresa->ubicacion->provincia . ', ' . $empresa->ubicacion->canton : 'N/A',
                     'ofertas' => $ofertas,
-                ] : null,
+                ],
             ];
         });
-
-        return response()->json($users);
+    
+        return response()->json($empresas);
     }
+    
+
+
+
 
     public function getOfertasPorMes(Request $request)
     {
@@ -229,6 +264,80 @@ public function getPostulantesPorGenero(Request $request)
 
     return response()->json($data);
 }
+
+public function getOfertas(Request $request)
+{
+    $startDate = $request->query('startDate') ? Carbon::parse($request->query('startDate'))->startOfDay() : null;
+    $endDate = $request->query('endDate') ? Carbon::parse($request->query('endDate'))->endOfDay() : null;
+    $cargo = $request->query('cargo');
+    $experiencia = $request->query('experiencia');
+    $cargaHoraria = $request->query('carga_horaria');
+    $modalidad = $request->query('modalidad');
+    $estado = $request->query('estado');
+
+    // Log de los parámetros recibidos
+    Log::info('Filtros recibidos', [
+        'startDate' => $startDate,
+        'endDate' => $endDate,
+        'cargo' => $cargo,
+        'experiencia' => $experiencia,
+        'carga_horaria' => $cargaHoraria,
+        'modalidad' => $modalidad,
+        'estado' => $estado,
+    ]);
+
+    $query = DB::table('oferta')
+        ->join('empresa', 'oferta.id_empresa', '=', 'empresa.id_empresa')
+        ->select(
+            'oferta.id_oferta',
+            'oferta.cargo',
+            'oferta.sueldo',
+            'oferta.objetivo_cargo',
+            'empresa.nombre_comercial',
+            'oferta.experiencia',
+            'oferta.funciones',
+            'oferta.carga_horaria',
+            'oferta.modalidad',
+            'oferta.estado'
+        );
+
+    if ($startDate) {
+        $query->where('oferta.fecha_publi', '>=', $startDate);
+    }
+
+    if ($endDate) {
+        $query->where('oferta.fecha_publi', '<=', $endDate);
+    }
+
+    if ($cargo) {
+        $query->where('oferta.cargo', 'like', "%$cargo%");
+    }
+
+    if ($experiencia !== null) {
+        $query->where('oferta.experiencia', '=', $experiencia);
+    }
+
+    if ($cargaHoraria) {
+        $query->where('oferta.carga_horaria', '=', $cargaHoraria);
+    }
+
+    if ($modalidad) {
+        $query->where('oferta.modalidad', '=', $modalidad);
+    }
+
+    if ($estado) {
+        $query->where('oferta.estado', '=', $estado);
+    }
+
+    $ofertas = $query->get();
+
+    // Log de la consulta generada
+    Log::info('Consulta generada', ['query' => $query->toSql(), 'bindings' => $query->getBindings()]);
+
+    return response()->json($ofertas);
+}
+
+
 
     
 }
