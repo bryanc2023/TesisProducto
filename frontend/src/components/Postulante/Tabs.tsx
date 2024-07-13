@@ -4,6 +4,8 @@ import ExperienceTab from './ExperienceTab';
 import LanguagesTab from './LanguagesTab';
 import CoursesTab from './CoursesTab';
 import CurriTab from './CurriTab';
+import HabilidadTab from './HabilidadTab';
+import CompetenciaTab from './CompetenciaTab';
 
 interface TabsProps {
   profileData: ProfileData;
@@ -62,6 +64,14 @@ interface Idioma {
   } | null;
 }
 
+interface Habilidad{
+  nivel: string;
+  habilidad: {
+    id: number;
+    habilidad: string;
+  } | null;
+}
+
 interface Curso {
   id: number;
   nombre: string;
@@ -90,6 +100,7 @@ const Tabs: React.FC<TabsProps> = ({
   handleDeleteFormacion,
   openModal,
   openEditLanguageModal,
+  openEditHabilidadModal,
   openEditCursoModal,
   handleDeleteCurso,
   handleViewCV,
@@ -140,6 +151,22 @@ const Tabs: React.FC<TabsProps> = ({
             handleDownloadCV={handleDownloadCV}
           />
         );
+        case 'habilidades':
+          return (
+            <HabilidadTab
+            habilidades={profileData.postulante.habilidades}
+            openEditHabilidadModal={openEditHabilidadModal}
+            openModal={openModal}
+          />
+        );
+        case 'competencias':
+          return (
+            <CompetenciaTab
+            habilidades={profileData.postulante.competencias}
+            openEditHabilidadModal={openEditHabilidadModal}
+            openModal={openModal}
+          />
+          );
       default:
         return null;
     }
@@ -171,6 +198,19 @@ const Tabs: React.FC<TabsProps> = ({
           className={`py-2 px-4 flex-shrink-0 ${activeTab === 'courses' ? 'bg-gray-800 text-white rounded-t-lg' : 'bg-gray-400 text-black rounded-lg'}`}
         >
           Cursos
+        </button>
+        <button
+          onClick={() => setActiveTab('habilidades')}
+          className={`py-2 px-4 flex-shrink-0 ${activeTab === 'habilidades' ? 'bg-gray-800 text-white rounded-t-lg' : 'bg-gray-400 text-black rounded-lg'}`}
+        >
+          Habilidades
+        </button>
+
+        <button
+          onClick={() => setActiveTab('competencias')}
+          className={`py-2 px-4 flex-shrink-0 ${activeTab === 'competencias' ? 'bg-gray-800 text-white rounded-t-lg' : 'bg-gray-400 text-black rounded-lg'}`}
+        >
+          Competencias
         </button>
         <button
           onClick={() => setActiveTab('cv')}

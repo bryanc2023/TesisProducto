@@ -6,6 +6,8 @@ use App\Http\Requests\Postulante\PostulanteRequest;
 use App\Models\FormacionPro;
 use App\Models\PersonaFormacionPro;
 use App\Models\Postulante;
+use App\Models\Postulante_Habilidad;
+use App\Models\PostulanteCompetencia;
 use App\Models\PostulanteIdioma;
 use App\Models\PostulanteRed;
 use App\Models\User;
@@ -90,7 +92,7 @@ class PostulanteController extends Controller
     public function getPerfil($id)
 {
     try {
-        $postulante = Postulante::with(['ubicacion', 'formaciones.titulo', 'idiomas.idioma'])->where('id_usuario', $id)->first();
+        $postulante = Postulante::with(['ubicacion', 'formaciones.titulo', 'idiomas.idioma','habilidades.habilidad','competencias.competencia'])->where('id_usuario', $id)->first();
         if (!$postulante) {
             return response()->json(['message' => 'User not found'], 404);
         }
@@ -113,6 +115,19 @@ class PostulanteController extends Controller
                     'idioma' => $idioma->nombre,
                     'nivel_oral' => $idioma->nivel_oral,
                     'nivel_escrito' => $idioma->nivel_escrito,
+                ];
+            }),
+            'habilidades' => $postulante->habilidades->map(function ($habilidad) {
+                return [
+                    'habilidad' => $habilidad->habilidad,
+                    'nivel' => $habilidad->nivel,
+                ];
+            }),
+            'competencias' => $postulante->competencias->map(function ($competencia) {
+                return [
+                    'grupo' => $competencia->grupo,
+                    'nombre' => $competencia->nombre,
+                    'nivel' => $competencia->nivel,
                 ];
             }),
         ];
@@ -257,6 +272,53 @@ public function getCurriculum($id)
         $postulanteidi->id_idioma = $request->idiomaId;
         $postulanteidi->nivel_oral = $request->nivelOral;
         $postulanteidi->nivel_escrito = $request->nivelEscrito;
+        $postulanteidi->save();
+
+        return response()->json(['message' => 'Postulante registrada exitosamente', 'postulante_formacion' => $postulanteidi], 201);
+    }
+
+
+    public function registroHabilidad(Request $request)
+    {
+        $request->validate([
+            'userId' => 'required|integer',
+            'habilidadId' => 'required|integer|exists:habilidad,id',
+            'nivel' => 'required|string|max:220',
+        ]);
+
+        $postulante = Postulante::where('id_usuario', $request->userId)->first();
+        if (!$postulante) {
+            return response()->json(['error' => 'Postulante no encontrado'], 404);
+        }
+
+        $idp = $postulante->id_postulante;
+        $postulanteidi = new Postulante_Habilidad();
+        $postulanteidi->id_postulante = $idp;
+        $postulanteidi->id_habilidad = $request->habilidadId;
+        $postulanteidi->nivel = $request->nivel;
+        $postulanteidi->save();
+
+        return response()->json(['message' => 'Postulante registrada exitosamente', 'postulante_formacion' => $postulanteidi], 201);
+    }
+
+    public function registroCompetencia(Request $request)
+    {
+        $request->validate([
+            'userId' => 'required|integer',
+            'competenciaId' => 'required|integer|exists:competencia,id',
+            'nivel' => 'required|string|max:220',
+        ]);
+
+        $postulante = Postulante::where('id_usuario', $request->userId)->first();
+        if (!$postulante) {
+            return response()->json(['error' => 'Postulante no encontrado'], 404);
+        }
+
+        $idp = $postulante->id_postulante;
+        $postulanteidi = new PostulanteCompetencia();
+        $postulanteidi->id_postulante = $idp;
+        $postulanteidi->id_competencia= $request->competenciaId;
+        $postulanteidi->nivel = $request->nivel;
         $postulanteidi->save();
 
         return response()->json(['message' => 'Postulante registrada exitosamente', 'postulante_formacion' => $postulanteidi], 201);

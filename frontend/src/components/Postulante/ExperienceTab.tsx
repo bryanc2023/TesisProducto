@@ -125,7 +125,7 @@ const ExperienceTab: React.FC = () => {
             </div>
             <p><strong>Empresa:</strong> {experiencia.empresa}</p>
             <p><strong>Puesto:</strong> {experiencia.puesto}</p>
-            <p><strong>Área:</strong> {experiencia.area}</p>
+            <p><strong>Área:</strong> {experiencia.area.split(',')[1]}</p>
             <p><strong>Fecha de Inicio:</strong> {experiencia.fecha_ini}</p>
             <p><strong>Fecha de Fin:</strong> {experiencia.fecha_fin}</p>
             <p><strong>Descripción:</strong> {experiencia.descripcion_responsabilidades}</p>

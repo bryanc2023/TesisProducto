@@ -1,10 +1,12 @@
 <?php
+use App\Http\Controllers\HabilidadController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\UploadController;
 use App\Http\Controllers\AreaController;
+use App\Http\Controllers\CompetenciaController;
 use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\CriterioController;
 use App\Http\Controllers\EmpresaController;
@@ -61,6 +63,8 @@ Route::post('uploadSec',[UploadController::class,'uploadSector']);
 Route::post('uploadA',[UploadController::class,'uploadArea']);
 Route::post('uploadC',[UploadController::class,'uploadCriterio']);
 Route::post('uploadI',[UploadController::class,'uploadIdioma']);
+Route::post('uploadH',[UploadController::class,'uploadHabilidad']);
+Route::post('uploadCom',[UploadController::class,'uploadCompetencias']);
 Route::get('/ubicacionesR', [UploadController::class, 'getUbicaciones']);
 Route::get('/titulosR', [UploadController::class, 'getTitulos']);
 Route::get('/sectoresR', [UploadController::class, 'getSectores']);
@@ -105,6 +109,22 @@ Route::get('/idiomas', [IdiomaController::class, 'getIdiomas']);
 Route::post('nuevoidioma', [PostulanteController::class, 'registroIdioma']);
 Route::put('postulante_idioma/update', [IdiomaController::class, 'updateidiomas']);
 Route::delete('postulante_idioma/delete', [IdiomaController::class, 'deleteidiomaPostulante']);
+
+
+//Rutas para habilidad
+Route::get('/habilidad', [HabilidadController::class, 'getHabilidadesAll']);
+Route::get('/habilidades', [HabilidadController::class, 'getHabilidades']);
+Route::post('nuevohabilidad', [PostulanteController::class, 'registroHabilidad']);
+Route::put('postulante_habilidad/update', [HabilidadController::class, 'updatehabilidades']);
+Route::delete('postulante_habilidad/delete', [HabilidadController::class, 'deletehabilidadPostulante']);
+
+//Rutas para competencia
+Route::get('/competencia', [CompetenciaController::class, 'getCompetenciasAll']);
+Route::get('/competencias', [CompetenciaController::class, 'getCompetencias']);
+Route::post('nuevocompetencia', [PostulanteController::class, 'registroCompetencia']);
+Route::put('postulante_competencia/update', [CompetenciaController::class, 'updatecompetencias']);
+Route::delete('postulante_competencia/delete', [CompetenciaController::class, 'deletecompetenciaPostulante']);
+
 
 //Rutas para Postulante
 Route::post('postulanteC',[PostulanteController::class,'registerPos']);

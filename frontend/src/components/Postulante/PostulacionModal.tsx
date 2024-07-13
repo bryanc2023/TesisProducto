@@ -30,7 +30,7 @@ interface Oferta {
         titulo: string;
         nivel_educacion: string;
     }[];
-    sueldo: string;
+    sueldo: number;
     n_mostrar_sueldo: number;
     soli_sueldo: number;
 }
@@ -226,7 +226,7 @@ const Modal: React.FC<ModalProps> = ({ oferta, onClose, userId }) => {
                         </div>
                         <div className="text-left">
                             <p className="text-gray-700 mb-1"><strong>Empresa:</strong> {oferta.empresa.nombre_comercial}</p>
-                            <p className="text-gray-700 mb-1"><strong>Sueldo:</strong>{oferta.sueldo}</p>
+                            <p className="text-gray-700 mb-1"><strong>Sueldo:</strong>{oferta.sueldo === 0 ?'No especificado':oferta.sueldo}</p>
                             <p className="text-gray-700 mb-1"><strong>Experiencia en cargos similares:</strong> {oferta.experiencia} año/s</p>
                             <p className="text-gray-700 mb-1"><strong>Carga Horaria:</strong> {oferta.carga_horaria}</p>
                             <p className="text-gray-700 mb-1"><strong>Fecha Máxima De Postulación:</strong> {formatFechaMaxPos(oferta.fecha_max_pos)}</p>

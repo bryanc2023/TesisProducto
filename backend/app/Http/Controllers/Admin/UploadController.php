@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Imports\AreaImport;
+use App\Imports\CompetenciaImport;
 use App\Imports\CriterioImport;
+use App\Imports\HabilidadImport;
 use App\Imports\IdiomaImport;
 use App\Imports\SectorImport;
 use App\Imports\TituloImport;
 use App\Imports\UbicacionImport;
+use App\Models\Competencia;
+use App\Models\habilidad;
 use Illuminate\Http\Request;
 use App\Models\Ubicacion;
 use App\Models\Titulo;
@@ -124,6 +128,41 @@ class UploadController extends Controller
         }
     }
 
+
+    public function uploadHabilidad(Request $request)
+    {
+        try {
+            $request->validate([
+                'file' => 'required|mimes:xlsx,xls',
+            ]);
+
+            $file = $request->file('file');
+
+            Excel::import(new HabilidadImport, $file);
+
+            return response()->json(['message' => 'File uploaded successfully'], 200);
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function uploadCompetencias(Request $request)
+    {
+        try {
+            $request->validate([
+                'file' => 'required|mimes:xlsx,xls',
+            ]);
+
+            $file = $request->file('file');
+
+            Excel::import(new CompetenciaImport, $file);
+
+            return response()->json(['message' => 'File uploaded successfully'], 200);
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Error: ' . $e->getMessage()], 500);
+        }
+    }
+
     public function getUbicaciones()
     {
         $ubicaciones = Ubicacion::all();
@@ -160,6 +199,19 @@ class UploadController extends Controller
         return response()->json($idiomas);
     }
 
+
+    public function getHabilidades()
+    {
+        $habilidades = habilidad::all();
+        return response()->json($habilidades);
+    }
+
+
+    public function getCompetencias()
+    {
+        $competencias = Competencia::all();
+        return response()->json($competencias);
+    }
     // Métodos de actualización
     public function updateUbicaciones(Request $request)
     {
@@ -240,6 +292,36 @@ class UploadController extends Controller
                 Idioma::updateOrCreate(['id' => $item['id']], $item);
             }
             return response()->json(['message' => 'Idiomas actualizados correctamente'], 200);
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Error: ' . $e->getMessage()], 500);
+        }
+    }
+
+
+    public function updateHabilidad(Request $request)
+    {
+        try {
+            $data = $request->input('data');
+            foreach ($data as $item) {
+                $item['updated_at'] = now();
+                habilidad::updateOrCreate(['id' => $item['id']], $item);
+            }
+            return response()->json(['message' => 'Idiomas actualizados correctamente'], 200);
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    
+    public function updateCompetencia(Request $request)
+    {
+        try {
+            $data = $request->input('data');
+            foreach ($data as $item) {
+                $item['updated_at'] = now();
+                Competencia::updateOrCreate(['id' => $item['id']], $item);
+            }
+            return response()->json(['message' => 'Competencias actualizados correctamente'], 200);
         } catch (Exception $e) {
             return response()->json(['message' => 'Error: ' . $e->getMessage()], 500);
         }
