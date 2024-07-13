@@ -12,6 +12,7 @@ interface ReportData {
   name: string;
   email: string;
   created_at: string;
+  ubicacion: string;
   empresa?: {
     nombre_comercial: string;
     sector: string;
@@ -31,6 +32,10 @@ interface ReportData {
   carga_horaria?: string;
   modalidad?: string;
   estado?: string;
+  genero?: string;
+  estado_civil?: string;
+  provincia?: string;
+  canton?: string;
 }
 
 const Reportes: React.FC = () => {
@@ -59,6 +64,10 @@ const Reportes: React.FC = () => {
   const [cargaHoraria, setCargaHoraria] = useState<string>('');
   const [modalidad, setModalidad] = useState<string>('');
   const [estado, setEstado] = useState<string>('');
+
+  // Filtros adicionales para postulantes
+  const [selectedGenero, setSelectedGenero] = useState<string>('');
+  const [selectedEstadoCivil, setSelectedEstadoCivil] = useState<string>('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -139,6 +148,14 @@ const Reportes: React.FC = () => {
     setEstado(event.target.value);
   };
 
+  const handleGeneroChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedGenero(event.target.value);
+  };
+
+  const handleEstadoCivilChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedEstadoCivil(event.target.value);
+  };
+
   const fetchData = async () => {
     if (useFilters && (!startDate || !endDate || startDate > endDate)) {
       setError('Por favor, selecciona fechas válidas.');
@@ -170,6 +187,14 @@ const Reportes: React.FC = () => {
           modalidad: modalidad || undefined,
           estado: estado || undefined,
         };
+      } else if (reportType === 'postulantes') {
+        params = {
+          ...params,
+          genero: selectedGenero || undefined,
+          estadoCivil: selectedEstadoCivil || undefined,
+          provincia: selectedProvince || undefined,
+          canton: selectedCanton || undefined,
+        };
       }
       const response = await axios.get(`/usuarios/${reportType}`, { params });
       if (Array.isArray(response.data)) {
@@ -187,7 +212,7 @@ const Reportes: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, [startDate, endDate, reportType, selectedProvince, selectedCanton, selectedSector, selectedTamanio, cargo, experiencia, cargaHoraria, modalidad, estado]);
+  }, [startDate, endDate, reportType, selectedProvince, selectedCanton, selectedSector, selectedTamanio, cargo, experiencia, cargaHoraria, modalidad, estado, selectedGenero, selectedEstadoCivil]);
 
   const generatePDF = () => {
     const doc = new jsPDF();
@@ -204,11 +229,11 @@ const Reportes: React.FC = () => {
         item.name,
         item.email,
         item.created_at,
-        item.empresa.nombre_comercial,
-        item.empresa.sector,
-        item.empresa.tamanio,
-        item.empresa.ubicacion,
-        item.empresa.ofertas.map(oferta => `${oferta.cargo} (Postulantes: ${oferta.num_postulantes})`).join(', ')
+        item.empresa?.nombre_comercial,
+        item.empresa?.sector,
+        item.empresa?.tamanio,
+        item.empresa?.ubicacion,
+        item.empresa?.ofertas.map(oferta => `${oferta.cargo} (Postulantes: ${oferta.num_postulantes})`).join(', ')
       ]);
     } else if (reportType === 'ofertas') {
       tableColumn = ["Cargo", "Sueldo", "Objetivo del Cargo", "Nombre de la Empresa", "Experiencia", "Funciones", "Carga Horaria", "Modalidad", "Estado"];
@@ -222,6 +247,19 @@ const Reportes: React.FC = () => {
         item.carga_horaria,
         item.modalidad,
         item.estado
+      ]);
+    } else if (reportType === 'postulantes') {
+      tableColumn = ["Nombre", "Correo", "Fecha de Creación", "Número de Postulaciones", "Postulaciones", "Vigencia", "Género", "Estado Civil", "Ubicación"];
+      tableRows = data.map(item => [
+        item.name,
+        item.email,
+        item.created_at,
+        item.num_postulaciones,
+        item.detalles_postulaciones?.map(detalle => detalle.cargo).join(', '),
+        item.vigencia,
+        item.genero,
+        item.estado_civil,
+        item.ubicacion
       ]);
     }
 
@@ -251,11 +289,11 @@ const Reportes: React.FC = () => {
         item.name,
         item.email,
         item.created_at,
-        item.empresa.nombre_comercial,
-        item.empresa.sector,
-        item.empresa.tamanio,
-        item.empresa.ubicacion,
-        item.empresa.ofertas.map(oferta => `${oferta.cargo} (Postulantes: ${oferta.num_postulantes})`).join(', ')
+        item.empresa?.nombre_comercial,
+        item.empresa?.sector,
+        item.empresa?.tamanio,
+        item.empresa?.ubicacion,
+        item.empresa?.ofertas.map(oferta => `${oferta.cargo} (Postulantes: ${oferta.num_postulantes})`).join(', ')
       ]);
     } else if (reportType === 'ofertas') {
       tableColumn = ["Cargo", "Sueldo", "Objetivo del Cargo", "Nombre de la Empresa", "Experiencia", "Funciones", "Carga Horaria", "Modalidad", "Estado"];
@@ -269,6 +307,19 @@ const Reportes: React.FC = () => {
         item.carga_horaria,
         item.modalidad,
         item.estado
+      ]);
+    } else if (reportType === 'postulantes') {
+      tableColumn = ["Nombre", "Correo", "Fecha de Creación", "Número de Postulaciones", "Postulaciones", "Vigencia", "Género", "Estado Civil", "Ubicación"];
+      tableRows = data.map(item => [
+        item.name,
+        item.email,
+        item.created_at,
+        item.num_postulaciones,
+        item.detalles_postulaciones?.map(detalle => detalle.cargo).join(', '),
+        item.vigencia,
+        item.genero,
+        item.estado_civil,
+        item.ubicacion
       ]);
     }
 
@@ -339,7 +390,7 @@ const Reportes: React.FC = () => {
             onChange={(e) => setUseFilters(e.target.checked)}
             className="mr-2"
           />
-          Usar filtros de fecha
+          Usar filtros
         </label>
       </div>
       {useFilters && (
@@ -366,7 +417,7 @@ const Reportes: React.FC = () => {
           </div>
         </>
       )}
-      {reportType === 'empresas' && (
+      {reportType === 'empresas' && useFilters && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
@@ -426,7 +477,7 @@ const Reportes: React.FC = () => {
           </div>
         </>
       )}
-      {reportType === 'ofertas' && (
+      {reportType === 'ofertas' && useFilters && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
@@ -487,6 +538,66 @@ const Reportes: React.FC = () => {
           </div>
         </>
       )}
+      {reportType === 'postulantes' && useFilters && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Género</label>
+              <select
+                value={selectedGenero}
+                onChange={handleGeneroChange}
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="">Seleccione</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Femenino">Femenino</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Estado Civil</label>
+              <select
+                value={selectedEstadoCivil}
+                onChange={handleEstadoCivilChange}
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="">Seleccione</option>
+                <option value="Soltero">Soltero/a</option>
+                <option value="Casado">Casado/a</option>
+                <option value="Divorciado">Divorciado/a</option>
+                <option value="Viudo">Viudo/a</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Provincia</label>
+              <select
+                value={selectedProvince}
+                onChange={handleProvinceChange}
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="">Seleccione</option>
+                {provinces.map(provincia => (
+                  <option key={provincia} value={provincia}>{provincia}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Cantón</label>
+              <select
+                value={selectedCanton}
+                onChange={handleCantonChange}
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                disabled={!selectedProvince}
+              >
+                <option value="">Seleccione</option>
+                {cantons.map(canton => (
+                  <option key={canton} value={canton}>{canton}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </>
+      )}
       {error && <div className="text-red-500 mb-4">{error}</div>}
       <div className="mb-4">
         <button
@@ -532,8 +643,11 @@ const Reportes: React.FC = () => {
                             <th className="w-2/12 px-4 py-2">Correo</th>
                             <th className="w-2/12 px-4 py-2">Fecha de Creación</th>
                             <th className="w-2/12 px-4 py-2">Número de Postulaciones</th>
-                            <th className="w-5/12 px-4 py-2">Postulaciones</th>
+                            <th className="w-2/12 px-4 py-2">Postulaciones</th>
                             <th className="w-2/12 px-4 py-2">Vigencia</th>
+                            <th className="w-2/12 px-4 py-2">Género</th>
+                            <th className="w-2/12 px-4 py-2">Estado Civil</th>
+                            <th className="w-2/12 px-4 py-2">Ubicación</th>
                           </>
                         )}
                         {reportType === 'empresas' && (
@@ -574,6 +688,9 @@ const Reportes: React.FC = () => {
                               <td className="border px-4 py-2">{item.num_postulaciones}</td>
                               <td className="border px-4 py-2">{item.detalles_postulaciones?.map(detalle => detalle.cargo).join(', ')}</td>
                               <td className="border px-4 py-2">{item.vigencia}</td>
+                              <td className="border px-4 py-2">{item.genero}</td>
+                              <td className="border px-4 py-2">{item.estado_civil}</td>
+                              <td className="border px-4 py-2">{item.ubicacion}</td>
                             </>
                           )}
                           {reportType === 'empresas' && item.empresa && (

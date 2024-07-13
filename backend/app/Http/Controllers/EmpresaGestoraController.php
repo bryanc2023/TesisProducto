@@ -19,44 +19,80 @@ class EmpresaGestoraController extends Controller
  
     
     public function getPostulantes(Request $request)
-    {
-        $startDate = $request->query('startDate') ? Carbon::parse($request->query('startDate'))->startOfDay() : null;
-        $endDate = $request->query('endDate') ? Carbon::parse($request->query('endDate'))->endOfDay() : null;
-    
-        $query = DB::table('users')
-            ->join('postulante', 'users.id', '=', 'postulante.id_usuario')
-            ->select('users.id', 'users.name', 'users.email', 'users.created_at', 'postulante.id_postulante', 'postulante.vigencia');
-    
-        if ($startDate) {
-            $query->where('users.created_at', '>=', $startDate);
-        }
-    
-        if ($endDate) {
-            $query->where('users.created_at', '<=', $endDate);
-        }
-    
-        $users = $query->get();
-    
-        $result = $users->map(function ($user) {
-            $postulaciones = DB::table('postulacion')
-                ->join('oferta', 'postulacion.id_oferta', '=', 'oferta.id_oferta')
-                ->where('postulacion.id_postulante', '=', $user->id_postulante)
-                ->select('oferta.cargo')
-                ->get();
-    
-            return [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'created_at' => Carbon::parse($user->created_at)->format('Y-m-d'),
-                'num_postulaciones' => $postulaciones->count(),
-                'detalles_postulaciones' => $postulaciones,
-                'vigencia' => $user->vigencia ? 'Activo' : 'Inactivo',
-            ];
-        });
-    
-        return response()->json($result);
+{
+    $startDate = $request->query('startDate') ? Carbon::parse($request->query('startDate'))->startOfDay() : null;
+    $endDate = $request->query('endDate') ? Carbon::parse($request->query('endDate'))->endOfDay() : null;
+    $genero = $request->query('genero');
+    $estadoCivil = $request->query('estadoCivil');
+    $provincia = $request->query('provincia');
+    $canton = $request->query('canton');
+
+    $query = DB::table('users')
+        ->join('postulante', 'users.id', '=', 'postulante.id_usuario')
+        ->join('ubicacion', 'postulante.id_ubicacion', '=', 'ubicacion.id')
+        ->select(
+            'users.id',
+            'users.name',
+            'users.email',
+            'users.created_at',
+            'postulante.id_postulante',
+            'postulante.vigencia',
+            'postulante.genero',
+            'postulante.estado_civil',
+            DB::raw("CONCAT(ubicacion.provincia, ', ', ubicacion.canton) as ubicacion")
+        );
+
+    if ($startDate) {
+        $query->where('users.created_at', '>=', $startDate);
     }
+
+    if ($endDate) {
+        $query->where('users.created_at', '<=', $endDate);
+    }
+
+    if ($genero) {
+        $query->where('postulante.genero', '=', $genero);
+    }
+
+    if ($estadoCivil) {
+        $query->where('postulante.estado_civil', '=', $estadoCivil);
+    }
+
+    if ($provincia) {
+        $query->where('ubicacion.provincia', '=', $provincia);
+    }
+
+    if ($canton) {
+        $query->where('ubicacion.canton', '=', $canton);
+    }
+
+    $users = $query->get();
+
+    $result = $users->map(function ($user) {
+        $postulaciones = DB::table('postulacion')
+            ->join('oferta', 'postulacion.id_oferta', '=', 'oferta.id_oferta')
+            ->where('postulacion.id_postulante', '=', $user->id_postulante)
+            ->select('oferta.cargo')
+            ->get();
+
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'created_at' => Carbon::parse($user->created_at)->format('Y-m-d'),
+            'num_postulaciones' => $postulaciones->count(),
+            'detalles_postulaciones' => $postulaciones,
+            'vigencia' => $user->vigencia ? 'Activo' : 'Inactivo',
+            'genero' => $user->genero,
+            'estado_civil' => $user->estado_civil,
+            'ubicacion' => $user->ubicacion,
+        ];
+    });
+
+    return response()->json($result);
+}
+
+
     
 
 
