@@ -184,7 +184,7 @@ function ResultadosP() {
                                 <h3 className="text-lg font-medium leading-6 text-gray-900">Detalles de la postulación</h3>
                                 <div className="mt-5">
                                     <p><span className="font-medium">Cargo:</span> {selectedPostulacion.postulacion.oferta.cargo}</p>
-                                    <p><span className="font-medium">Empresa:</span> {selectedPostulacion.postulacion.oferta.empresa.nombre_comercial}</p>
+                                    <p><span className="font-medium">Empresa:</span> {selectedPostulacion.postulacion.oferta.n_mostrar_empresa === 1 ? 'Anónima' : selectedPostulacion.postulacion.oferta.empresa.nombre_comercial}</p>
                                     <p><span className="font-medium">Ubicación:</span> {selectedPostulacion.ubicacion.provincia}, {selectedPostulacion.ubicacion.canton}</p>
                                     <p><span className="font-medium">Estado:</span> {renderEstadoPostulacion(selectedPostulacion.postulacion.estado_postulacion)}</p>
                                     <p>

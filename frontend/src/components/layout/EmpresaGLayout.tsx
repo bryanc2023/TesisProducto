@@ -534,7 +534,7 @@ function EmpresaLayout() {
                     <li className={`mb-4 flex items-center hover:bg-gray-700 rounded-md p-2 ${location.pathname === '/CatalogoRegistro' ? 'bg-gray-700' : ''}`}>
                         <Link to="/CatalogoRegistro" className="flex items-center w-full">
                             <FontAwesomeIcon icon={faFileAlt} className="mr-2" />
-                            <span className="lg:inline">Registro de catálogos</span>
+                            <span className="lg:inline">Gestión de criterios</span>
                         </Link>
                     </li>
                     <li className={`mb-4 flex items-center hover:bg-gray-700 rounded-md p-2 ${location.pathname === '/MonitoreoG' ? 'bg-gray-700' : ''}`}>

@@ -76,64 +76,7 @@ const CatalogoRegistro: React.FC = () => {
   return (
     <div className="container mx-auto p-4">
       <center> <h2 className="text-2xl font-bold mb-4">Catálogo de evaluación de la aplicación</h2></center>
-      <div className="bg-white p-4 rounded shadow mb-8">
-        
-        <center><p>En esta sección puedes visualizar el catálogo de evaluación y modificarlo con el cual se efectua la evaluación de cada oferta en la aplicacion:</p></center>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="criterio" className="block text-sm font-medium text-gray-700">Nombre del Criterio</label>
-            <input
-              type="text"
-              id="criterio"
-              name="criterio"
-              value={nuevoCriterio.criterio}
-              placeholder='Nombre del criterio de evaluación'
-              onChange={handleInputChange}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700">Descripción del Criterio</label>
-            <textarea
-              id="descripcion"
-              name="descripcion"
-              value={nuevoCriterio.descripcion}
-              placeholder='Describe cual es la condición de la puntuación'
-              onChange={handleInputChange}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="valor" className="block text-sm font-medium text-gray-700">¿Qué se evalua del postulante?</label>
-            <select
-              id="valor"
-              name="valor"
-              value={nuevoCriterio.valor}
-              onChange={handleSelectChange}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-              required
-            >
-              <option value="">Campo a tomar en cuenta..</option>
-              <option value="Experiencia1">Formacion Profesional</option>
-              <option value="Experiencia2">Cursos</option>
-              <option value="Experiencia3">Idiomas</option>
-              <option value="Experiencia4">Redes</option>
-              <option value="Experiencia5">Presentación</option>
-              <option value="Experiencia5">Area de aplicación similar</option>
-            </select>
-          </div>
-          <button
-            type="button"
-            onClick={agregarCriterio}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md"
-          >
-            Agregar Criterio Al Catálogo
-          </button>
-         
-        </form>
-      </div>
+
       <div className="bg-white p-4 rounded shadow mb-8">
         <h3 className="text-xl font-bold mb-4">Católogo de evaluación:</h3>
         <table className="min-w-full bg-white">

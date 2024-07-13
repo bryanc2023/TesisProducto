@@ -59,6 +59,29 @@ class Postulante extends Model
         return $this->belongsToMany(Idioma::class, 'postulante_idioma', 'id_postulante', 'id_idioma');
     }
 
+
+    public function habilidades()
+    {
+        return $this->hasMany(Postulante_Habilidad::class, 'id_postulante');
+    }
+
+    public function habilidadesp()
+    {
+        return $this->belongsToMany(habilidad::class, 'postulante_habilidad', 'id_postulante', 'id_habilidad');
+    }
+
+
+    public function competencias()
+    {
+        return $this->hasMany(PostulanteCompetencia::class, 'id_postulante');
+    }
+
+    public function competenciasp()
+    {
+        return $this->belongsToMany(Competencia::class, 'postulante_competencia', 'id_postulante', 'id_competencia');
+    }
+
+
     public function red()
     {
         return $this->hasMany(PostulanteRed::class, 'id_postulante', 'id_postulante');
