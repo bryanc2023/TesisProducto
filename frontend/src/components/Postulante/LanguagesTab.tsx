@@ -191,9 +191,9 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
                 <FaTrash className="w-4 h-4" />
               </button>
             </div>
-            <p><strong>Idioma:</strong> {idioma.nombre}</p>
-            <p><strong>Nivel Oral:</strong> {idioma.pivot?.nivel_oral}</p>
-            <p><strong>Nivel Escrito:</strong> {idioma.pivot?.nivel_escrito}</p>
+            <p><strong className='text-orange-400'>Idioma:</strong> {idioma.nombre}</p>
+            <p><strong className='text-orange-400' >Nivel De Desempeño Oral :</strong> {idioma.pivot?.nivel_oral}</p>
+            <p><strong className='text-orange-400' >Nivel De Desempeño Escrito :</strong> {idioma.pivot?.nivel_escrito}</p>
           </div>
         ))
       ) : (

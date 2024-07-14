@@ -195,9 +195,9 @@ const CompetenciaTab: React.FC<CompetenciasTabProps> = ({ competencias }) => {
                 <FaTrash className="w-4 h-4" />
               </button>
             </div>
-            <p><strong>Grupo de competencias:</strong> {competencia.grupo}</p>
-            <p><strong>Competencia:</strong> {competencia.nombre}</p>
-            <p><strong>Nivel:</strong> {competencia.pivot?.nivel}</p>
+            <p><strong className='text-orange-400'>Grupo de competencias:</strong> {competencia.grupo}</p>
+            <p><strong className='text-orange-400'>Competencia:</strong> {competencia.nombre}</p>
+            <p><strong className='text-orange-400' >Nivel de desarrollo:</strong> {competencia.pivot?.nivel}</p>
           </div>
         ))
       ) : (

@@ -1,6 +1,7 @@
 
   interface ProfileData {
     postulante: {
+      telefono: string;
       id_postulante: number;
       foto: string;
       nombres: string;

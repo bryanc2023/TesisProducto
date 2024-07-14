@@ -58,6 +58,34 @@ interface Idioma {
   };
 }
 
+interface Habilidad {
+  id_postulante: number;
+  id_habilidad: number;
+  nivel: string;
+  habilidad: {
+    id: number;
+    habilidad: string;
+    created_at: string;
+    updated_at: string;
+  };
+}
+
+interface Competencia {
+  id_postulante: number;
+  id_competencia: number;
+  nivel: string;
+  competencia: {
+    id: number;
+    grupo: string;
+    nombre: string;
+    descripcion: string;
+    created_at: string;
+    updated_at: string;
+  };
+}
+
+
+
 interface RedSocial {
   id_postulante_red: number;
   id_postulante: number;
@@ -108,11 +136,14 @@ interface PostulanteData {
     foto: string;
     cv: string;
     ubicacion: Ubicacion;
+    telefono: string;
     formaciones: Formacion[];
     idiomas: Idioma[];
     red: RedSocial[];
     certificado: Certificado[];
     formapro: FormacionProfesional[];
+    habilidades: Habilidad[];
+    competencias: Competencia[];
   };
 }
 
@@ -157,6 +188,15 @@ const CurriTab: React.FC = () => {
     fetchCVs();
   }, [user]);
 
+  const getModifiedEstadoCivil = (estadoCivil: any, genero: any) => {
+    if (genero.toLowerCase() === 'femenino') {
+      if (estadoCivil.endsWith('o')) {
+        return estadoCivil.slice(0, -1) + 'a';
+      }
+    }
+    return estadoCivil;
+  };
+
   const generatePDF = async () => {
     if (!profileData || !profileData.postulante) {
       console.error('No hay datos de perfil disponibles para generar el PDF.');
@@ -165,28 +205,31 @@ const CurriTab: React.FC = () => {
 
     const doc = new jsPDF();
     let yOffset = 10;
+    const bottomMargin = 10; // Margen inferior deseado
 
-    const addWatermark = () => {
-      const totalPages = doc.internal.pages.length;
-      const imgWidth = 150;
-      const imgHeight = 150;
-      const pdfWidth = doc.internal.pageSize.getWidth();
-      const pdfHeight = doc.internal.pageSize.getHeight();
-      for (let i = 1; i <= totalPages; i++) {
-        doc.setPage(i);
-        const x = pdfWidth / 2 - imgWidth / 2;
-        const y = pdfHeight / 2 - imgHeight / 2;
-        doc.addImage(logoImg, 'PNG', x, y, imgWidth, imgHeight);
-      }
-    };
+
+
 
     const addSection = (title: string) => {
+      const titleHeight = 10;
+      const lineHeight = 1;
+      const spaceNeeded = titleHeight + lineHeight + 10; // Espacio necesario para la sección
+
+      // Verificar si hay suficiente espacio en la página actual
+      if (yOffset + spaceNeeded > doc.internal.pageSize.height - bottomMargin) {
+        doc.addPage(); // Agregar una nueva página si no hay suficiente espacio
+        yOffset = 10; // Reiniciar el yOffset en la nueva página
+      }
+
+      yOffset += 2;
+
+      // Dibujar rectángulo con fondo gris si se especifica backgroundColor
+
+
       doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(255, 165, 0);
       doc.text(title, 10, yOffset);
-      const titleHeight = 10;
-      const lineHeight = 1;
       doc.setDrawColor(255, 165, 0);
       doc.setLineWidth(lineHeight);
       doc.line(10, yOffset + titleHeight, doc.internal.pageSize.width - 10, yOffset + titleHeight);
@@ -209,25 +252,34 @@ const CurriTab: React.FC = () => {
         if (parts.length === 2) {
           const normalFont = doc.getFont();
           const fontSize = 12;
-          const fontStyle = 'italic';
+          const fontStyle = 'bold';
           const part1Width = doc.getStringUnitWidth(parts[0]) * fontSize / doc.internal.scaleFactor;
           doc.setFont(normalFont.fontName, fontStyle);
           doc.text(parts[0], 10, yOffset);
           const part2X = 10 + part1Width + 2;
           doc.setFont(normalFont.fontName, normalFont.fontStyle);
-          doc.text(`: ${parts[1]}`, part2X, yOffset);
+
+          // Si es la línea de Fecha de Nacimiento, formatear la fecha
+          if (parts[0].trim() === 'Fecha de Nacimiento') {
+            const fechaNacimiento = format(new Date(profileData.postulante.fecha_nac), 'dd-MM-yyyy');
+            doc.text(` : ${fechaNacimiento}`, part2X, yOffset);
+          } else {
+            doc.text(` : ${parts[1]}`, part2X, yOffset);
+          }
         } else {
           doc.text(line, 10, yOffset);
         }
 
         yOffset += 10;
 
-        if (yOffset > 270) {
+        // Verificar si es necesario agregar una nueva página
+        if (yOffset > doc.internal.pageSize.height - bottomMargin - 20) {
           doc.addPage();
-          yOffset = 10;
+          yOffset = 10; // Reiniciar yOffset en la nueva página
         }
       });
     };
+
 
     if (imageSrc) {
       const img = new Image();
@@ -245,6 +297,11 @@ const CurriTab: React.FC = () => {
         doc.setFontSize(18);
         doc.setTextColor(0, 0, 0);
         doc.setFont('helvetica', 'bold');
+        doc.text('HOJA DE VIDA', 10, yOffset);
+        doc.setLineWidth(0.5); // Grosor de la línea de subrayado
+        doc.line(10, 11, 55, 11); // Coordenadas para el subrayado
+
+        yOffset += 10;
         const fullName = `${profileData.postulante.nombres.toUpperCase()} ${profileData.postulante.apellidos.toUpperCase()}`;
         doc.text(fullName, 10, yOffset);
         yOffset += 10;
@@ -260,93 +317,601 @@ const CurriTab: React.FC = () => {
         doc.setTextColor(0);
         addText(`Fecha de Nacimiento: ${profileData.postulante.fecha_nac}`);
         addText(`Edad: ${profileData.postulante.edad}`);
-        addText(`Estado Civil: ${profileData.postulante.estado_civil}`);
+        addText(`Estado Civil: ${getModifiedEstadoCivil(profileData.postulante.estado_civil, profileData.postulante.genero)}`);
         addText(`Cédula: ${profileData.postulante.cedula}`);
         addText(`Género: ${profileData.postulante.genero}`);
+        addText(`Teléfono de contacto :${profileData.postulante.telefono}`);
 
         addSection('UBICACIÓN');
         addText(`Provincia: ${profileData.postulante.ubicacion.provincia}`);
         addText(`Canton: ${profileData.postulante.ubicacion.canton}`);
-        yOffset += 5;
+        yOffset += 7;
 
         addSection('PRESENTACIÓN');
         addText(profileData.postulante.informacion_extra || '');
 
         if (profileData.postulante.formaciones.length > 0) {
-          addSection('FORMACIÓN ACADÉMICA');
-          profileData.postulante.formaciones.forEach((formacion) => {
+
+
+          addSection('INSTRUCCIÓN FORMAL');
+          const requiredSpace = 40; // Ajusta este valor según el espacio necesario para cada iteración
+          if (yOffset + requiredSpace > doc.internal.pageSize.height - 10) {
+            doc.addPage();
+            yOffset = 10;
+
+            // Redibujar el fondo naranja y el texto vertical en la nueva página
+            const leftSectionText = 'INSTRUCCIÓN FORMAL';
+            const leftSectionX = 4;
+            let leftSectionYStart = yOffset;
+            let leftSectionYEnd = yOffset + (profileData.postulante.formaciones.length * 30); // Ajusta según el espacio necesario
+
+            // Dibujar el fondo naranja para el texto vertical
+            const rectWidth = 10; // Ajusta este valor según sea necesario
+            const textHeight = doc.getTextDimensions(leftSectionText).h;
+            doc.setFillColor(255, 165, 0); // Naranja
+            doc.rect(leftSectionX - 5, leftSectionYStart, rectWidth, leftSectionYEnd - leftSectionYStart, 'F');
+
+            // Dibujar el texto vertical en la parte izquierda con letras blancas
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(255, 255, 255); // Blanco
+            doc.text(leftSectionText, leftSectionX, leftSectionYStart + textHeight, {
+              angle: -90,
+              align: 'left',
+            });
+
+          }else{
+               // Redibujar el fondo naranja y el texto vertical en la nueva página
+               const leftSectionText = 'INSTRUCCIÓN FORMAL';
+               const leftSectionX = 4;
+               let leftSectionYStart = yOffset;
+               let leftSectionYEnd = yOffset + (profileData.postulante.formaciones.length * 30); // Ajusta según el espacio necesario
+ 
+               // Dibujar el fondo naranja para el texto vertical
+               const rectWidth = 10; // Ajusta este valor según sea necesario
+               const textHeight = doc.getTextDimensions(leftSectionText).h;
+               doc.setFillColor(255, 165, 0); // Naranja
+               doc.rect(leftSectionX - 5, leftSectionYStart, rectWidth, leftSectionYEnd - leftSectionYStart, 'F');
+ 
+               // Dibujar el texto vertical en la parte izquierda con letras blancas
+               doc.setFontSize(12);
+               doc.setFont('helvetica', 'bold');
+               doc.setTextColor(255, 255, 255); // Blanco
+               doc.text(leftSectionText, leftSectionX, leftSectionYStart + textHeight, {
+                 angle: -90,
+                 align: 'left',
+               });
+          }
+
+
+          profileData.postulante.formaciones.forEach((formacion, index) => {
+            const requiredSpace = 40; // Ajusta este valor según el espacio necesario para cada iteración
+            if (yOffset + requiredSpace > doc.internal.pageSize.height - 10) {
+              doc.addPage();
+              yOffset = 10;
+
+             
+            }
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(12);
+            doc.setTextColor(0);
+
+            const lineYStart = yOffset;
+            doc.setDrawColor(230, 230, 230); // Color gris claro
+            doc.line(10, lineYStart, doc.internal.pageSize.width - 10, lineYStart);
+            yOffset += 8;
+
             const startDate = format(new Date(formacion.fecha_ini), 'MMM-yyyy');
             const endDate = formacion.fecha_fin ? format(new Date(formacion.fecha_fin), 'MMM-yyyy') : 'Presente';
+
             doc.setFont('helvetica', 'bold');
             addText(`${formacion.titulo_acreditado}`);
-            doc.setFont('helvetica', 'normal');
+            doc.setFont('helvetica', 'italic');
             addText(`${formacion.titulo.nivel_educacion} en ${formacion.titulo.campo_amplio}`);
-            addText(`Institución: ${formacion.institucion}`);
+            doc.setFont('helvetica', 'normal');
             addText(`Fechas: ${startDate} - ${endDate}`);
+            addText(`Institución: ${formacion.institucion}`);
+
+            yOffset += 2;
+            const lineYEnd = yOffset;
+            doc.line(10, lineYEnd, doc.internal.pageSize.width - 10, lineYEnd);
+            yOffset += 10; // Ajustar el yOffset para la siguiente iteración
+          });
+        }
+
+
+        if (profileData.postulante.formapro.length > 0) {
+          addSection('EXPERIENCIA LABORAL');
+
+       
+          let requiredSpace = 40; // Espacio base para cada iteración sin funciones y responsabilidades
+        
+
+          // Comprobar si hay espacio suficiente para una nueva iteración
+          if (yOffset + requiredSpace > doc.internal.pageSize.height - 10) {
+            doc.addPage();
+            yOffset = 10;
+            const leftSectionText = 'EXPERIENCIA LABORAL';
+            const leftSectionX = 4;
+            let leftSectionYStart = yOffset;
+            let leftSectionYEnd = yOffset + (profileData.postulante.formapro.length * 60); // Ajusta según el espacio necesario
+  
+            // Dibujar el fondo naranja para el texto vertical
+            const rectWidth = 10; // Ajusta este valor según sea necesario
+            const textHeight = doc.getTextDimensions(leftSectionText).h;
+            doc.setFillColor(255, 165, 0); // Naranja
+            doc.rect(leftSectionX - 5, leftSectionYStart, rectWidth, leftSectionYEnd - leftSectionYStart, 'F');
+  
+            // Dibujar el texto vertical en la parte izquierda con letras blancas
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(255, 255, 255); // Blanco
+            doc.text(leftSectionText, leftSectionX, leftSectionYStart + textHeight, {
+              angle: -90,
+              align: 'left',
+            });
+          }else{
+            const leftSectionText = 'EXPERIENCIA LABORAL';
+            const leftSectionX = 4;
+            let leftSectionYStart = yOffset;
+            let leftSectionYEnd = yOffset + (profileData.postulante.formapro.length * 60); // Ajusta según el espacio necesario
+  
+            // Dibujar el fondo naranja para el texto vertical
+            const rectWidth = 10; // Ajusta este valor según sea necesario
+            const textHeight = doc.getTextDimensions(leftSectionText).h;
+            doc.setFillColor(255, 165, 0); // Naranja
+            doc.rect(leftSectionX - 5, leftSectionYStart, rectWidth, leftSectionYEnd - leftSectionYStart, 'F');
+  
+            // Dibujar el texto vertical en la parte izquierda con letras blancas
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(255, 255, 255); // Blanco
+            doc.text(leftSectionText, leftSectionX, leftSectionYStart + textHeight, {
+              angle: -90,
+              align: 'left',
+            });
+          }
+
+     
+
+          profileData.postulante.formapro.forEach((exp) => {
+            const lineHeight = 6; // Ajustar el espacio entre ítems de la lista
+            let requiredSpace = 40; // Espacio base para cada iteración sin funciones y responsabilidades
+            const funcionesResponsabilidades = exp.descripcion_responsabilidades.split(',');
+
+            if (funcionesResponsabilidades.length > 1) {
+              requiredSpace += funcionesResponsabilidades.length * lineHeight; // Añadir espacio para cada ítem de la lista
+            } else {
+              requiredSpace += lineHeight; // Añadir espacio para la descripción normal
+            }
+
+            // Comprobar si hay espacio suficiente para una nueva iteración
+            if (yOffset + requiredSpace > doc.internal.pageSize.height - 10) {
+              doc.addPage();
+              yOffset = 10;
+             
+            }
+
+    
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(12);
+            doc.setTextColor(0);
+
+            const lineYStart = yOffset;
+            doc.setDrawColor(230, 230, 230); // Color gris claro
+            doc.line(10, lineYStart, doc.internal.pageSize.width - 10, lineYStart);
             yOffset += 5;
+
+            const startDate = format(new Date(exp.fecha_ini), 'MMM-yyyy');
+            const endDate = exp.fecha_fin ? format(new Date(exp.fecha_fin), 'MMM-yyyy') : 'Presente';
+
+            doc.setFont('helvetica', 'normal');
+            addText(`Empresa/Institución: ${exp.empresa}`);
+            doc.setFont('helvetica', 'normal');
+            addText(`Cargo: ${exp.puesto}`);
+            addText(`Fechas: ${startDate} - ${endDate}`);
+            const areaText = exp.area.split(',')[1].trim();
+            addText(`Área: ${areaText}`);
+
+            if (funcionesResponsabilidades.length > 1) {
+              // Si hay más de un elemento (separados por coma), crear una lista
+              doc.setFont('helvetica', 'bold');
+              doc.setFontSize(12);
+              doc.text('Funciones y responsabilidades en el cargo:', 10, yOffset);
+
+              yOffset += 8;
+
+              // Iterar sobre cada elemento y agregar a la lista
+              doc.setFont('helvetica', 'normal');
+              doc.setFontSize(12);
+              funcionesResponsabilidades.forEach((item, index) => {
+                yOffset += lineHeight; // Ajustar el espacio entre ítems de la lista
+                doc.text(`${index + 1}. ${item.trim()}`, 15, yOffset); // Numerar cada ítem de la lista
+              });
+              yOffset += 8;
+            } else {
+              // Si no hay comas, agregar el texto normalmente
+              doc.setFont('helvetica', 'normal');
+              doc.setFontSize(12);
+              doc.text(`Funciones y responsabilidades en el cargo: ${exp.descripcion_responsabilidades}`, 10, yOffset);
+              yOffset += 8;
+            }
+
+            yOffset += 2;
+            const lineYEnd = yOffset;
+            doc.line(10, lineYEnd, doc.internal.pageSize.width - 10, lineYEnd);
+            yOffset += 10; // Ajustar el yOffset para la siguiente iteración
           });
         }
 
         if (profileData.postulante.certificado.length > 0) {
-          addSection('CERTIFICACIONES');
+          addSection('CURSOS Y CAPACITACIONES');
+          const requiredSpace = 40; // Ajusta este valor según el espacio necesario para cada iteración
+          if (yOffset + requiredSpace > doc.internal.pageSize.height - 10) {
+            doc.addPage();
+            yOffset = 10;
+           
+          const leftSectionText = 'CURSOS ';
+          const leftSectionX = 4;
+          const leftSectionYStart = yOffset;
+          const leftSectionYEnd = yOffset + (profileData.postulante.certificado.length * 40); // Ajusta según el espacio necesario
+
+          // Dibujar el fondo naranja para el texto vertical
+          const rectWidth = 10; // Ajusta este valor según sea necesario
+          const textHeight = doc.getTextDimensions(leftSectionText).h;
+          doc.setFillColor(255, 165, 0); // Naranja
+          doc.rect(leftSectionX - 5, leftSectionYStart, rectWidth, leftSectionYEnd - leftSectionYStart, 'F');
+
+          // Dibujar el texto vertical en la parte izquierda con letras blancas
+          doc.setFontSize(12);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(255, 255, 255); // Blanco
+          doc.text(leftSectionText, leftSectionX, leftSectionYStart + textHeight, {
+            angle: -90,
+            align: 'left',
+          });
+          }else{
+        
+          const leftSectionText = 'CURSOS ';
+          const leftSectionX = 4;
+          const leftSectionYStart = yOffset;
+          const leftSectionYEnd = yOffset + (profileData.postulante.certificado.length * 40); // Ajusta según el espacio necesario
+
+          // Dibujar el fondo naranja para el texto vertical
+          const rectWidth = 10; // Ajusta este valor según sea necesario
+          const textHeight = doc.getTextDimensions(leftSectionText).h;
+          doc.setFillColor(255, 165, 0); // Naranja
+          doc.rect(leftSectionX - 5, leftSectionYStart, rectWidth, leftSectionYEnd - leftSectionYStart, 'F');
+
+          // Dibujar el texto vertical en la parte izquierda con letras blancas
+          doc.setFontSize(12);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(255, 255, 255); // Blanco
+          doc.text(leftSectionText, leftSectionX, leftSectionYStart + textHeight, {
+            angle: -90,
+            align: 'left',
+          });
+          }
+          
           profileData.postulante.certificado.forEach((curso) => {
-            doc.setFont('helvetica', 'bold');
-            addText(`${curso.titulo}`);
+            const requiredSpace = 30; // Ajusta este valor según el espacio necesario para cada iteración
+            if (yOffset + requiredSpace > doc.internal.pageSize.height - 10) {
+              doc.addPage();
+              yOffset = 10;
+            }
+
             doc.setFont('helvetica', 'normal');
-            addText(`Enlace del certificado: ${curso.certificado}`);
+            doc.setFontSize(12);
+            doc.setTextColor(0);
+            const lineYStart = yOffset;
+            doc.setDrawColor(230, 230, 230); // Color gris claro
+            doc.line(10, lineYStart, doc.internal.pageSize.width - 10, lineYStart);
             yOffset += 5;
+            addText(`Título: ${curso.titulo}`);
+            addText(`Enlace del certificado: ${curso.certificado}`);
+
+            yOffset += 2;
+            const lineYEnd = yOffset;
+            doc.line(10, lineYEnd, doc.internal.pageSize.width - 10, lineYEnd);
+            yOffset += 10; // Ajustar el yOffset para la siguiente iteración
+          });
+          yOffset += 7;
+        }
+
+        if (profileData.postulante.idiomas.length > 0) {
+          addSection('IDIOMAS');
+          const requiredSpace = 30; // Ajusta este valor según el espacio necesario para cada iteración
+          if (yOffset + requiredSpace > doc.internal.pageSize.height - 10) {
+            doc.addPage();
+            yOffset = 10;
+             // Redibujar el fondo naranja y el texto vertical en la nueva página
+             const leftSectionText = 'IDIOMAS';
+             const leftSectionX = 4;
+             let leftSectionYStart = yOffset;
+             let leftSectionYEnd = yOffset + (profileData.postulante.idiomas.length * 30); // Ajusta según el espacio necesario
+ 
+             // Dibujar el fondo naranja para el texto vertical
+             const rectWidth = 10; // Ajusta este valor según sea necesario
+             const textHeight = doc.getTextDimensions(leftSectionText).h;
+             doc.setFillColor(255, 165, 0); // Naranja
+             doc.rect(leftSectionX - 5, leftSectionYStart, rectWidth, leftSectionYEnd - leftSectionYStart, 'F');
+ 
+             // Dibujar el texto vertical en la parte izquierda con letras blancas
+             doc.setFontSize(12);
+             doc.setFont('helvetica', 'bold');
+             doc.setTextColor(255, 255, 255); // Blanco
+             doc.text(leftSectionText, leftSectionX, leftSectionYStart + textHeight, {
+               angle: -90,
+               align: 'left',
+             });
+          }else{
+             // Redibujar el fondo naranja y el texto vertical en la nueva página
+             const leftSectionText = 'IDIOMAS';
+             const leftSectionX = 4;
+             let leftSectionYStart = yOffset;
+             let leftSectionYEnd = yOffset + (profileData.postulante.idiomas.length * 30); // Ajusta según el espacio necesario
+ 
+             // Dibujar el fondo naranja para el texto vertical
+             const rectWidth = 10; // Ajusta este valor según sea necesario
+             const textHeight = doc.getTextDimensions(leftSectionText).h;
+             doc.setFillColor(255, 165, 0); // Naranja
+             doc.rect(leftSectionX - 5, leftSectionYStart, rectWidth, leftSectionYEnd - leftSectionYStart, 'F');
+ 
+             // Dibujar el texto vertical en la parte izquierda con letras blancas
+             doc.setFontSize(12);
+             doc.setFont('helvetica', 'bold');
+             doc.setTextColor(255, 255, 255); // Blanco
+             doc.text(leftSectionText, leftSectionX, leftSectionYStart + textHeight, {
+               angle: -90,
+               align: 'left',
+             });
+          }
+               
+          profileData.postulante.idiomas.forEach((idioma) => {
+            const requiredSpace = 30; // Ajusta este valor según el espacio necesario para cada iteración
+            if (yOffset + requiredSpace > doc.internal.pageSize.height - 10) {
+              doc.addPage();
+              yOffset = 10;
+            }
+
+      
+
+
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(12);
+            doc.setTextColor(0);
+
+            const lineYStart = yOffset;
+            doc.setDrawColor(230, 230, 230); // Color gris claro
+            doc.line(10, lineYStart, doc.internal.pageSize.width - 10, lineYStart);
+            yOffset += 5;
+            doc.setFont('helvetica', 'bold');
+            addText(` ${idioma.idioma.nombre}`);
+            doc.setFont('helvetica', 'normal');
+            addText(`Nivel Oral: ${idioma.nivel_oral}`);
+            addText(`Nivel Escrito: ${idioma.nivel_escrito}`);
+            yOffset += 2;
+            const lineYEnd = yOffset;
+            doc.line(10, lineYEnd, doc.internal.pageSize.width - 10, lineYEnd);
+            yOffset += 10; // Ajustar el yOffset para la siguiente iteración
+          });
+        }
+
+        if (profileData.postulante.habilidades.length > 0) {
+          addSection('HABILIDADES');
+          const requiredSpace = 30; // Ajusta este valor según el espacio necesario para cada iteración
+          if (yOffset + requiredSpace > doc.internal.pageSize.height - 10) {
+            doc.addPage();
+            yOffset = 10;
+             // Redibujar el fondo naranja y el texto vertical en la nueva página
+             const leftSectionText = 'HABILIDADES';
+             const leftSectionX = 4;
+             let leftSectionYStart = yOffset;
+             let leftSectionYEnd = yOffset + (profileData.postulante.habilidades.length * 30); // Ajusta según el espacio necesario
+ 
+             // Dibujar el fondo naranja para el texto vertical
+             const rectWidth = 10; // Ajusta este valor según sea necesario
+             const textHeight = doc.getTextDimensions(leftSectionText).h;
+             doc.setFillColor(255, 165, 0); // Naranja
+             doc.rect(leftSectionX - 5, leftSectionYStart, rectWidth, leftSectionYEnd - leftSectionYStart, 'F');
+ 
+             // Dibujar el texto vertical en la parte izquierda con letras blancas
+             doc.setFontSize(12);
+             doc.setFont('helvetica', 'bold');
+             doc.setTextColor(255, 255, 255); // Blanco
+             doc.text(leftSectionText, leftSectionX, leftSectionYStart + textHeight, {
+               angle: -90,
+               align: 'left',
+             });
+          }else{
+             // Redibujar el fondo naranja y el texto vertical en la nueva página
+             const leftSectionText = 'HABILIDADES';
+             const leftSectionX = 4;
+             let leftSectionYStart = yOffset;
+             let leftSectionYEnd = yOffset + (profileData.postulante.habilidades.length * 30); // Ajusta según el espacio necesario
+ 
+             // Dibujar el fondo naranja para el texto vertical
+             const rectWidth = 10; // Ajusta este valor según sea necesario
+             const textHeight = doc.getTextDimensions(leftSectionText).h;
+             doc.setFillColor(255, 165, 0); // Naranja
+             doc.rect(leftSectionX - 5, leftSectionYStart, rectWidth, leftSectionYEnd - leftSectionYStart, 'F');
+ 
+             // Dibujar el texto vertical en la parte izquierda con letras blancas
+             doc.setFontSize(12);
+             doc.setFont('helvetica', 'bold');
+             doc.setTextColor(255, 255, 255); // Blanco
+             doc.text(leftSectionText, leftSectionX, leftSectionYStart + textHeight, {
+               angle: -90,
+               align: 'left',
+             });
+          }
+               
+          profileData.postulante.habilidades.forEach((habilidad) => {
+            const requiredSpace = 30; // Ajusta este valor según el espacio necesario para cada iteración
+            if (yOffset + requiredSpace > doc.internal.pageSize.height - 10) {
+              doc.addPage();
+              yOffset = 10;
+            }
+
+
+  
+  
+  
+              doc.setFont('helvetica', 'normal');
+              doc.setFontSize(12);
+              doc.setTextColor(0);
+            const lineYStart = yOffset;
+            doc.setDrawColor(230, 230, 230); // Color gris claro
+            doc.line(10, lineYStart, doc.internal.pageSize.width - 10, lineYStart);
+            yOffset += 5;
+
+            doc.setFont('helvetica', 'normal');
+            addText(`Habilidad: ${habilidad.habilidad.habilidad}`);
+            addText(`Nivel de destreza: ${habilidad.nivel}`);
+
+
+            const lineYEnd = yOffset;
+            doc.line(10, lineYEnd, doc.internal.pageSize.width - 10, lineYEnd);
+            yOffset += 10; // Ajustar el yOffset para la siguiente iteración
+
+          });
+        }
+
+
+        if (profileData.postulante.competencias.length > 0) {
+          addSection('COMPETENCIAS');
+          const requiredSpace = 30; // Ajusta este valor según el espacio necesario para cada iteración
+          if (yOffset + requiredSpace > doc.internal.pageSize.height - 10) {
+            doc.addPage();
+            yOffset = 10;
+             // Redibujar el fondo naranja y el texto vertical en la nueva página
+             const leftSectionText = 'COMPETENCIAS';
+             const leftSectionX = 4;
+             let leftSectionYStart = yOffset;
+             let leftSectionYEnd = yOffset + (profileData.postulante.competencias.length * 40); // Ajusta según el espacio necesario
+ 
+             // Dibujar el fondo naranja para el texto vertical
+             const rectWidth = 10; // Ajusta este valor según sea necesario
+             const textHeight = doc.getTextDimensions(leftSectionText).h;
+             doc.setFillColor(255, 165, 0); // Naranja
+             doc.rect(leftSectionX - 5, leftSectionYStart, rectWidth, leftSectionYEnd - leftSectionYStart, 'F');
+ 
+             // Dibujar el texto vertical en la parte izquierda con letras blancas
+             doc.setFontSize(12);
+             doc.setFont('helvetica', 'bold');
+             doc.setTextColor(255, 255, 255); // Blanco
+             doc.text(leftSectionText, leftSectionX, leftSectionYStart + textHeight, {
+               angle: -90,
+               align: 'left',
+             });
+          }else{
+             // Redibujar el fondo naranja y el texto vertical en la nueva página
+             const leftSectionText = 'COMPETENCIAS';
+             const leftSectionX = 4;
+             let leftSectionYStart = yOffset;
+             let leftSectionYEnd = yOffset + (profileData.postulante.competencias.length * 40); // Ajusta según el espacio necesario
+ 
+             // Dibujar el fondo naranja para el texto vertical
+             const rectWidth = 10; // Ajusta este valor según sea necesario
+             const textHeight = doc.getTextDimensions(leftSectionText).h;
+             doc.setFillColor(255, 165, 0); // Naranja
+             doc.rect(leftSectionX - 5, leftSectionYStart, rectWidth, leftSectionYEnd - leftSectionYStart, 'F');
+ 
+             // Dibujar el texto vertical en la parte izquierda con letras blancas
+             doc.setFontSize(12);
+             doc.setFont('helvetica', 'bold');
+             doc.setTextColor(255, 255, 255); // Blanco
+             doc.text(leftSectionText, leftSectionX, leftSectionYStart + textHeight, {
+               angle: -90,
+               align: 'left',
+             });
+          }
+          profileData.postulante.competencias.forEach((competencia) => {
+            const requiredSpace = 30; // Ajusta este valor según el espacio necesario para cada iteración
+            if (yOffset + requiredSpace > doc.internal.pageSize.height - 10) {
+              doc.addPage();
+              yOffset = 10;
+            }
+
+  
+  
+              doc.setFont('helvetica', 'normal');
+              doc.setFontSize(12);
+              doc.setTextColor(0);
+            const lineYStart = yOffset;
+            doc.setDrawColor(230, 230, 230); // Color gris claro
+            doc.line(10, lineYStart, doc.internal.pageSize.width - 10, lineYStart);
+            yOffset += 5;
+
+            doc.setFont('helvetica', 'normal');
+            addText(`Competencia: ${competencia.competencia.nombre}`);
+            addText(`Grupo al que pertenece: ${competencia.competencia.grupo}`);
+            addText(`Nivel de desarrollo: ${competencia.nivel}`);
+
+
+            const lineYEnd = yOffset;
+            doc.line(10, lineYEnd, doc.internal.pageSize.width - 10, lineYEnd);
+            yOffset += 10; // Ajustar el yOffset para la siguiente iteración
+
+          });
+          yOffset += 7;
+        }
+        if (profileData.postulante.red.length > 0) {
+          addSection('REDES SOCIALES');
+          profileData.postulante.red.forEach((red) => {
+            const requiredSpace = 30; // Ajusta este valor según el espacio necesario para cada iteración
+            if (yOffset + requiredSpace > doc.internal.pageSize.height - 10) {
+              doc.addPage();
+              yOffset = 10;
+            }
+            
+  
+  
+  
+              doc.setFont('helvetica', 'normal');
+              doc.setFontSize(12);
+              doc.setTextColor(0);
+
+            addText(`${red.nombre_red} : ${red.enlace}`);
           });
         }
 
         if (profileData.postulante.formapro.length > 0) {
-          addSection('FORMACIÓN PROFESIONAL');
-          profileData.postulante.formapro.forEach((exp) => {
-            const startDate = format(new Date(exp.fecha_ini), 'MMM-yyyy');
-            const endDate = exp.fecha_fin ? format(new Date(exp.fecha_fin), 'MMM-yyyy') : 'Presente';
-            doc.setFont('helvetica', 'bold');
-            addText(`${exp.empresa}`);
-            doc.setFont('helvetica', 'normal');
-            addText(`Puesto: ${exp.puesto}`);
-            addText(`Responsabilidades: ${exp.descripcion_responsabilidades}`);
-            const areaText = exp.area.split(',')[1].trim();
-            addText(`Area: ${areaText}`);
-            addText(`Fechas: ${startDate} - ${endDate}`);
-            yOffset += 5;
-          });
-        }
+          addSection('REFERENCIAS PERSONALES');
 
-        if (profileData.postulante.idiomas.length > 0) {
-          addSection('REFERENCIAS');
           profileData.postulante.formapro.forEach((exp) => {
+            // Comprobar si hay espacio suficiente para una nueva iteración
+            const requiredSpace = 30; // Ajusta este valor según el espacio necesario para cada iteración
+            if (yOffset + requiredSpace > doc.internal.pageSize.height - 10) {
+              doc.addPage();
+              yOffset = 10;
+            }
+              doc.setFont('helvetica', 'normal');
+              doc.setFontSize(12);
+              doc.setTextColor(0);
+
+            const lineYStart = yOffset;
+            doc.setDrawColor(230, 230, 230); // Color gris claro
+            doc.line(10, lineYStart, doc.internal.pageSize.width - 10, lineYStart);
+            yOffset += 5;
+
             doc.setFont('helvetica', 'bold');
             addText(`${exp.persona_referencia}`);
             doc.setFont('helvetica', 'normal');
             addText(`Perteneciente a: ${exp.empresa}`);
             addText(`Contacto: ${exp.contacto}`);
             yOffset += 5;
+
+            const lineYEnd = yOffset;
+            doc.line(10, lineYEnd, doc.internal.pageSize.width - 10, lineYEnd);
+            yOffset += 10; // Ajustar el yOffset para la siguiente iteración
           });
         }
 
-        if (profileData.postulante.formapro.length > 0) {
-          addSection('IDIOMAS');
-          profileData.postulante.idiomas.forEach((idioma) => {
-            doc.setFont('helvetica', 'bold');
-            addText(` ${idioma.idioma.nombre}`);
-            doc.setFont('helvetica', 'normal');
-            addText(`Nivel Oral: ${idioma.nivel_oral}`);
-            addText(`Nivel Escrito: ${idioma.nivel_escrito}`);
-            yOffset += 5;
-          });
-        }
 
-        if (profileData.postulante.red.length > 0) {
-          addSection('REDES');
-          profileData.postulante.red.forEach((red) => {
-            addText(`${red.nombre_red}: ${red.enlace}`);
-          });
-        }
 
-        addWatermark();
+
 
         const pdfBlob = doc.output('blob');
         const pdfFileName = `${profileData.postulante.nombres}_${profileData.postulante.apellidos}_CV.pdf`;

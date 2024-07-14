@@ -15,6 +15,7 @@ use App\Models\Titulo;
 use App\Models\Ubicacion;
 use DateTime;
 use Illuminate\Http\Request;
+use Illuminate\Queue\NullQueue;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -49,6 +50,7 @@ class PostulanteController extends Controller
         $postulante->informacion_extra = $request->description;
         $postulante->foto = $request->foto; // URL de Firebase para la foto
         $postulante->cv = $request->cv; // URL de Firebase para el CV
+        $postulante->telefono = $request->telefono; 
 
         // Guardar el postulante
         $postulante->save();
@@ -141,7 +143,7 @@ class PostulanteController extends Controller
 public function getCurriculum($id)
 {
     try {
-        $postulante = Postulante::with(['ubicacion', 'formaciones.titulo', 'idiomas.idioma','red','certificado','formapro'])->where('id_usuario', $id)->first();
+        $postulante = Postulante::with(['ubicacion', 'formaciones.titulo', 'idiomas.idioma','red','certificado','formapro','habilidades.habilidad','competencias.competencia'])->where('id_usuario', $id)->first();
         if (!$postulante) {
             return response()->json(['message' => 'User not found'], 404);
         }
@@ -444,7 +446,7 @@ public function getCurriculum($id)
                     'institucion' => $institucion,
                     'estado' => $estado,
                     'fecha_ini' => $fechaini,
-                    'fecha_fin' => $fechafin,
+                    'fecha_fin' => $fechafin?:Null,
                     'titulo_acreditado' => $titulo_acreditado,
                 ]);
     

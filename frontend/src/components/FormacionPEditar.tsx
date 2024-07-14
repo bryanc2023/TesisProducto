@@ -127,6 +127,7 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
 
   useEffect(() => {
     if (formacion) {
+      setIsEnCurso(false);
       setValue('institucion', formacion.institucion);
       setValue('estado', formacion.estado);
       setValue('fechaini', formacion.fechaini);
@@ -148,6 +149,7 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
       setSelectedCampo('');
       setSelectedTitulo('');
       setSelectedTituloId('');
+      setIsEnCurso(false);
     }
   }, [formacion, setValue, reset]);
 
@@ -317,7 +319,7 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
           </select>
         </div>
         <div className="form-group">
-          <label htmlFor="titulo" className="block text-gray-700 font-semibold mb-2">Título:</label>
+          <label htmlFor="titulo" className="block text-gray-700 font-semibold mb-2">Título (Acreditado por la Senecyt):</label>
           <select id="titulo" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" onChange={handleTituloChange} value={selectedTitulo} disabled={!selectedNivel || !selectedCampo || !!formacion}>
             <option value="">Seleccione</option>
             {titulos.map((titulo, index) => (
@@ -328,17 +330,17 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
           </select>
         </div>
         <div className="form-group">
-          <label htmlFor="titulo_acreditado" className="block text-gray-700 font-semibold mb-2">Título Acreditado:</label>
+          <label htmlFor="titulo_acreditado" className="block text-gray-700 font-semibold mb-2">Título Acreditado por la institución:</label>
           <input type="text" id="titulo_acreditado" {...register('titulo_acreditado', { required: true })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" />
           {errors.titulo_acreditado && <span className="text-red-500">Este campo es obligatorio</span>}
         </div>
         <div className="form-group">
-          <label htmlFor="institucion" className="block text-gray-700 font-semibold mb-2">Institución:</label>
+          <label htmlFor="institucion" className="block text-gray-700 font-semibold mb-2">Institución que otorga el título:</label>
           <input type="text" id="institucion" {...register('institucion', { required: true })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" />
           {errors.institucion && <span className="text-red-500">Este campo es obligatorio</span>}
         </div>
         <div className="form-group">
-          <label htmlFor="estado" className="block text-gray-700 font-semibold mb-2">Estado:</label>
+          <label htmlFor="estado" className="block text-gray-700 font-semibold mb-2">Estado de la formación académica:</label>
           <select id="estado" {...register('estado', { required: true })} onChange={handleEstadoChange}  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600">
             <option value="">Seleccione</option>
             <option value="En curso">En curso</option>
