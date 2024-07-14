@@ -22,6 +22,7 @@ class CreateUsersTable extends Migration
             $table->timestamp('first_login_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
+            $table->string('reset_password_token', 250)->nullable();
         });
     }
 
