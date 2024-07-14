@@ -15,6 +15,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\URL;
 use App\Notifications\VerifyEmailCustom;
+use App\Notifications\ResetPassword;
 
 
 class AuthController extends Controller
@@ -141,4 +142,5 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Verification email resent'], 200);
     }
+    
 }

@@ -20,6 +20,7 @@ use App\Http\Controllers\EmpresaRedController;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\EmpresaGestoraController;
 use App\Http\Controllers\NotificacionesController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -30,6 +31,7 @@ Route::get('/test-cors', function (Request $request) {
 
 Route::prefix('auth')->group(function(){
   Route::post('register',[AuthController::class,'register'])->name('verification.verify');
+
   Route::post('registerE',[AuthController::class,'registerEmpresa'])->name('verification.verify');
   Route::post('login',[AuthController::class,'login'])->name('login');
   Route::post('loginE',[AuthController::class,'loginEmpresa'])->name('login');
@@ -40,6 +42,8 @@ Route::prefix('auth')->group(function(){
   Route::middleware('auth:sanctum')->post('email/resend', [AuthController::class, 'resend'])->name('verification.resend');
 });
 
+Route::post('ResetPassword3', [UserController::class, 'resetPassword']);
+Route::post('reset-password', [ResetPasswordController::class, 'resetPassword']);
 Route::middleware(['jwt.verify'])->get('users',[UserController::class,'index']);
 
 

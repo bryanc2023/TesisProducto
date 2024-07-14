@@ -38,6 +38,8 @@ import ConsultoPostuG from "../pages/empresaG/ConsultoPostuG"
 import EditarO from "../pages/empresa/EditarO"
 import GestionUsuarios from "../pages/admin/GestionUsuarios"
 import EditarOG from "../pages/empresaG/EditarOG"
+import EmailRequest from "../pages/EmailRequest"
+import ResetPassword from "../pages/ResetPassword"
 
 type TypeRoute = {
     path: string;
@@ -59,6 +61,14 @@ export const routes: TypeRoute[] = [
     {
         path: '/login',
         element: Login,
+    },
+    {
+        path: '/EmailRequest',
+        element: EmailRequest,
+    },
+    {
+        path: '/ResetPassword/:token',
+        element: ResetPassword,
     },
     {
         path: '/register',
