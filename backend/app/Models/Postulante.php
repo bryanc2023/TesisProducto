@@ -22,6 +22,7 @@ class Postulante extends Model
         'edad',
         'estado_civil',
         'cedula',
+        'telefono',
         'genero',
         'informacion_extra',
         'foto',

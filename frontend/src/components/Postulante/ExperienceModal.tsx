@@ -159,7 +159,7 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
               {errors.area && <p className="text-red-500">{errors.area.message}</p>}
             </div>
             <div>
-              <label className="block text-gray-700">Puesto en la empresa:</label>
+              <label className="block text-gray-700">Cargo en la empresa:</label>
               <input 
                 {...register('puesto', { 
                   required: 'Este campo es obligatorio', 
@@ -192,7 +192,7 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
               {errors.fecha_fin && <p className="text-red-500">{errors.fecha_fin.message}</p>}
             </div>
             <div>
-              <label className="block text-gray-700">Descripción de responsabilidades en la empresa:</label>
+              <label className="block text-gray-700">Descripción de funciones y responsabilidades en la empresa:</label>
               <textarea 
                 {...register('descripcion', { 
                   required: 'Este campo es obligatorio', 
@@ -210,11 +210,12 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
                   maxLength: { value: 250, message: 'Máximo 250 caracteres' } 
                 })} 
                 className="w-full px-4 py-2 border rounded-md text-gray-700" 
+                placeholder='Nombre (Cargo de la persona en la empresa)'
               />
               {errors.referencia && <p className="text-red-500">{errors.referencia.message}</p>}
             </div>
             <div>
-              <label className="block text-gray-700">Contacto:</label>
+              <label className="block text-gray-700">Contacto de la persona de referencia:</label>
               <input 
                 type="text" 
                 {...register('contacto', { 

@@ -107,7 +107,7 @@ const EducationTab: React.FC<EducationTabProps> = ({ formaciones, openEditFormac
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Formación Académica</h2>
         <button onClick={() => openEditFormacionModal(null)} className="text-orange-400 hover:underline">
-          + Agregar educación
+          + Agregar formación académica
         </button>
       </div>
 
@@ -139,10 +139,10 @@ const EducationTab: React.FC<EducationTabProps> = ({ formaciones, openEditFormac
                   <FaTrash className="w-4 h-4" />
                 </button>
               </div>
-              <p><strong> {formacion.titulo_acreditado}</strong> </p>
-              <p> {fechainiFormateada} - {fechafinFormateada}</p>
-              <p><strong>Institución:</strong> {formacion.institucion}</p>
-              <p><strong>Estado:</strong> {formacion.estado}</p>
+              <p><strong className='text-orange-500'>Título:</strong><strong className='text-blue-100'> {formacion.titulo_acreditado}</strong> </p>
+              <p><strong className='text-orange-500'>Fechas: </strong>{fechainiFormateada} - {fechafinFormateada}</p>
+              <p><strong className='text-orange-500'>Institución que otorga el título:</strong> {formacion.institucion}</p>
+              <p><strong className='text-orange-500' >Estado de la formación:</strong> {formacion.estado}</p>
             </div>
           );
         })

@@ -107,7 +107,7 @@ const CoursesTab: React.FC<CoursesTabProps> = () => {
   return (
     <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Cursos y Capacitaciones</h2>
+        <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Cursos ,Participaciones y Capacitaciones</h2>
         <button onClick={() => openEditModal(null)} className="text-orange-400 hover:underline">
           + Agregar curso
         </button>
@@ -134,8 +134,8 @@ const CoursesTab: React.FC<CoursesTabProps> = () => {
                 <FaTrash className="w-4 h-4" />
               </button>
             </div>
-            <p><strong>Nombre del Curso:</strong> {curso.titulo}</p>
-            <p><strong>Certificado:</strong> <a href={curso.certificado} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Ver certificado</a></p>
+            <p><strong className='text-orange-500'>Título:</strong> {curso.titulo}</p>
+            <p><strong className='text-orange-500' >Certificado:</strong> <a href={curso.certificado} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Ver certificado</a></p>
           </div>
         ))
       ) : (

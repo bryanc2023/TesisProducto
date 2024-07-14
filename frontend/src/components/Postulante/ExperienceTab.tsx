@@ -4,9 +4,11 @@ import ExperienceModal from './ExperienceModal';
 import axios from '../../services/axios';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 interface Experiencia {
-  id_formacion_pro: number; 
+  id_formacion_pro: number;
   empresa: string;
   puesto: string;
   area: string;
@@ -22,7 +24,7 @@ const ExperienceTab: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [experiencias, setExperiencias] = useState<Experiencia[]>([]);
   const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
-  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false); 
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [experienceToDelete, setExperienceToDelete] = useState<number | null>(null);
   const [selectedExperience, setSelectedExperience] = useState<Experiencia | null>(null);
 
@@ -43,7 +45,7 @@ const ExperienceTab: React.FC = () => {
       setExperiencias([]);
     }
   }, [user]);
-  
+
   useEffect(() => {
     fetchExperiencia();
   }, [fetchExperiencia, user]);
@@ -93,10 +95,16 @@ const ExperienceTab: React.FC = () => {
     }
   };
 
+  const formatearFecha = (fecha: any) => {
+    const fechaObj = new Date(fecha);
+    const fechaFormateada = format(fechaObj, 'MMMM yyyy', { locale: es });
+    return fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1);
+  };
+
   return (
     <div className="mt-6 bg-gray-800 p-4 rounded-lg shadow-inner text-gray-200">
       <div className="flex justify-between items-center">
-        <h3 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Experiencia</h3>
+        <h3 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Experiencia Profesional</h3>
         <button onClick={() => openModal()} className="text-orange-400 hover:underline">
           + Agregar experiencia
         </button>
@@ -108,6 +116,7 @@ const ExperienceTab: React.FC = () => {
       )}
       {experiencias && experiencias.length > 0 ? (
         experiencias.map((experiencia, index) => (
+
           <div key={index} className="mb-4 p-4 border rounded-lg bg-gray-700 relative">
             <div className="flex justify-end space-x-2 mb-2">
               <button
@@ -123,14 +132,24 @@ const ExperienceTab: React.FC = () => {
                 <FaTrash className="w-4 h-4" />
               </button>
             </div>
-            <p><strong>Empresa:</strong> {experiencia.empresa}</p>
-            <p><strong>Puesto:</strong> {experiencia.puesto}</p>
-            <p><strong>Área:</strong> {experiencia.area.split(',')[1]}</p>
-            <p><strong>Fecha de Inicio:</strong> {experiencia.fecha_ini}</p>
-            <p><strong>Fecha de Fin:</strong> {experiencia.fecha_fin}</p>
-            <p><strong>Descripción:</strong> {experiencia.descripcion_responsabilidades}</p>
-            <p><strong>Referencia:</strong> {experiencia.persona_referencia}</p>
-            <p><strong>Contacto:</strong> {experiencia.contacto}</p>
+            <p><strong className='text-orange-500'>Empresa:</strong> {experiencia.empresa}</p>
+            <p><strong className='text-orange-500' >Cargo:</strong> {experiencia.puesto}</p>
+            <p><strong className='text-orange-500'>Fechas de labores:</strong> {formatearFecha(experiencia.fecha_ini)} - {formatearFecha(experiencia.fecha_fin)}</p>
+            <p><strong className='text-orange-500' >Área:</strong> {experiencia.area.split(',')[1]}</p>
+
+
+            <p><strong className='text-orange-500' >Funciones y responsabilidades en el cargo:</strong></p>
+            {experiencia.descripcion_responsabilidades.includes(',') ? (
+              <ul className="list-disc list-inside">
+                {experiencia.descripcion_responsabilidades.split(',').map((item, idx) => (
+                  <li key={idx}>{item.trim()}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>{experiencia.descripcion_responsabilidades}</p>
+            )}
+            <p><strong className='text-orange-500'>Reporta a:</strong> {experiencia.persona_referencia}</p>
+            <p><strong className='text-orange-500' >Contacto:</strong> {experiencia.contacto}</p>
           </div>
         ))
       ) : (

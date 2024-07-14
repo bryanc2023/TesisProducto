@@ -19,12 +19,13 @@ interface IFormInput {
   description: string;
   province: string;
   canton: string;
+  telefono:string;
 }
 
 const CompletarP: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
-  const { register, handleSubmit, formState: { errors } } = useForm<IFormInput>();
+  const { register, handleSubmit, formState: { errors } , setError, clearErrors} = useForm<IFormInput>();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [provinces, setProvinces] = useState<string[]>([]);
   const [cantons, setCantons] = useState<string[]>([]);
@@ -120,7 +121,8 @@ const CompletarP: React.FC = () => {
           gender: data.gender,
           maritalStatus: data.maritalStatus,
           description: data.description,
-          usuario_id: user.id
+          usuario_id: user.id,
+          telefono:data.telefono
         };
 
         await axios.post('postulanteC', formData);
@@ -133,12 +135,22 @@ const CompletarP: React.FC = () => {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      if (file.size > 500 * 1024) { // 300 KB en bytes
+        setError('image', {
+          type: 'manual',
+          message: 'El archivo debe ser menor a 500 KB',
+        });
+        setImagePreview(null);
+      } else {
+        clearErrors('image');
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 
@@ -161,7 +173,7 @@ const CompletarP: React.FC = () => {
                 Seleccionar imagen
               </div>
             )}
-            <input type="file" id="image" {...register('image', { required: 'La imagen es requerida' })} onChange={handleImageChange} className={`block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 ${errors.image ? 'border-red-500' : ''}`} />
+            <input type="file" id="image" {...register('image', { required: 'La imagen es requerida' })} onChange={handleImageChange}  accept=".png, .jpg, .jpeg"  className={`block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 ${errors.image ? 'border-red-500' : ''}`} />
             {errors.image && <p className="text-red-500 text-xs mt-1">{errors.image.message}</p>}
           </div>
         </div>
@@ -221,6 +233,9 @@ const CompletarP: React.FC = () => {
             {errors.idNumber && <p className="text-red-500 text-xs mt-1">{errors.idNumber.type === 'validate' ? 'Cédula inválida' : errors.idNumber.message}</p>}
           </div>
         </div>
+       
+       
+
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           <div className="form-group">
@@ -245,6 +260,12 @@ const CompletarP: React.FC = () => {
             </select>
             {errors.maritalStatus && <p className="text-red-500 text-xs mt-1">{errors.maritalStatus.message}</p>}
           </div>
+
+          <div className="form-group">
+            <label htmlFor="telefono" className="block text-gray-700 font-semibold mb-2">Teléfono de contacto:</label>
+            <input type="text" id="telefono" {...register('telefono', { required: 'Teléfono es requerido' })} className={getInputClassName(errors.telefono)} />
+            {errors.telefono && <p className="text-red-500 text-xs mt-1">{errors.telefono?.message}</p>}
+          </div>
         </div>
 
         <div className="form-group mb-8">
@@ -252,6 +273,8 @@ const CompletarP: React.FC = () => {
           <textarea id="description" {...register('description', { required: 'Descripción es requerida' })} placeholder="Describete, Tus Habilidades y competencias propias..." className={getInputClassName(errors.description)}></textarea>
           {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
         </div>
+
+        
 
         <button type="submit" className="w-full py-3 px-4 bg-blue-500 text-white font-bold rounded-lg hover:bg-slate-600">CONTINUAR</button>
       </form>

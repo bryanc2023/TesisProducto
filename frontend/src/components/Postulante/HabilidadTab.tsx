@@ -192,8 +192,8 @@ const HabilidadTab: React.FC<HabilidadesTabProps> = ({ habilidades }) => {
                 <FaTrash className="w-4 h-4" />
               </button>
             </div>
-            <p><strong>Hablidad:</strong> {habilidad.habilidad}</p>
-            <p><strong>Nivel:</strong> {habilidad.pivot?.nivel}</p>
+            <p><strong className='text-orange-400'>Hablidad:</strong> {habilidad.habilidad}</p>
+            <p><strong className='text-orange-400' >Nivel de destreza:</strong> {habilidad.pivot?.nivel}</p>
           </div>
         ))
       ) : (

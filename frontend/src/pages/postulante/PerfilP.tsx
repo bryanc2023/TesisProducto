@@ -202,6 +202,14 @@ const Profile: React.FC = () => {
         }
     };
 
+    const getModifiedEstadoCivil = (estadoCivil:any, genero:any) => {
+        if (genero.toLowerCase() === 'femenino') {
+          if (estadoCivil.endsWith('o')) {
+            return estadoCivil.slice(0, -1) + 'a';
+          }
+        }
+        return estadoCivil;
+      };
     
 
     if (loading) {
@@ -236,10 +244,14 @@ const Profile: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <p><strong>Fecha de Nacimiento:</strong> {profileData.postulante.fecha_nac}</p>
                     <p><strong>Edad:</strong> {profileData.postulante.edad}</p>
-                    <p><strong>Estado Civil:</strong> {profileData.postulante.estado_civil}</p>
+                    <p><strong>Estado Civil:</strong> {getModifiedEstadoCivil(profileData.postulante.estado_civil, profileData.postulante.genero)}</p>
                     <p>
                         <strong>Cédula:</strong> {profileData.postulante.cedula}
                         {cedulaError && <span className="text-red-500 ml-2">{cedulaError}</span>}
+                    </p>
+                    <p>
+                        <strong>Teléfono:</strong> {profileData.postulante.telefono}
+                       
                     </p>
                     <p><strong>Género:</strong> {profileData.postulante.genero}</p>
                 </div>

@@ -343,7 +343,7 @@ const handleRedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
   return (
     <div className="min-h-screen flex flex-col justify-center items-center p-5 bg-gray-100">
       <h1 className="text-3xl font-bold text-center mb-8">Completar registro</h1>
-      <p className="text-center mb-8">Necesitamos más información acerca de tu trayectoria, tranquilo podras aumentar más experiencia, títulos e idiomas en tu perfil.</p>
+      <p className="text-center mb-8">Necesitamos más información acerca de tu trayectoria, tranquilo podras aumentar más experiencia, títulos y otros aspectos en tu perfil.</p>
       <form onSubmit={handleSubmit(onSubmit)} className="bg-white p-10 rounded-lg shadow-lg w-full max-w-4xl">
         <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Formación Académica</h2>
         <p className="text-center mb-8">Añade mínimo un título para comenzar:</p>
@@ -375,7 +375,7 @@ const handleRedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         </div>
 
         <div className="form-group mb-8">
-          <label htmlFor="titulo" className="block text-gray-700 font-semibold mb-2">Título:</label>
+          <label htmlFor="titulo" className="block text-gray-700 font-semibold mb-2">Título (Acreditado por la Senecyct):</label>
           <select id="titulo" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
             onChange={handleTituloChange}
             disabled={!selectedNivel || !selectedCampo}>
@@ -388,19 +388,19 @@ const handleRedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
           </select>
         </div>
         <div className="form-group">
-          <label htmlFor="titulo_acreditado" className="block text-gray-700 font-semibold mb-2">Título Acreditado:</label>
+          <label htmlFor="titulo_acreditado" className="block text-gray-700 font-semibold mb-2">Título Otorgado por la Institución:</label>
           <input type="text" id="titulo_acreditado" {...register('titulo_acreditado', { required: true })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" />
           {errors.titulo_acreditado && <span className="text-red-500">Este campo es obligatorio</span>}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           <div className="form-group">
-            <label htmlFor="institucion" className="block text-gray-700 font-semibold mb-2">Institución:</label>
+            <label htmlFor="institucion" className="block text-gray-700 font-semibold mb-2">Institución que otorga el título:</label>
             <input type="text" id="institucion" {...register('institucion', { required: 'Este campo es requerido' })} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600" />
             {errors.institucion && <p className="text-red-500 text-sm mt-2">{errors.institucion.message}</p>}
           </div>
           <div className="form-group">
-            <label htmlFor="estado" className="block text-gray-700 font-semibold mb-2">Estado:</label>
+            <label htmlFor="estado" className="block text-gray-700 font-semibold mb-2">Estado de la formación académica:</label>
             <select id="estado" {...register('estado', { required: 'Este campo es requerido' })} onChange={handleEstadoChange} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600">
               <option value="">Seleccione</option>
               <option value="En curso">En curso</option>
@@ -412,7 +412,7 @@ const handleRedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           <div className="form-group">
-            <label htmlFor="fechaini" className="block text-gray-700 font-semibold mb-2">Fecha de inicio:</label>
+            <label htmlFor="fechaini" className="block text-gray-700 font-semibold mb-2">Fecha de inicio de formación:</label>
             <input type="date" id="fechaini" {...register('fechaini', { required: 'Este campo es requerido', validate: value => {
               const today = new Date().toISOString().split('T')[0];
               return value <= today || 'La fecha no puede ser mayor a hoy';
@@ -422,7 +422,7 @@ const handleRedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 
           {!isEnCurso && (
             <div className="form-group">
-              <label htmlFor="fechafin" className="block text-gray-700 font-semibold mb-2">Fecha de Fin:</label>
+              <label htmlFor="fechafin" className="block text-gray-700 font-semibold mb-2">Fecha de Fin de formación:</label>
               <input type="date" id="fechafin" {...register('fechafin', { required: 'Este campo es requerido', validate: value => {
                 const today = new Date().toISOString().split('T')[0];
                 return value <= today || 'La fecha no puede ser mayor a hoy';
@@ -432,7 +432,7 @@ const handleRedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
           )}
         </div>
 
-        <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Información básica:</h2>
+        <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Información sobre el postulante:</h2>
         <p className="text-center mb-8">Añade mínimo un idioma para comenzar:</p>
         <p className="text-right text-gray-500 text-sm">*Campos obligatorios</p>
         <div className="grid grid-cols-1 gap-4">
@@ -450,7 +450,7 @@ const handleRedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700">Nivel escrito <span className="text-red-500">*</span></label>
+            <label className="block text-gray-700">Nivel escrito de desempeño en el lenguaje <span className="text-red-500">*</span></label>
             <select className="w-full px-4 py-2 border rounded-md" required
               {...register('nivelescrito', { required: 'Este campo es requerido' })}>
               <option value="">Elige una opción</option>
@@ -461,7 +461,7 @@ const handleRedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
             </select>
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700">Nivel oral <span className="text-red-500">*</span></label>
+            <label className="block text-gray-700">Nivel oral de desempeño en el lenguaje <span className="text-red-500">*</span></label>
             <select className="w-full px-4 py-2 border rounded-md" required
               {...register('niveloral', { required: 'Este campo es requerido' })}>
               <option value="">Elige una opción</option>
@@ -474,8 +474,8 @@ const handleRedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
           </div>
           
         </div>
-        <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Formación profesional:</h2>
-        <p className="text-center mb-8">¿Tienes experiencia en alguna empresa?</p>
+        <h2 className="text-2xl text-center font-semibold mb-4 text-blue-500">Experiencia Profesional:</h2>
+        <p className="text-center mb-8">¿Tienes experiencia profesional?</p>
       <div className="text-center mb-4">
         <input
           type="checkbox"
@@ -518,7 +518,7 @@ const handleRedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
             {errors.area && <p className="text-red-500">{errors.area.message}</p>}
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700">Puesto en la empresa:</label>
+            <label className="block text-gray-700">Cargo en la empresa:</label>
             <input 
               {...register('puesto', { 
                 required: hasExperience ? 'Este campo es obligatorio' : false, 
@@ -551,7 +551,7 @@ const handleRedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
             {errors.fechae2 && <p className="text-red-500">{errors.fechae2.message}</p>}
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700">Descripción de responsabilidades en la empresa:</label>
+            <label className="block text-gray-700">Descripción de funciones y responsabilidades en la empresa:</label>
             <textarea 
               {...register('descripcion', { 
                 required: hasExperience ? 'Este campo es obligatorio' : false, 
@@ -562,18 +562,20 @@ const handleRedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
             {errors.descripcion && <p className="text-red-500">{errors.descripcion.message}</p>}
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700">Nombre Persona Referencia:</label>
+          <label className="block text-gray-700 "><b>Referencia Personal:</b></label>
+            <label className="block text-gray-700">Nombre de la Persona Referencia:</label>
             <input 
               {...register('referencia', { 
                 required: hasExperience ? 'Este campo es obligatorio' : false, 
                 maxLength: { value: 250, message: 'Máximo 250 caracteres' } 
               })} 
               className="w-full px-4 py-2 border rounded-md text-gray-700" 
+              placeholder='Nombre persona (Cargo en la empresa)'
             />
             {errors.referencia && <p className="text-red-500">{errors.referencia.message}</p>}
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700">Contacto:</label>
+            <label className="block text-gray-700">Contacto de la persona de referencia:</label>
             <input 
               type="text" 
               {...register('contacto', { 
@@ -597,11 +599,12 @@ const handleRedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
           checked={hasRed}
           onChange={handleCheckboxChange2}
         />
-        <label htmlFor="hasRed" className="ml-2 text-gray-700">Sí, tengo red</label>
+        <label htmlFor="hasRed" className="ml-2 text-gray-700">Sí, cuento con una red social</label>
       </div>
       {hasRed && (
         <div className="grid grid-cols-1 gap-4">
           <div className="mb-4">
+          <label className="block text-gray-700">Añade mínimo una red social para comenzar</label>
           <label className="block text-gray-700">Nombre de la Red</label>
                     <select
                            {...register('red', { 
