@@ -3,6 +3,7 @@ import axios from '../../services/axios';
 import { useSelector } from 'react-redux';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { RootState } from '../../store';
 
 interface EditCursoProps {
   isOpen: boolean;
@@ -42,7 +43,7 @@ const EditCurso: React.FC<EditCursoProps> = ({ isOpen, closeModal, reloadCursos,
     fetchProfileData();
   }, [user]);
 
-  const [nombre, setNombre] = useState(curso ? curso.nombre : '');
+  const [nombre, setNombre] = useState(curso ? curso.titulo : '');
   const [institucion, setInstitucion] = useState(curso ? curso.institucion : '');
   const [fechaini, setFechaini] = useState(curso ? curso.fechaini : '');
   const [fechafin, setFechafin] = useState(curso ? curso.fechafin : '');

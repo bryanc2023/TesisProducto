@@ -1,4 +1,4 @@
-import React, { useEffect, useState, ChangeEvent } from 'react';
+import { useEffect, useState, ChangeEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from "../../services/axios";
 import ModalComponent from './NotiModal';
@@ -10,7 +10,9 @@ const getEndpoints = {
     area: 'areasR',
     criterio: 'criteriosR',
     idioma: 'idiomasR',
-};
+    competencia: 'competenciaR',
+    habilidad: 'habilidadR',
+} as const;
 
 const updateEndpoints = {
     ubicacion: '/updateUbicaciones',
@@ -19,7 +21,11 @@ const updateEndpoints = {
     area: '/updateAreas',
     criterio: '/updateCriterios',
     idioma: '/updateIdiomas',
-};
+    competencia: '/postulante_competencia/update',
+    habilidad: '/postulante_habilidad/update',
+} as const;
+
+type FieldKeys = keyof typeof getEndpoints;
 
 interface DataRow {
     [key: string]: any;
@@ -28,7 +34,7 @@ interface DataRow {
 const VistaPreviaArchivo = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { field } = location.state || {};
+    const { field } = location.state as { field: FieldKeys } || {};
 
     const [data, setData] = useState<DataRow[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -39,12 +45,24 @@ const VistaPreviaArchivo = () => {
         const fetchData = async () => {
             try {
                 const response = await axios.get(getEndpoints[field]);
-                // Excluir 'created_at' y 'updated_at' de los datos
-                const filteredData = response.data.map((row: DataRow) => {
-                    const { created_at, updated_at, ...rest } = row;
-                    return rest;
-                });
-                setData(filteredData);
+                let responseData = response.data.data || response.data;
+
+                if (field === 'competencia' && responseData.competencias) {
+                    responseData = responseData.competencias;
+                } else if (field === 'habilidad' && responseData.habilidades) {
+                    responseData = responseData.habilidades;
+                }
+
+                if (Array.isArray(responseData)) {
+                    const filteredData = responseData.map((row: DataRow) => {
+                        const { created_at, updated_at, ...rest } = row;
+                        return rest;
+                    });
+                    setData(filteredData);
+                } else {
+                    console.error(`Expected an array but got:`, responseData);
+                }
+
                 setIsLoading(false);
             } catch (error) {
                 console.error(`Error fetching data:`, error);
@@ -75,7 +93,6 @@ const VistaPreviaArchivo = () => {
 
     const handleSaveChanges = async () => {
         try {
-            // Añadir 'created_at' y 'updated_at' por defecto a las nuevas filas
             const currentTime = new Date().toISOString();
             const dataWithTimestamps = data.map((row) => ({
                 ...row,

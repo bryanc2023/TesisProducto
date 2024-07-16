@@ -4,6 +4,8 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import axios from '../../services/axios';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
+import Swal from 'sweetalert2';
+import { isAxiosError } from 'axios';
 
 interface AddHabilidadModalProps {
     isOpen: boolean;
@@ -24,16 +26,35 @@ const AddHabilidadModal: React.FC<AddHabilidadModalProps> = ({ isOpen, onRequest
 
     const onSubmit: SubmitHandler<FormValues> = async (data) => {
         try {
-            await axios.post('/nuevohabilidad', {
+            const response = await axios.post('/nuevohabilidad', {
                 userId: user?.id,
                 habilidadId: data.habilidadId,
                 nivel:data.nivel,
             });
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: response.data.message,
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+              });
             onHabilidadAdded();
             onRequestClose();
         } catch (error) {
-            console.error('Error adding habilidad:', error);
-        }
+            if (isAxiosError(error) && error.response) {
+              Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: error.response.data.message,
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+              });
+            }
+          }
     };
 
     return (

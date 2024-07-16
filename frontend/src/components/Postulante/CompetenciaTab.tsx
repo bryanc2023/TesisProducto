@@ -10,6 +10,8 @@ import AddHabilidadModal from './AddHabilidadModal';
 import EditHabilidadModal from './EditHabilidadModal';
 import AddCompetenciadModal from './AddCompetenciaModal';
 import EditCompetenciaModal from './EditCompetenciaModal';
+import { isAxiosError } from 'axios';
+import Swal from 'sweetalert2';
 
 interface CompetenciasTabProps {
   competencias: Competencia[];
@@ -45,9 +47,7 @@ const CompetenciaTab: React.FC<CompetenciasTabProps> = ({ competencias }) => {
     const fetchProfileData = async () => {
       try {
         if (user) {
-         
           const response = await axios.get(`/perfil/${user.id}`);
-        
           setProfileData(response.data);
           fetchUserHabilidades(response.data.postulante.id_postulante);
         }
@@ -81,9 +81,7 @@ const CompetenciaTab: React.FC<CompetenciasTabProps> = ({ competencias }) => {
 
   const fetchUserHabilidades = async (id_postulante: number) => {
     try {
-     
       const response = await axios.get('/competencias', { params: { id_postulante } });
-     
       if (response.data && Array.isArray(response.data.competencias)) {
         setUserHabilidades(response.data.competencias);
       } else {
@@ -131,22 +129,38 @@ const CompetenciaTab: React.FC<CompetenciasTabProps> = ({ competencias }) => {
     }
 
     try {
-      await axios.delete('/postulante_competencia/delete', {
+      const response = await axios.delete('/postulante_competencia/delete', {
         data: {
           id_postulante: profileData.postulante.id_postulante,
           id_competencia: habilidadToDelete.id,
         }
       });
-
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: response.data.message,
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+      });
       setDeleteMessage('Competencia eliminado exitosamente');
       setTimeout(() => setDeleteMessage(null), 3000);
       if (profileData) {
         await fetchUserHabilidades(profileData.postulante.id_postulante);
       }
     } catch (error) {
-      console.error('Error eliminando la competencia:', error.response ? error.response.data : error);
-      setDeleteMessage('Error al eliminar la competencia');
-      setTimeout(() => setDeleteMessage(null), 3000);
+      if (isAxiosError(error) && error.response) {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'error',
+          title: error.response.data.message,
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+        });
+      }
     }
 
     setIsConfirmationModalOpen(false);
@@ -211,6 +225,7 @@ const CompetenciaTab: React.FC<CompetenciasTabProps> = ({ competencias }) => {
         onRequestClose={() => setIsAddModalOpen(false)}
         onHabilidadAdded={handleHabilidadAdded}
         habilidades={generalHabilidades}
+        userId={user?.id}
       />
       {selectedHabilidad && (
         <EditCompetenciaModal

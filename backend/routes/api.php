@@ -116,17 +116,17 @@ Route::delete('postulante_idioma/delete', [IdiomaController::class, 'deleteidiom
 
 
 //Rutas para habilidad
-Route::get('/habilidad', [HabilidadController::class, 'getHabilidadesAll']);
+Route::get('/habilidadR', [HabilidadController::class, 'getHabilidadesAll']);
 Route::get('/habilidades', [HabilidadController::class, 'getHabilidades']);
 Route::post('nuevohabilidad', [PostulanteController::class, 'registroHabilidad']);
-Route::put('postulante_habilidad/update', [HabilidadController::class, 'updatehabilidades']);
+Route::post('postulante_habilidad/update', [HabilidadController::class, 'updatehabilidades']);
 Route::delete('postulante_habilidad/delete', [HabilidadController::class, 'deletehabilidadPostulante']);
 
 //Rutas para competencia
-Route::get('/competencia', [CompetenciaController::class, 'getCompetenciasAll']);
+Route::get('/competenciaR', [CompetenciaController::class, 'getCompetenciasAll']);
 Route::get('/competencias', [CompetenciaController::class, 'getCompetencias']);
 Route::post('nuevocompetencia', [PostulanteController::class, 'registroCompetencia']);
-Route::put('postulante_competencia/update', [CompetenciaController::class, 'updatecompetencias']);
+Route::post('postulante_competencia/update', [CompetenciaController::class, 'updatecompetencias']);
 Route::delete('postulante_competencia/delete', [CompetenciaController::class, 'deletecompetenciaPostulante']);
 
 

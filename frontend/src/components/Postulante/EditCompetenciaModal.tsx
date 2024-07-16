@@ -5,6 +5,8 @@ import axios from '../../services/axios';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 
+
+
 interface EditCompetenciaModalProps {
   isOpen: boolean;
   onRequestClose: () => void;

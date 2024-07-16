@@ -255,20 +255,22 @@ public function getCurriculum($id)
     }
 
     public function registroIdioma(Request $request)
-    {
-        $request->validate([
-            'userId' => 'required|integer',
-            'idiomaId' => 'required|integer|exists:idioma,id',
-            'nivelOral' => 'required|string|max:220',
-            'nivelEscrito' => 'required|string|max:30'
-        ]);
+{
+    $request->validate([
+        'userId' => 'required|integer',
+        'idiomaId' => 'required|integer|exists:idioma,id',
+        'nivelOral' => 'required|string|max:220',
+        'nivelEscrito' => 'required|string|max:30'
+    ]);
 
-        $postulante = Postulante::where('id_usuario', $request->userId)->first();
-        if (!$postulante) {
-            return response()->json(['error' => 'Postulante no encontrado'], 404);
-        }
+    $postulante = Postulante::where('id_usuario', $request->userId)->first();
+    if (!$postulante) {
+        return response()->json(['error' => 'Postulante no encontrado'], 404);
+    }
 
-        $idp = $postulante->id_postulante;
+    $idp = $postulante->id_postulante;
+
+    try {
         $postulanteidi = new PostulanteIdioma();
         $postulanteidi->id_postulante = $idp;
         $postulanteidi->id_idioma = $request->idiomaId;
@@ -276,8 +278,15 @@ public function getCurriculum($id)
         $postulanteidi->nivel_escrito = $request->nivelEscrito;
         $postulanteidi->save();
 
-        return response()->json(['message' => 'Postulante registrada exitosamente', 'postulante_formacion' => $postulanteidi], 201);
+        return response()->json(['message' => 'Idioma registrado exitosamente', 'postulante_formacion' => $postulanteidi], 201);
+    } catch (\Illuminate\Database\QueryException $ex) {
+        if($ex->errorInfo[1] == 1062) {
+            return response()->json(['error' => 'Este idioma ya ha sido registrado para este postulante'], 409);
+        }
+        return response()->json(['error' => 'Error al registrar el idioma'], 500);
     }
+}
+
 
 
     public function registroHabilidad(Request $request)

@@ -35,13 +35,12 @@ const PasswordResetForm = () => {
         };
         try {
             const response = await axios.post('/reset-password', data);
-            setStatus(response.data.message);
             
             Swal.fire({
                 toast: true,
                 position: 'top-end',
                 icon: 'success',
-                title: 'Contraseña cambiada exitosamente',
+                title: response.data.message,
                 showConfirmButton: false,
                 timer: 3000,
                 timerProgressBar: true,

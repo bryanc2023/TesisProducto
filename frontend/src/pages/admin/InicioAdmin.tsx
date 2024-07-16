@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from "../../services/axios";
 import Modal from '../../components/Admin/CargaModal'; 
-import * as XLSX from 'xlsx';
 
 interface UploadFields {
     ubicacion: string;
@@ -11,6 +10,8 @@ interface UploadFields {
     area: string;
     criterio: string;
     idioma: string;
+    competencia: string;
+    habilidad: string;
 }
 
 const uploadEndpoints: UploadFields = {
@@ -20,6 +21,8 @@ const uploadEndpoints: UploadFields = {
     area: 'uploadA',
     criterio: 'uploadC',
     idioma: 'uploadI',
+    competencia: 'uploadCom',
+    habilidad: 'uploadH',
 };
 
 const fields = [
@@ -29,6 +32,8 @@ const fields = [
     { name: 'area', label: 'Subir Áreas' },
     { name: 'criterio', label: 'Subir Criterios' },
     { name: 'idioma', label: 'Subir Idiomas' },
+    { name: 'competencia', label: 'Subir Competencias' },
+    { name: 'habilidad', label: 'Subir Habilidades' },
 ];
 
 function InicioAdmin() {
@@ -40,6 +45,8 @@ function InicioAdmin() {
         area: null,
         criterio: null,
         idioma: null,
+        competencia: null,
+        habilidad: null,
     });
     const [loading, setLoading] = useState<{ [K in keyof UploadFields]: boolean }>({
         ubicacion: false,
@@ -48,6 +55,8 @@ function InicioAdmin() {
         area: false,
         criterio: false,
         idioma: false,
+        competencia: false,
+        habilidad: false,
     });
     const [modalOpen, setModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState({ title: '', message: '', success: false });
@@ -98,7 +107,7 @@ function InicioAdmin() {
 
     return (
         <div className="p-4">
-                 <center><h1 className="text-2xl font-bold mb-4">Gestión de tablas satélites</h1></center>
+            <center><h1 className="text-2xl font-bold mb-4">Gestión de tablas satélites</h1></center>
             <p> En esta sección se maneja los datos de las tablas satélites de la aplicación esenciales para el funcionamiento correcto de la aplicación web</p>
             <hr className="my-4" />
             <h1 className="text-xl text-orange-400 mb-4">TABLAS SATÉLITES</h1>

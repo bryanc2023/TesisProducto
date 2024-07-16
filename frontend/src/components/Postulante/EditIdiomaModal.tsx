@@ -4,6 +4,8 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import axios from '../../services/axios';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
+import { isAxiosError } from 'axios';
+import Swal from 'sweetalert2';
 
 interface EditIdiomaModalProps {
   isOpen: boolean;
@@ -58,16 +60,35 @@ const EditIdiomaModal: React.FC<EditIdiomaModalProps> = ({ isOpen, onRequestClos
     });
 
     try {
-      await axios.put('/postulante_idioma/update', {
+      const response = await axios.put('/postulante_idioma/update', {
         id_postulante: profileData?.postulante?.id_postulante,
         id_idioma: idioma.id,
         nivel_oral: data.nivel_oral,
         nivel_escrito: data.nivel_escrito
       });
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: response.data.message,
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+      });
       onIdiomaUpdated();
       onRequestClose();
     } catch (error) {
-      console.error('Error updating idioma:', error);
+      if (isAxiosError(error) && error.response) {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'error',
+          title: error.response.data.message,
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+        });
+      }
     }
   };
 
