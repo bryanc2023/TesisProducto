@@ -1,17 +1,16 @@
+// CoursesTab.tsx
 import React, { useState, useEffect } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import axios from '../../services/axios';
 import { useSelector } from 'react-redux';
 import EditCurso from './EditCurso';
+import Swal from 'sweetalert2';
+import { isAxiosError } from 'axios';
+import { RootState } from '../../store';
+import { Curso } from '../../types/CursoType';
 
 interface CoursesTabProps {
   openEditCursoModal: (curso: Curso | null) => void;
-}
-
-interface Curso {
-  id_certificado: number;
-  titulo: string;
-  certificado: string;
 }
 
 const CoursesTab: React.FC<CoursesTabProps> = () => {
@@ -48,6 +47,7 @@ const CoursesTab: React.FC<CoursesTabProps> = () => {
         titulo: certificado.titulo,
         certificado: certificado.certificado
       }));
+      
       setCursos(certificados);
     } catch (error) {
       console.error('Error fetching cursos:', error);
@@ -68,14 +68,29 @@ const CoursesTab: React.FC<CoursesTabProps> = () => {
     }
 
     try {
-      await axios.delete(`/certificadoD/${cursoToDelete.id_certificado}`);
-      setDeleteMessage('Curso eliminado exitosamente');
-      fetchCursos(profileData.postulante.id_postulante); // Actualiza la lista de cursos después de eliminar
-      setTimeout(() => setDeleteMessage(null), 3000);
+      const response = await axios.delete(`/certificadoD/${cursoToDelete.id_certificado}`);
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: response.data.message,
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+      });
+      fetchCursos(profileData.postulante.id_postulante);
     } catch (error) {
-      console.error('Error deleting curso:', error.response ? error.response.data : error);
-      setDeleteMessage('Error al eliminar el curso');
-      setTimeout(() => setDeleteMessage(null), 3000);
+      if (isAxiosError(error) && error.response) {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'error',
+          title: error.response.data.message,
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+        });
+      }
     }
     setIsConfirmationModalOpen(false);
   };
@@ -172,7 +187,7 @@ const CoursesTab: React.FC<CoursesTabProps> = () => {
         <EditCurso
           isOpen={isEditModalOpen}
           closeModal={closeEditModal}
-          reloadCursos={() => fetchCursos(profileData.postulante.id_postulante)} // Pasar la función fetchCursos directamente
+          reloadCursos={() => fetchCursos(profileData.postulante.id_postulante)}
           curso={cursoToEdit}
         />
       )}

@@ -289,51 +289,73 @@ public function getCurriculum($id)
 
 
 
-    public function registroHabilidad(Request $request)
-    {
-        $request->validate([
-            'userId' => 'required|integer',
-            'habilidadId' => 'required|integer|exists:habilidad,id',
-            'nivel' => 'required|string|max:220',
-        ]);
+public function registroHabilidad(Request $request)
+{
+    $request->validate([
+        'userId' => 'required|integer',
+        'habilidadId' => 'required|integer|exists:habilidad,id',
+        'nivel' => 'required|string|max:220',
+    ]);
 
-        $postulante = Postulante::where('id_usuario', $request->userId)->first();
-        if (!$postulante) {
-            return response()->json(['error' => 'Postulante no encontrado'], 404);
-        }
-
-        $idp = $postulante->id_postulante;
-        $postulanteidi = new Postulante_Habilidad();
-        $postulanteidi->id_postulante = $idp;
-        $postulanteidi->id_habilidad = $request->habilidadId;
-        $postulanteidi->nivel = $request->nivel;
-        $postulanteidi->save();
-
-        return response()->json(['message' => 'Postulante registrada exitosamente', 'postulante_formacion' => $postulanteidi], 201);
+    $postulante = Postulante::where('id_usuario', $request->userId)->first();
+    if (!$postulante) {
+        return response()->json(['error' => 'Postulante no encontrado'], 404);
     }
+
+    $idp = $postulante->id_postulante;
+
+    // Verificar si la habilidad ya está registrada para el postulante
+    $existingHabilidad = Postulante_Habilidad::where('id_postulante', $idp)
+        ->where('id_habilidad', $request->habilidadId)
+        ->first();
+
+    if ($existingHabilidad) {
+        return response()->json(['error' => 'La habilidad ya está registrada para este postulante'], 409);
+    }
+
+    $postulanteHabilidad = new Postulante_Habilidad();
+    $postulanteHabilidad->id_postulante = $idp;
+    $postulanteHabilidad->id_habilidad = $request->habilidadId;
+    $postulanteHabilidad->nivel = $request->nivel;
+    $postulanteHabilidad->save();
+
+    return response()->json(['message' => 'Habilidad agregada correctamente', 'postulante_habilidad' => $postulanteHabilidad], 201);
+}
+
 
     public function registroCompetencia(Request $request)
-    {
-        $request->validate([
-            'userId' => 'required|integer',
-            'competenciaId' => 'required|integer|exists:competencia,id',
-            'nivel' => 'required|string|max:220',
-        ]);
+{
+    $request->validate([
+        'userId' => 'required|integer',
+        'competenciaId' => 'required|integer|exists:competencia,id',
+        'nivel' => 'required|string|max:220',
+    ]);
 
-        $postulante = Postulante::where('id_usuario', $request->userId)->first();
-        if (!$postulante) {
-            return response()->json(['error' => 'Postulante no encontrado'], 404);
-        }
-
-        $idp = $postulante->id_postulante;
-        $postulanteidi = new PostulanteCompetencia();
-        $postulanteidi->id_postulante = $idp;
-        $postulanteidi->id_competencia= $request->competenciaId;
-        $postulanteidi->nivel = $request->nivel;
-        $postulanteidi->save();
-
-        return response()->json(['message' => 'Postulante registrada exitosamente', 'postulante_formacion' => $postulanteidi], 201);
+    $postulante = Postulante::where('id_usuario', $request->userId)->first();
+    if (!$postulante) {
+        return response()->json(['error' => 'Postulante no encontrado'], 404);
     }
+
+    $idp = $postulante->id_postulante;
+
+    // Verificar si la competencia ya está registrada para el postulante
+    $existeCompetencia = PostulanteCompetencia::where('id_postulante', $idp)
+                                               ->where('id_competencia', $request->competenciaId)
+                                               ->exists();
+
+    if ($existeCompetencia) {
+        return response()->json(['error' => 'La competencia ya está registrada para este postulante'], 409);
+    }
+
+    $postulanteCompetencia = new PostulanteCompetencia();
+    $postulanteCompetencia->id_postulante = $idp;
+    $postulanteCompetencia->id_competencia = $request->competenciaId;
+    $postulanteCompetencia->nivel = $request->nivel;
+    $postulanteCompetencia->save();
+
+    return response()->json(['message' => 'Competencia agregada correctamente', 'postulante_competencia' => $postulanteCompetencia], 201);
+}
+
 
     public function updatePostulanteByIdUser(Request $request, $idUser)
     {

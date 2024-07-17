@@ -6,6 +6,8 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';  // Importar el locale en español
+import Swal from 'sweetalert2';
+import { isAxiosError } from 'axios';
 
 interface EducationTabProps {
   formaciones: Formacion[];
@@ -55,16 +57,32 @@ const EducationTab: React.FC<EducationTabProps> = ({ formaciones, openEditFormac
   const handleDeleteFormacion = async (id_postulante: number, id_titulo: number) => {
     try {
      
-      await axios.delete('/formacion_academica/delete', {
+      const response = await axios.delete('/formacion_academica/delete', {
         data: { id_postulante, id_titulo },
         headers: { 'Content-Type': 'application/json' },
       });
-
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: response.data.message,
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+    });
       setFormaciones(prevFormaciones => prevFormaciones.filter(f => !(f.id_postulante === id_postulante && f.titulo.id === id_titulo)));
-      setMessage({ type: 'success', text: 'Formación académica eliminada exitosamente' });
-    } catch (error: any) {
-      console.error('Error al eliminar la formación académica', error.response ? error.response.data : error.message);
-      setMessage({ type: 'error', text: 'Hubo un error al eliminar la formación académica' });
+    } catch (error) {
+      if (isAxiosError(error) && error.response) {
+          Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'error',
+              title: error.response.data.message,
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true,
+          });
+      }
     } finally {
       setShowConfirmModal(false); // Cerrar el modal de confirmación
     }
