@@ -8,6 +8,8 @@ import { useForm } from 'react-hook-form';
 import { RootState } from '../../store';
 import AddHabilidadModal from './AddHabilidadModal';
 import EditHabilidadModal from './EditHabilidadModal';
+import Swal from 'sweetalert2';
+import { isAxiosError } from 'axios';
 
 interface HabilidadesTabProps {
   habilidades: Habilidad[];
@@ -64,7 +66,7 @@ const HabilidadTab: React.FC<HabilidadesTabProps> = ({ habilidades }) => {
 
   const fetchGeneralHabilidades = async () => {
     try {
-      const response = await axios.get('/habilidad');
+      const response = await axios.get('/habilidadR');
       if (response.data && Array.isArray(response.data.habilidades)) {
         setGeneralHabilidades(response.data.habilidades);
       } else {
@@ -128,22 +130,37 @@ const HabilidadTab: React.FC<HabilidadesTabProps> = ({ habilidades }) => {
     }
 
     try {
-      await axios.delete('/postulante_habilidad/delete', {
+      const response = await axios.delete('/postulante_habilidad/delete', {
         data: {
           id_postulante: profileData.postulante.id_postulante,
           id_habilidad: habilidadToDelete.id,
         }
       });
 
-      setDeleteMessage('Habilidad eliminado exitosamente');
-      setTimeout(() => setDeleteMessage(null), 3000);
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: response.data.message,
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+    });
       if (profileData) {
         await fetchUserHabilidades(profileData.postulante.id_postulante);
       }
     } catch (error) {
-      console.error('Error eliminando la habilidad:', error.response ? error.response.data : error);
-      setDeleteMessage('Error al eliminar la habilidad');
-      setTimeout(() => setDeleteMessage(null), 3000);
+      if (isAxiosError(error) && error.response) {
+          Swal.fire({
+              toast: true,
+              position: 'top-end',  
+              icon: 'error',
+              title: error.response.data.message,
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true,
+          });
+      }
     }
 
     setIsConfirmationModalOpen(false);

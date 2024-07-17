@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
+import Swal from 'sweetalert2';
+import { isAxiosError } from 'axios';
 
 interface ExperienceModalProps {
   isOpen: boolean;
@@ -96,22 +98,58 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
     if (experiencia && experiencia.id_formacion_pro) {
       // Editar experiencia
       try {
-        await axios.put(`/experiencia/${experiencia.id_formacion_pro}`, {
+        const response = await axios.put(`/experiencia/${experiencia.id_formacion_pro}`, {
           ...dataToSend,
           id_experiencia: experiencia.id_formacion_pro,
         });
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: response.data.message,
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+      });
         onSubmit(data);
       } catch (error) {
-        console.error('Error updating experiencia:', error);
+        if (isAxiosError(error) && error.response) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: error.response.data.message,
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+            });
+        };
       }
     } else {
-      // Agregar nueva experiencia
       try {
         const response = await axios.post('/exp', dataToSend);
-        console.log('Response:', response.data); // Debugging line
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: response.data.message,
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+      });
         onSubmit(data);
       } catch (error) {
-        console.error('Error adding experiencia:', error);
+        if (isAxiosError(error) && error.response) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: error.response.data.message,
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+            });
+        }
         
       }
     }

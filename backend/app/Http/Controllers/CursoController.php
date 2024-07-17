@@ -25,7 +25,7 @@ class CursoController extends Controller
         $certificado = Certificado::find($id);
 
         if (!$certificado) {
-            return response()->json(['message' => 'Certificado not found'], 404);
+            return response()->json(['message' => 'Certificado no encontrado'], 404);
         }
 
         return response()->json($certificado, 200);
@@ -43,7 +43,7 @@ class CursoController extends Controller
         $certificado = Certificado::find($id);
 
         if (!$certificado) {
-            return response()->json(['message' => 'Certificado not found'], 404);
+            return response()->json(['message' => 'Certificado no encontrado'], 404);
         }
 
         $certificado->id_postulante = $request->input('id_postulante');
@@ -59,12 +59,12 @@ class CursoController extends Controller
         $certificado = Certificado::find($id);
 
         if (!$certificado) {
-            return response()->json(['message' => 'Certificado not found'], 404);
+            return response()->json(['message' => 'Certificado no encontrado'], 404);
         }
 
         $certificado->delete();
 
-        return response()->json(['message' => 'Certificado deleted'], 200);
+        return response()->json(['message' => 'Certificado eliminado'], 200);
     }
 
 

@@ -4,6 +4,8 @@ import { useSelector } from 'react-redux';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { RootState } from '../../store';
+import Swal from 'sweetalert2';
+import { isAxiosError } from 'axios';
 
 interface EditCursoProps {
   isOpen: boolean;
@@ -76,16 +78,41 @@ const EditCurso: React.FC<EditCursoProps> = ({ isOpen, closeModal, reloadCursos,
     try {
       if (curso && curso.id_certificado) {
         await axios.put(`/certificadoU/${curso.id_certificado}`, updatedCurso);
-        toast.success('Curso actualizado correctamente');
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: 'Curso actualizado',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+      });
       } else {
         await axios.post('/certificadoC', updatedCurso);
-        toast.success('Curso agregado correctamente');
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: 'Curso agregado correctamente',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+      });
       }
       reloadCursos(); // Llama a fetchCursos después de agregar o editar
       closeModal();
     } catch (error) {
-      console.error('Error updating course:', error);
-      toast.error('Hubo un error al guardar el curso');
+      if (isAxiosError(error) && error.response) {
+          Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'error',
+              title: 'Error al guardar el curso',
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true,
+          });
+      }
     }
   };
 

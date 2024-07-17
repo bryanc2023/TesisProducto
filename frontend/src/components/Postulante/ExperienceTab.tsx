@@ -6,6 +6,8 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import Swal from 'sweetalert2';
+import { isAxiosError } from 'axios';
 
 interface Experiencia {
   id_formacion_pro: number;
@@ -67,14 +69,29 @@ const ExperienceTab: React.FC = () => {
 
   const handleDeleteExperiencia = async (id: number) => {
     try {
-      await axios.delete(`/experiencia/${id}`);
-      setDeleteMessage('Experiencia eliminada exitosamente');
+      const response = await axios.delete(`/experiencia/${id}`);
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: response.data.message,
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+    });
       fetchExperiencia(); // Refrescar las experiencias después de eliminar una
-      setTimeout(() => setDeleteMessage(null), 3000); // Ocultar mensaje después de 3 segundos
     } catch (error) {
-      console.error('Error eliminando la experiencia:', error);
-      setDeleteMessage('Error al eliminar la experiencia');
-      setTimeout(() => setDeleteMessage(null), 3000); // Ocultar mensaje después de 3 segundos
+      if (isAxiosError(error) && error.response) {
+          Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'error',
+              title: error.response.data.message,
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true,
+          });
+      }
     }
     setIsConfirmationModalOpen(false); // Cerrar el modal de confirmación
   };

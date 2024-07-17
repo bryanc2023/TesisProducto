@@ -4,8 +4,8 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import axios from '../../services/axios';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
-
-
+import Swal from 'sweetalert2';
+import { isAxiosError } from 'axios';
 
 interface EditCompetenciaModalProps {
   isOpen: boolean;
@@ -56,15 +56,34 @@ const EditCompetenciaModal: React.FC< EditCompetenciaModalProps> = ({ isOpen, on
     });
 
     try {
-      await axios.put('/postulante_competencia/update', {
+      const response = await axios.put('/postulante_competencia/update', {
         id_postulante: profileData?.postulante?.id_postulante,
         id_competencia: habilidad.id,
         nivel: data.nivel
       });
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: response.data.message,
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+    });
       onhabilidadUpdated();
       onRequestClose();
     } catch (error) {
-      console.error('Error updating habilidad:', error);
+      if (isAxiosError(error) && error.response) {
+          Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'error',
+              title: error.response.data.message,
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true,
+          });
+      };
     }
   };
 

@@ -4,6 +4,8 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import axios from '../services/axios';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
+import Swal from 'sweetalert2';
+import { isAxiosError } from 'axios';
 
 interface IFormInput {
   institucion: string;
@@ -243,7 +245,15 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
         const response = formacion ? await axios.put(`/formacion_academica/update`, formData) : await axios.post('postulante/forma2', formData);
 
         if (response.status === 200) {
-          setSuccessMessage('Formación académica actualizada exitosamente.');
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: response.data.message,
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+        });
         } else {
           setErrorMessage('Error al guardar la formación.');
         }
@@ -251,8 +261,17 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
         closeModal();
         await reloadProfile();
       } catch (error) {
-        console.error('Error saving formacion:', error);
-        setErrorMessage(`Error al guardar la formación: ${error.message}`);
+        if (isAxiosError(error) && error.response) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: error.response.data.message,
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+            });
+        }
         setSuccessMessage(null);
       }
     } else {

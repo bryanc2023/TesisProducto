@@ -95,7 +95,8 @@ const PerfilPModal: React.FC<PerfilPModalProps> = ({ isModalPost, closeModal, da
                                 <h2 className="text-xl font-semibold mb-4 border-b-2 border-blue-500 pb-2">Redes</h2>
                                 {dataPost.red.length > 0 ? (
                                     dataPost.red.map(red => {
-                                        const Icon = iconMap[red.nombre_red.toLowerCase()] || FaGlobe;
+                                        const Icon = iconMap[red.nombre_red.toLowerCase() as keyof typeof iconMap] || FaGlobe;
+
                                         return (
                                             <div key={red.id_postulante_red} className="flex items-center">
                                                 <Icon className='text-blue-500' />

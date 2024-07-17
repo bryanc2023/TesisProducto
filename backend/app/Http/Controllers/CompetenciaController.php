@@ -42,7 +42,7 @@ class CompetenciaController extends Controller
 
     
 
-   //Update 
+   //Update
    public function updateCompetencias (Request $request) {
     try {
         $idPostulante = $request->input('id_postulante');

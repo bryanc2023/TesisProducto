@@ -5,6 +5,9 @@ import EditIdiomaModal from './EditIdiomaModal';
 import axios from '../../services/axios';
 import { useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
+import { RootState } from '../../store';
+import Swal from 'sweetalert2';
+import { isAxiosError } from 'axios';
 
 interface LanguagesTabProps {
   idiomas: Idioma[];
@@ -127,22 +130,37 @@ const LanguagesTab: React.FC<LanguagesTabProps> = ({ idiomas }) => {
     }
 
     try {
-      await axios.delete('/postulante_idioma/delete', {
+      const response = await axios.delete('/postulante_idioma/delete', {
         data: {
           id_postulante: profileData.postulante.id_postulante,
           id_idioma: idiomaToDelete.id,
         }
       });
 
-      setDeleteMessage('Idioma eliminado exitosamente');
-      setTimeout(() => setDeleteMessage(null), 3000);
+       Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: response.data.message,
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+            });
       if (profileData) {
         await fetchUserLanguages(profileData.postulante.id_postulante);
       }
     } catch (error) {
-      console.error('Error eliminando el idioma:', error.response ? error.response.data : error);
-      setDeleteMessage('Error al eliminar el idioma');
-      setTimeout(() => setDeleteMessage(null), 3000);
+      if (isAxiosError(error) && error.response) {
+          Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'error',
+              title: error.response.data.message,
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true,
+          });
+      }
     }
 
     setIsConfirmationModalOpen(false);

@@ -29,7 +29,7 @@ const AddHabilidadModal: React.FC<AddHabilidadModalProps> = ({ isOpen, onRequest
             const response = await axios.post('/nuevohabilidad', {
                 userId: user?.id,
                 habilidadId: data.habilidadId,
-                nivel:data.nivel,
+                nivel: data.nivel,
             });
             Swal.fire({
                 toast: true,
@@ -39,22 +39,26 @@ const AddHabilidadModal: React.FC<AddHabilidadModalProps> = ({ isOpen, onRequest
                 showConfirmButton: false,
                 timer: 3000,
                 timerProgressBar: true,
-              });
+            });
             onHabilidadAdded();
             onRequestClose();
         } catch (error) {
             if (isAxiosError(error) && error.response) {
-              Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'error',
-                title: error.response.data.message,
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-              });
+                let errorMessage = error.response.data.error || 'Error al agregar habilidad';
+                if (error.response.status === 409) { // Verificar si es un error de conflicto
+                    errorMessage = 'La habilidad ya está registrada para este postulante';
+                }
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: errorMessage,
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                });
             }
-          }
+        }
     };
 
     return (

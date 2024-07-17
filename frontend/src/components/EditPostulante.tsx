@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import axios from '../services/axios';
+import Swal from 'sweetalert2';
+import { isAxiosError } from 'axios';
 
 interface EditPostulanteModalProps {
   isOpen: boolean;
@@ -112,15 +114,33 @@ const EditPostulanteModal: React.FC<EditPostulanteModalProps> = ({ isOpen, close
           provincia: selectedProvince,
           canton: selectedCanton,
         };
-        await axios.put(`/updatePostulanteById/${postulante.id_usuario}`, updatedProfile);
-        setSuccessMessage("Datos guardados con éxito!");
+        const response = await axios.put(`/updatePostulanteById/${postulante.id_usuario}`, updatedProfile);
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: response.data.message,
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+      });
         setTimeout(() => {
           setSuccessMessage(null);
           closeModal();
           reloadProfile();
         }, 3000);
-      } catch (err) {
-        console.error('Error saving data:', err);
+      } catch (error) {
+        if (isAxiosError(error) && error.response) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: error.response.data.message,
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+            });
+        }
       }
     } else {
       setErrorCedula("Cédula inválida");
