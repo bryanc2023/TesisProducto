@@ -5,6 +5,7 @@ import axios from "../../services/axios";
 import { FaHandPaper, FaSearch } from 'react-icons/fa';
 import { FiUser, FiEye, FiMapPin } from 'react-icons/fi';
 import Modal from '../../components/Postulante/PostulacionModal';
+import { useNavigate } from "react-router-dom";
 
 interface Oferta {
     id_oferta: number;
@@ -25,6 +26,7 @@ interface Oferta {
         };
     };
     fecha_max_pos: string;
+    fecha_publi:string;
     n_mostrar_empresa: number;
     modalidad: string;
     carga_horaria: string;
@@ -40,6 +42,8 @@ interface Oferta {
     sueldo: number;
     n_mostrar_sueldo: number;
     soli_sueldo: number;
+    correo_contacto:string;
+    numero_contacto:string;
 }
 
 interface Criterio {
@@ -59,6 +63,7 @@ interface Canton {
     canton: string;
 }
 const VerOfertasAll = () => {
+    const navigate = useNavigate();
     const { user } = useSelector((state: RootState) => state.auth);
     const [ofertas, setOfertas] = useState<Oferta[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -75,6 +80,7 @@ const VerOfertasAll = () => {
     const [cantons, setCantons] = useState<Canton[]>([]);
     const [selectedProvince, setSelectedProvince] = useState('');
     const [selectedCanton, setSelectedCanton] = useState<number | string>('');
+    const [loading, setLoading] = useState(true);
     const ofertasPerPage = 5;
 
     const formatFechaMaxPos = (fecha: string) => {
@@ -85,10 +91,41 @@ const VerOfertasAll = () => {
     };
 
     useEffect(() => {
+        const getFirstLoginDate = async () => {
+            try {
+           
+                if (!user || !user.id) {
+                  throw new Error('User ID not available');
+                }
+        
+                const response = await axios.get(`first?user_id=${user.id}`);
+                const { data } = response;
+        
+                if (!data.hasOwnProperty('has_first_login')) {
+                  throw new Error('Invalid response format');
+                }
+        
+                const hasFirstLogin = data.has_first_login;
+           
+        
+                if (!hasFirstLogin ) {
+                  navigate('/completar'); // Redirigir a completar perfil si no tiene first_login_at y está logeado
+                } else {
+                  navigate('/verOfertasAll'); // Redirigir a ver ofertas si tiene first_login_at
+                }
+              } catch (error) {
+                console.error('Error fetching first login status:', error);
+                // Manejar el error según tus necesidades, por ejemplo, mostrar un mensaje de error
+              }
+          };
+          getFirstLoginDate
         fetchOfertas();
         fetchAreas();
         fetchData();
+    
     }, []);
+
+   
 
     const fetchData = async () => {
         try {
@@ -142,6 +179,8 @@ const VerOfertasAll = () => {
             }
         } catch (error) {
             console.error('Error fetching ofertas:', error);
+        }finally {
+            setLoading(false);
         }
     };
 
@@ -312,7 +351,14 @@ const VerOfertasAll = () => {
                     </div>
                 )}
 
-                {currentOfertas.length === 0 ? (
+                { loading ? (
+                    <div className="flex justify-center items-center h-32">
+                        <div className="flex items-center space-x-2">
+                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                            <span className="font-bold">Cargando...</span>
+                        </div>
+                    </div>
+                ) : currentOfertas.length === 0 ? (
                     <p>Todavía no se han publicado ofertas.</p>
                 ) : (
                     <>

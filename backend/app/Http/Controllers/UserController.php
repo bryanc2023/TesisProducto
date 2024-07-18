@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends Controller
 {
@@ -52,4 +53,25 @@ class UserController extends Controller
             'message' => 'No se pudo enviar el email de recuperación, intentelo de nuevo'], 501);
         }
     }
+    public function getFirstLoginDate(Request $request)
+    {
+        $userId = $request->query('user_id');
+    
+        if (!$userId) {
+            return response()->json(['error' => 'User ID not provided'], 400);
+        }
+    
+        // Obtener el usuario por ID
+        $user = User::find($userId);
+    
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+    
+        // Verificar si el usuario tiene first_login_at definido
+        $hasFirstLogin = !is_null($user->first_login_at);
+    
+        return response()->json(['has_first_login' => $hasFirstLogin]);
+    }
+
 }

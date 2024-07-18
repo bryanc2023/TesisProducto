@@ -31,6 +31,41 @@ const CompletarP: React.FC = () => {
   const [cantons, setCantons] = useState<string[]>([]);
   const [selectedProvince, setSelectedProvince] = useState('');
   const [selectedCanton, setSelectedCanton] = useState('');
+  const { isLogged, role } = useSelector((state: RootState) => state.auth);
+  useEffect(() => {
+    const getFirstLoginDate = async () => {
+      try {
+     
+          if (!user || !user.id) {
+            throw new Error('User ID not available');
+          }
+  
+          const response = await axios.get(`first?user_id=${user.id}`);
+          const { data } = response;
+  
+          if (!data.hasOwnProperty('has_first_login')) {
+            throw new Error('Invalid response format');
+          }
+  
+          const hasFirstLogin = data.has_first_login;
+     
+  
+          if (!hasFirstLogin && isLogged) {
+            navigate('/completar'); // Redirigir a completar perfil si no tiene first_login_at y está logeado
+          } else {
+            navigate('/verOfertasAll'); // Redirigir a ver ofertas si tiene first_login_at
+          }
+        } catch (error) {
+          console.error('Error fetching first login status:', error);
+          // Manejar el error según tus necesidades, por ejemplo, mostrar un mensaje de error
+        }
+    };
+
+    if (isLogged) {
+      getFirstLoginDate();
+    }
+  }, [isLogged, navigate]);
+
 
   useEffect(() => {
     const fetchData = async () => {

@@ -1,6 +1,6 @@
 
 import { Formik } from 'formik';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import InputLabel from '../components/input/InputLabel';
 
 import * as Yup from 'yup';
@@ -9,9 +9,28 @@ import Swal from 'sweetalert2';
 import  "../assets/css/RegistroP.css"
 import ButtonOrange from '../components/input/ButtonOrange';
 import Navbar from '../components/layout/Navbar';
+import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store';
 
 const RegisterP = () => {
     const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
+    const { isLogged, role } = useSelector((state: RootState) => state.auth);
+
+    useEffect(() => {
+        if (isLogged && role) {
+            if (role === 'postulante') {
+                navigate('/verOfertasAll');
+            } else if (role === 'empresa_oferente') {
+                navigate('/inicio-e');
+            } else if (role === 'admin') {
+                navigate('/inicioAdmin');
+            } else if (role === 'empresa_gestora') {
+                navigate('/inicioG');
+            }
+        }
+    }, [isLogged, role, navigate]);
 
     const initialValues={
         name: '',
