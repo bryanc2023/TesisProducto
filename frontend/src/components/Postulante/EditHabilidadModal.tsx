@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import Swal from 'sweetalert2';
 import { isAxiosError } from 'axios';
+import { Habilidad } from './HabilidadTab';
 
 interface EditHabilidadModalProps {
   isOpen: boolean;
@@ -83,7 +84,7 @@ const EditHabilidadModal: React.FC< EditHabilidadModalProps> = ({ isOpen, onRequ
               timer: 3000,
               timerProgressBar: true,
           });
-      };
+      }
     }
   };
 

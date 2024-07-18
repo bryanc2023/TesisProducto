@@ -1,5 +1,5 @@
 
-  interface ProfileData {
+  export interface ProfileData {
     postulante: {
       telefono: string;
       id_postulante: number;
