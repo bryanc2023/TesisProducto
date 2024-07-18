@@ -4,6 +4,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import Swal from 'sweetalert2';
+import { Experiencia } from '../../types/ExperienciaType';
 import { isAxiosError } from 'axios';
 
 interface ExperienceModalProps {
@@ -16,18 +17,6 @@ interface ExperienceModalProps {
 interface Area {
   id: number;
   nombre_area: string;
-}
-
-interface Experiencia {
-  id_formacion_pro?: number; // Añadir opcionalmente para editar
-  empresa: string;
-  puesto: string;
-  area: string;
-  fecha_ini: string;
-  fecha_fin: string;
-  descripcion: string;
-  referencia: string;
-  contacto: string;
 }
 
 const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClose, onSubmit, experiencia }) => {
@@ -57,8 +46,8 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
       setValue('area', experiencia.area);
       setValue('fecha_ini', experiencia.fecha_ini);
       setValue('fecha_fin', experiencia.fecha_fin);
-      setValue('descripcion', experiencia.descripcion);
-      setValue('referencia', experiencia.referencia);
+      setValue('descripcion_responsabilidades', experiencia.descripcion_responsabilidades);
+      setValue('persona_referencia', experiencia.persona_referencia);
       setValue('contacto', experiencia.contacto);
     } else {
       reset();
@@ -93,7 +82,7 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
       id_postulante: profileData.postulante.id_postulante,
     };
 
-    console.log('Data to send:', dataToSend); // Debugging line
+    console.log('Data to send:', dataToSend); 
 
     if (experiencia && experiencia.id_formacion_pro) {
       // Editar experiencia
@@ -102,6 +91,7 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
           ...dataToSend,
           id_experiencia: experiencia.id_formacion_pro,
         });
+        console.log(response);
         Swal.fire({
           toast: true,
           position: 'top-end',
@@ -110,20 +100,20 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
           showConfirmButton: false,
           timer: 3000,
           timerProgressBar: true,
-      });
+        });
         onSubmit(data);
       } catch (error) {
         if (isAxiosError(error) && error.response) {
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'error',
-                title: error.response.data.message,
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-            });
-        };
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
+            title: error.response.data.message,
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+          });
+        }
       }
     } else {
       try {
@@ -136,21 +126,20 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
           showConfirmButton: false,
           timer: 3000,
           timerProgressBar: true,
-      });
+        });
         onSubmit(data);
       } catch (error) {
         if (isAxiosError(error) && error.response) {
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'error',
-                title: error.response.data.message,
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-            });
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
+            title: error.response.data.message,
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+          });
         }
-        
       }
     }
     onRequestClose();
@@ -169,22 +158,22 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
           <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4">
             <div>
               <label className="block text-gray-700">Nombre de la Empresa:</label>
-              <input 
-                {...register('empresa', { 
-                  required: 'Este campo es obligatorio', 
-                  maxLength: { value: 100, message: 'Máximo 100 caracteres' } 
-                })} 
-                className="w-full px-4 py-2 border rounded-md text-gray-700" 
+              <input
+                {...register('empresa', {
+                  required: 'Este campo es obligatorio',
+                  maxLength: { value: 100, message: 'Máximo 100 caracteres' }
+                })}
+                className="w-full px-4 py-2 border rounded-md text-gray-700"
               />
               {errors.empresa && <p className="text-red-500">{errors.empresa.message}</p>}
             </div>
             <div>
               <label className="block text-gray-700">Área del puesto de trabajo:</label>
-              <select 
-                className="w-full px-4 py-2 border rounded-md text-gray-700" 
-                {...register('area', { 
-                  required: 'Área es requerida', 
-                  maxLength: { value: 250, message: 'Máximo 250 caracteres' } 
+              <select
+                className="w-full px-4 py-2 border rounded-md text-gray-700"
+                {...register('area', {
+                  required: 'Área es requerida',
+                  maxLength: { value: 250, message: 'Máximo 250 caracteres' }
                 })}
               >
                 <option value="">Seleccione</option>
@@ -198,69 +187,69 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
             </div>
             <div>
               <label className="block text-gray-700">Cargo en la empresa:</label>
-              <input 
-                {...register('puesto', { 
-                  required: 'Este campo es obligatorio', 
-                  maxLength: { value: 100, message: 'Máximo 100 caracteres' } 
-                })} 
-                className="w-full px-4 py-2 border rounded-md text-gray-700" 
+              <input
+                {...register('puesto', {
+                  required: 'Este campo es obligatorio',
+                  maxLength: { value: 100, message: 'Máximo 100 caracteres' }
+                })}
+                className="w-full px-4 py-2 border rounded-md text-gray-700"
               />
               {errors.puesto && <p className="text-red-500">{errors.puesto.message}</p>}
             </div>
             <div>
               <label className="block text-gray-700">Fecha de inicio labores:</label>
-              <input 
-                type="date" 
-                {...register('fecha_ini', { 
-                  required: 'Este campo es obligatorio' 
-                })} 
-                className="w-full px-4 py-2 border rounded-md text-gray-700" 
+              <input
+                type="date"
+                {...register('fecha_ini', {
+                  required: 'Este campo es obligatorio'
+                })}
+                className="w-full px-4 py-2 border rounded-md text-gray-700"
               />
               {errors.fecha_ini && <p className="text-red-500">{errors.fecha_ini.message}</p>}
             </div>
             <div>
               <label className="block text-gray-700">Fecha de fin de labores:</label>
-              <input 
-                type="date" 
-                {...register('fecha_fin', { 
-                  required: 'Este campo es obligatorio' 
-                })} 
-                className="w-full px-4 py-2 border rounded-md text-gray-700" 
+              <input
+                type="date"
+                {...register('fecha_fin', {
+                  required: 'Este campo es obligatorio'
+                })}
+                className="w-full px-4 py-2 border rounded-md text-gray-700"
               />
               {errors.fecha_fin && <p className="text-red-500">{errors.fecha_fin.message}</p>}
             </div>
             <div>
               <label className="block text-gray-700">Descripción de funciones y responsabilidades en la empresa:</label>
-              <textarea 
-                {...register('descripcion', { 
-                  required: 'Este campo es obligatorio', 
-                  maxLength: { value: 500, message: 'Máximo 500 caracteres' } 
-                })} 
-                className="w-full px-4 py-2 border rounded-md text-gray-700" 
+              <textarea
+                {...register('descripcion_responsabilidades', {
+                  required: 'Este campo es obligatorio',
+                  maxLength: { value: 500, message: 'Máximo 500 caracteres' }
+                })}
+                className="w-full px-4 py-2 border rounded-md text-gray-700"
               />
-              {errors.descripcion && <p className="text-red-500">{errors.descripcion.message}</p>}
+              {errors.descripcion_responsabilidades && <p className="text-red-500">{errors.descripcion_responsabilidades.message}</p>}
             </div>
             <div>
               <label className="block text-gray-700">Nombre Persona Referencia:</label>
-              <input 
-                {...register('referencia', { 
-                  required: 'Este campo es obligatorio', 
-                  maxLength: { value: 250, message: 'Máximo 250 caracteres' } 
-                })} 
-                className="w-full px-4 py-2 border rounded-md text-gray-700" 
-                placeholder='Nombre (Cargo de la persona en la empresa)'
+              <input
+                {...register('persona_referencia', {
+                  required: 'Este campo es obligatorio',
+                  maxLength: { value: 250, message: 'Máximo 250 caracteres' }
+                })}
+                className="w-full px-4 py-2 border rounded-md text-gray-700"
+                placeholder="Nombre (Cargo de la persona en la empresa)"
               />
-              {errors.referencia && <p className="text-red-500">{errors.referencia.message}</p>}
+              {errors.persona_referencia && <p className="text-red-500">{errors.persona_referencia.message}</p>}
             </div>
             <div>
               <label className="block text-gray-700">Contacto de la persona de referencia:</label>
-              <input 
-                type="text" 
-                {...register('contacto', { 
-                  required: 'Este campo es obligatorio', 
-                  maxLength: { value: 250, message: 'Máximo 250 caracteres' } 
-                })} 
-                className="w-full px-4 py-2 border rounded-md text-gray-700" 
+              <input
+                type="text"
+                {...register('contacto', {
+                  required: 'Este campo es obligatorio',
+                  maxLength: { value: 250, message: 'Máximo 250 caracteres' }
+                })}
+                className="w-full px-4 py-2 border rounded-md text-gray-700"
                 placeholder="Número o Correo de contacto de la persona de referencia"
               />
               {errors.contacto && <p className="text-red-500">{errors.contacto.message}</p>}

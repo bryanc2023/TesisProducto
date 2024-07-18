@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaPencilAlt, FaTrash } from 'react-icons/fa';
-import AddIdiomaModal from './AddIdiomaModal';
-import EditIdiomaModal from './EditIdiomaModal';
+
 import axios from '../../services/axios';
 import { useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
@@ -15,7 +14,7 @@ interface HabilidadesTabProps {
   habilidades: Habilidad[];
 }
 
-interface Habilidad {
+export interface Habilidad {
   id: number;
   habilidad: string;
   nivel: string;

@@ -426,35 +426,37 @@ public function registroHabilidad(Request $request)
     }
 
     public function registroFormaAcaPlus(Request $request)
-    {
-        $request->validate([
-            'id_postulante' => 'required|integer',
-            'id_titulo' => 'required|integer|exists:titulo,id',
-            'institucion' => 'required|string|max:220',
-            'estado' => 'required|string|max:30',
-            'fechaini' => 'nullable|date',
-            'fechafin' => 'nullable|date',
-            'titulo_acreditado' => 'required|string|max:220'
-        ]);
-    
-        $postulante = Postulante::where('id_usuario', $request->id_postulante)->first();
-        if (!$postulante) {
-            return response()->json(['error' => 'Postulante no encontrado'], 404);
-        }
-    
-        $idp = $postulante->id_postulante;
-        $postulantefor = new PersonaFormacionPro();
-        $postulantefor->id_postulante = $idp;
-        $postulantefor->id_titulo = $request->id_titulo;
-        $postulantefor->institucion = $request->institucion;
-        $postulantefor->estado = $request->estado;
-        $postulantefor->fecha_ini = $request->fechaini;
-        $postulantefor->fecha_fin = $request->fechafin;
-        $postulantefor->titulo_acreditado = $request->titulo_acreditado;
-        $postulantefor->save();
-    
-        return response()->json(['message' => 'Formación académica registrada exitosamente', 'postulante_formacion' => $postulantefor], 201);
+{
+    $request->validate([
+        'id_postulante' => 'required|integer|exists:postulante,id_postulante',
+        'id_titulo' => 'required|integer|exists:titulo,id',
+        'institucion' => 'required|string|max:220',
+        'estado' => 'required|string|max:30',
+        'fechaini' => 'nullable|date',
+        'fechafin' => 'nullable|date',
+        'titulo_acreditado' => 'required|string|max:220'
+    ]);
+
+    // Buscar el postulante directamente por id_postulante
+    $postulante = Postulante::find($request->id_postulante);
+    if (!$postulante) {
+        return response()->json(['error' => 'Postulante no encontrado'], 404);
     }
+
+    // Crear y guardar la nueva formación académica
+    $postulantefor = new PersonaFormacionPro();
+    $postulantefor->id_postulante = $request->id_postulante;
+    $postulantefor->id_titulo = $request->id_titulo;
+    $postulantefor->institucion = $request->institucion;
+    $postulantefor->estado = $request->estado;
+    $postulantefor->fecha_ini = $request->fechaini;
+    $postulantefor->fecha_fin = $request->fechafin;
+    $postulantefor->titulo_acreditado = $request->titulo_acreditado;
+    $postulantefor->save();
+
+    return response()->json(['message' => 'Formación académica registrada exitosamente', 'postulante_formacion' => $postulantefor], 201);
+}
+
     
     public function updateFormacionAcademica(Request $request)
     {
@@ -514,8 +516,8 @@ public function registroHabilidad(Request $request)
             'puesto' => 'required|string|max:100',
             'fecha_ini' => 'nullable|date',
             'fecha_fin' => 'nullable|date',
-            'descripcion' => 'required|string|max:500',
-            'referencia' => 'required|string|max:250',
+            'descripcion_responsabilidades' => 'required|string|max:500',
+            'persona_referencia' => 'required|string|max:250',
             'area'=> 'required|string|max:250',
             'contacto'=> 'required|string|max:250'
         ]);
@@ -531,8 +533,8 @@ public function registroHabilidad(Request $request)
         $postulantexp->puesto = $request->puesto;
         $postulantexp->fecha_ini = $request->fecha_ini;
         $postulantexp->fecha_fin = $request->fecha_fin;
-        $postulantexp->descripcion_responsabilidades = $request->descripcion;
-        $postulantexp->persona_referencia = $request->referencia;
+        $postulantexp->descripcion_responsabilidades = $request->descripcion_responsabilidades;
+        $postulantexp->persona_referencia = $request->persona_referencia;
         $postulantexp->area = $request->area;
         $postulantexp->contacto = $request->contacto;
     
@@ -617,10 +619,10 @@ public function registroHabilidad(Request $request)
             $idExperiencia = $request->input('id_experiencia');
             $empresa = $request->input('empresa');
             $puesto = $request->input('puesto');
-            $fechaini = $request->input('fechaini');
-            $fechafin = $request->input('fechafin');
-            $descripcion = $request->input('descripcion');
-            $referencia = $request->input('referencia');
+            $fecha_ini = $request->input('fecha_ini');
+            $fecha_fin = $request->input('fecha_fin');
+            $descripcion_responsabilidades = $request->input('descripcion_responsabilidades');
+            $persona_referencia = $request->input('persona_referencia');
             $area = $request->input('area');
             $contacto = $request->input('contacto');
     
@@ -631,10 +633,10 @@ public function registroHabilidad(Request $request)
                 ->update([
                     'empresa' => $empresa,
                     'puesto' => $puesto,
-                    'fecha_ini' => $fechaini,
-                    'fecha_fin' => $fechafin,
-                    'descripcion_responsabilidades' => $descripcion,
-                    'persona_referencia' => $referencia,
+                    'fecha_ini' => $fecha_ini,
+                    'fecha_fin' => $fecha_fin,
+                    'descripcion_responsabilidades' => $descripcion_responsabilidades,
+                    'persona_referencia' => $persona_referencia,
                     'area' => $area,
                     'contacto' => $contacto,
                 ]);
