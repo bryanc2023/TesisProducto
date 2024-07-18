@@ -63,6 +63,40 @@ function CompletarP2() {
   const [hasRed, setHasRed] = useState(false);
   const [nombreRed, setNombreRed] = useState('');
   const [enlace, setEnlace] = useState('');
+  const { isLogged, role } = useSelector((state: RootState) => state.auth);
+  useEffect(() => {
+    const getFirstLoginDate = async () => {
+      try {
+     
+          if (!user || !user.id) {
+            throw new Error('User ID not available');
+          }
+  
+          const response = await axios.get(`first?user_id=${user.id}`);
+          const { data } = response;
+  
+          if (!data.hasOwnProperty('has_first_login')) {
+            throw new Error('Invalid response format');
+          }
+  
+          const hasFirstLogin = data.has_first_login;
+     
+  
+          if (!hasFirstLogin && isLogged) {
+            navigate('/completar-2'); // Redirigir a completar perfil si no tiene first_login_at y está logeado
+          } else {
+            navigate('/verOfertasAll'); // Redirigir a ver ofertas si tiene first_login_at
+          }
+        } catch (error) {
+          console.error('Error fetching first login status:', error);
+          // Manejar el error según tus necesidades, por ejemplo, mostrar un mensaje de error
+        }
+    };
+
+    if (isLogged) {
+      getFirstLoginDate();
+    }
+  }, [isLogged, navigate]);
 
   const redes = [
     { nombre: 'LinkedIn', icono: <FaLinkedin className="text-blue-600 inline" /> },
@@ -217,6 +251,7 @@ const handleRedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     
         if (hasExperience) {
           if(hasRed){
+  
             formData.append('id_postulante', postulanteId.toString());
             formData.append('id_titulo', selectedTituloId);
             formData.append('institucion', data.institucion);

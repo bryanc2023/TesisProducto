@@ -259,8 +259,9 @@ class OfertaController extends Controller
 
     public function getAllOfertas()
     {
-        $ofertas = Oferta::with(['areas', 'criterios', 'empresa', 'expe'])
-            ->get();
+        $ofertas = Oferta::with(['areas', 'criterios', 'empresa.ubicacion', 'expe'])
+        ->where('estado', 'En espera')
+        ->get();
 
         return response()->json(['ofertas' => $ofertas]);
     }

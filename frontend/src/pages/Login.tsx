@@ -37,7 +37,7 @@ const Login = () => {
         }
     }, [isLogged, role, navigate]);
 
-    const onSubmit = (values) => {
+    const onSubmit = (values:any) => {
         Swal.fire({
             title: 'Cargando...',
             text: 'Por favor, espera mientras se procesa tu login.',

@@ -55,12 +55,7 @@ class PostulanteController extends Controller
         // Guardar el postulante
         $postulante->save();
 
-        // Actualizar el campo first_login_at del usuario
-        $user = User::find($request->usuario_id);
-        if ($user && is_null($user->first_login_at)) {
-            $user->first_login_at = now();
-            $user->save();
-        }
+ 
 
         return response()->json(['message' => 'Postulante creado exitosamente', 'postulante' => $postulante], 201);
     }
@@ -203,6 +198,13 @@ public function getCurriculum($id)
         $postulante = Postulante::find($request->id_postulante);
         $postulante->cv = null;
 
+           // Actualizar el campo first_login_at del usuario
+           $user = $postulante->usuario;
+           if ($user && is_null($user->first_login_at)) {
+               $user->first_login_at = now();
+               $user->save();
+           }
+
         if ($request->empresa && $request->puesto && $request->descripcion && $request->referencia && $request->area && $request->contacto) {
             $postulantexp = new FormacionPro();
             $postulantexp->id_postulante = $request->id_postulante;
@@ -237,6 +239,7 @@ public function getCurriculum($id)
         $postulanteRed->id_postulante = $request->id_postulante;
         $postulanteRed->nombre_red = $request->red;
         $postulanteRed->enlace = $request->enlace;
+            
         $postulanteRed->save();
     }
 

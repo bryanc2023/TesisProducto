@@ -212,6 +212,8 @@ Route::get('/configuracion/activa', [ConfiguracionController::class, 'getActiveC
 
 Route::get('/users', [UserController::class, 'index']);
 Route::get('/roles', [UserController::class, 'index2']);
+Route::get('/first', [UserController::class, 'getFirstLoginDate']);
+
 
 Route::get('/criteriosAll', [CriterioController::class, 'index']);
 
