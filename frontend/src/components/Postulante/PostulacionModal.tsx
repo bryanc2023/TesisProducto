@@ -211,12 +211,14 @@ const Modal: React.FC<ModalProps> = ({ oferta, onClose, userId }) => {
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white p-4 rounded shadow-lg w-11/12 md:w-3/4 max-w-4xl text-center overflow-auto max-h-screen md:max-h-96" style={{ maxHeight: `calc(100vh - 30px)` }}>
-            <div className= 'flex justify-end'>
-            <button onClick={onClose} className="text-white bg-red-500 rounded-full w-8 h-8 flex items-center justify-center">X</button>
-            </div>
+                <div className="flex justify-end">
+                    <button onClick={onClose} className="text-white bg-red-500 rounded-full w-8 h-8 flex items-center justify-center">X</button>
+                </div>
+                <h2 className="text-xl font-bold mb-4 text-blue-500">
+                    <strong>CARGO:</strong> {oferta.cargo}
+                </h2>
                 <div className="flex justify-center items-start">
                     <div className="w-full md:w-1/2">
-                        <h2 className="text-xl font-bold mb-4">{oferta.cargo}</h2>
                         <div className="flex justify-center items-center mb-4">
                             <img
                                 src={oferta.n_mostrar_empresa === 1 ? '/images/anonima.png' : oferta.empresa.logo}
@@ -226,15 +228,19 @@ const Modal: React.FC<ModalProps> = ({ oferta, onClose, userId }) => {
                         </div>
                         <div className="text-left">
                             <p className="text-gray-700 mb-1"><strong>Empresa:</strong> {oferta.empresa.nombre_comercial}</p>
-                            <p className="text-gray-700 mb-1"><strong>Sueldo:</strong>{oferta.sueldo === 0 ?'No especificado':oferta.sueldo}</p>
-                            <p className="text-gray-700 mb-1"><strong>Experiencia en cargos similares:</strong> {oferta.experiencia} año/s</p>
+                            <p className="text-gray-700 mb-1"><strong>Sueldo:</strong> {oferta.sueldo === 0 ? 'No especificado' : `${oferta.sueldo} $`}</p>
+
+                            <p className="text-gray-700 mb-1"><strong>Experiencia en cargos similares:</strong> {oferta.experiencia === 0 ? 'Ninguna' : `${oferta.experiencia} año/s`}</p>
+
                             <p className="text-gray-700 mb-1"><strong>Carga Horaria:</strong> {oferta.carga_horaria}</p>
+                            <p className="text-gray-700 mb-1"><strong>Modalidad:</strong> {oferta.modalidad}</p>
                             <p className="text-gray-700 mb-1"><strong>Fecha Máxima De Postulación:</strong> {formatFechaMaxPos(oferta.fecha_max_pos)}</p>
+                            <p className="text-gray-700 mb-1"><strong>Objetivo del cargo:</strong> {oferta.objetivo_cargo}</p>
                         </div>
                     </div>
                     <div className="w-full md:w-1/2">
                         <div className="text-left">
-                            <p className="text-gray-700 mb-1"><strong>Objetivo del cargo:</strong> {oferta.objetivo_cargo}</p>
+                            
                             <p className="text-gray-700 mb-1"><strong>Funciones:</strong> {renderFunciones()}</p>
                             <p className="text-gray-700 mb-1"><strong>Detalles adicionales:</strong> {renderDetalles()}</p>
                             {oferta.criterios.length > 0 && (
@@ -270,6 +276,7 @@ const Modal: React.FC<ModalProps> = ({ oferta, onClose, userId }) => {
             </div>
         </div>
     );
+    
 };
 
 export default Modal;
