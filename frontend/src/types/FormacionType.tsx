@@ -31,6 +31,6 @@ export interface Formacion {
       provincia: string;
       canton: string;
     };
-    cursos: Curso[]; // Replace 'any[]' with the correct type definition
+    cursos: Curso[]; 
   }
   

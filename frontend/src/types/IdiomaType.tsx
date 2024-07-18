@@ -1,4 +1,4 @@
-interface LanguagesTabProps {
+export interface LanguagesTabProps {
   idiomas: Idioma[];
 }
 

@@ -4,6 +4,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import Swal from 'sweetalert2';
+import {Experiencia} from '../../types/ExperienciaType'
 import { isAxiosError } from 'axios';
 
 interface ExperienceModalProps {
@@ -18,17 +19,7 @@ interface Area {
   nombre_area: string;
 }
 
-interface Experiencia {
-  id_formacion_pro?: number; // Añadir opcionalmente para editar
-  empresa: string;
-  puesto: string;
-  area: string;
-  fecha_ini: string;
-  fecha_fin: string;
-  descripcion: string;
-  referencia: string;
-  contacto: string;
-}
+
 
 const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClose, onSubmit, experiencia }) => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -57,8 +48,8 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
       setValue('area', experiencia.area);
       setValue('fecha_ini', experiencia.fecha_ini);
       setValue('fecha_fin', experiencia.fecha_fin);
-      setValue('descripcion', experiencia.descripcion);
-      setValue('referencia', experiencia.referencia);
+      setValue('descripcion_responsabilidades', experiencia.descripcion_responsabilidades);
+      setValue('persona_referencia', experiencia.persona_referencia);
       setValue('contacto', experiencia.contacto);
     } else {
       reset();
@@ -93,15 +84,18 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
       id_postulante: profileData.postulante.id_postulante,
     };
 
-    console.log('Data to send:', dataToSend); // Debugging line
+    console.log('Data to send:', dataToSend); 
 
     if (experiencia && experiencia.id_formacion_pro) {
       // Editar experiencia
+      
       try {
         const response = await axios.put(`/experiencia/${experiencia.id_formacion_pro}`, {
           ...dataToSend,
           id_experiencia: experiencia.id_formacion_pro,
+          
         });
+        console.log(response)
         Swal.fire({
           toast: true,
           position: 'top-end',
@@ -123,7 +117,7 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
                 timer: 3000,
                 timerProgressBar: true,
             });
-        };
+        }
       }
     } else {
       try {
@@ -232,25 +226,25 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen, onRequestClos
             <div>
               <label className="block text-gray-700">Descripción de funciones y responsabilidades en la empresa:</label>
               <textarea 
-                {...register('descripcion', { 
+                {...register('descripcion_responsabilidades', { 
                   required: 'Este campo es obligatorio', 
                   maxLength: { value: 500, message: 'Máximo 500 caracteres' } 
                 })} 
                 className="w-full px-4 py-2 border rounded-md text-gray-700" 
               />
-              {errors.descripcion && <p className="text-red-500">{errors.descripcion.message}</p>}
+              {errors.descripcion_responsabilidades && <p className="text-red-500">{errors.descripcion_responsabilidades.message}</p>}
             </div>
             <div>
               <label className="block text-gray-700">Nombre Persona Referencia:</label>
               <input 
-                {...register('referencia', { 
+                {...register('persona_referencia', { 
                   required: 'Este campo es obligatorio', 
                   maxLength: { value: 250, message: 'Máximo 250 caracteres' } 
                 })} 
                 className="w-full px-4 py-2 border rounded-md text-gray-700" 
                 placeholder='Nombre (Cargo de la persona en la empresa)'
               />
-              {errors.referencia && <p className="text-red-500">{errors.referencia.message}</p>}
+              {errors.persona_referencia && <p className="text-red-500">{errors.persona_referencia.message}</p>}
             </div>
             <div>
               <label className="block text-gray-700">Contacto de la persona de referencia:</label>

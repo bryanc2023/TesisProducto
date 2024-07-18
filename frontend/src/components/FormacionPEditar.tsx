@@ -36,6 +36,7 @@ interface TituloDetalle {
 }
 
 interface Postulante {
+  id_postulante:number;
   foto: string;
   nombres: string;
   apellidos: string;
@@ -209,7 +210,7 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
       setValue('titulo_acreditado', '');
     }
   };
-  const handleEstadoChange = (e: any) => {
+  const handleEstadoChange = (e:  React.ChangeEvent<HTMLSelectElement> ) => {
     const selectedEstado = e.target.value;
     if (selectedEstado === 'En curso') {
       setIsEnCurso(true);
@@ -230,7 +231,7 @@ const EditFormacionModal: React.FC<EditFormacionModalProps> = ({ isOpen, closeMo
         const selectedTituloObject = titulos.find(titulo => titulo.id.toString() === selectedTitulo);
 
         const formData = {
-          id_postulante: user.id,
+          id_postulante: profileData?.postulante?.id_postulante,
           id_titulo: selectedTituloId,
           institucion: data.institucion,
           estado: data.estado,

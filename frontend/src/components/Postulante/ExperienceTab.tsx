@@ -7,25 +7,16 @@ import { RootState } from '../../store';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Swal from 'sweetalert2';
+import {Experiencia} from '../../types/ExperienciaType'
 import { isAxiosError } from 'axios';
 
-interface Experiencia {
-  id_formacion_pro: number;
-  empresa: string;
-  puesto: string;
-  area: string;
-  fecha_ini: string;
-  fecha_fin: string;
-  descripcion_responsabilidades: string;
-  persona_referencia: string;
-  contacto: string;
-}
+
 
 const ExperienceTab: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [experiencias, setExperiencias] = useState<Experiencia[]>([]);
-  const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
+  const [deleteMessage] = useState<string | null>(null);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [experienceToDelete, setExperienceToDelete] = useState<number | null>(null);
   const [selectedExperience, setSelectedExperience] = useState<Experiencia | null>(null);
@@ -37,6 +28,7 @@ const ExperienceTab: React.FC = () => {
         return;
       }
       const response = await axios.get(`/experiencia/${user.id}`);
+    
       if (response.data && Array.isArray(response.data.experiencias)) {
         setExperiencias(response.data.experiencias);
       } else {
