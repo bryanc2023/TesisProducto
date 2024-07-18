@@ -7,10 +7,8 @@ import { RootState } from '../../store';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Swal from 'sweetalert2';
-import {Experiencia} from '../../types/ExperienciaType'
+import { Experiencia } from '../../types/ExperienciaType';
 import { isAxiosError } from 'axios';
-
-
 
 const ExperienceTab: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -28,7 +26,7 @@ const ExperienceTab: React.FC = () => {
         return;
       }
       const response = await axios.get(`/experiencia/${user.id}`);
-    
+      
       if (response.data && Array.isArray(response.data.experiencias)) {
         setExperiencias(response.data.experiencias);
       } else {
@@ -70,19 +68,19 @@ const ExperienceTab: React.FC = () => {
         showConfirmButton: false,
         timer: 3000,
         timerProgressBar: true,
-    });
+      });
       fetchExperiencia(); // Refrescar las experiencias después de eliminar una
     } catch (error) {
       if (isAxiosError(error) && error.response) {
-          Swal.fire({
-              toast: true,
-              position: 'top-end',
-              icon: 'error',
-              title: error.response.data.message,
-              showConfirmButton: false,
-              timer: 3000,
-              timerProgressBar: true,
-          });
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'error',
+          title: error.response.data.message,
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+        });
       }
     }
     setIsConfirmationModalOpen(false); // Cerrar el modal de confirmación
@@ -125,7 +123,6 @@ const ExperienceTab: React.FC = () => {
       )}
       {experiencias && experiencias.length > 0 ? (
         experiencias.map((experiencia, index) => (
-
           <div key={index} className="mb-4 p-4 border rounded-lg bg-gray-700 relative">
             <div className="flex justify-end space-x-2 mb-2">
               <button
@@ -141,14 +138,12 @@ const ExperienceTab: React.FC = () => {
                 <FaTrash className="w-4 h-4" />
               </button>
             </div>
-            <p><strong className='text-orange-500'>Empresa:</strong> {experiencia.empresa}</p>
-            <p><strong className='text-orange-500' >Cargo:</strong> {experiencia.puesto}</p>
-            <p><strong className='text-orange-500'>Fechas de labores:</strong> {formatearFecha(experiencia.fecha_ini)} - {formatearFecha(experiencia.fecha_fin)}</p>
-            <p><strong className='text-orange-500' >Área:</strong> {experiencia.area.split(',')[1]}</p>
-
-
-            <p><strong className='text-orange-500' >Funciones y responsabilidades en el cargo:</strong></p>
-            {experiencia.descripcion_responsabilidades.includes(',') ? (
+            <p><strong className="text-orange-500">Empresa:</strong> {experiencia.empresa}</p>
+            <p><strong className="text-orange-500">Cargo:</strong> {experiencia.puesto}</p>
+            <p><strong className="text-orange-500">Fechas de labores:</strong> {formatearFecha(experiencia.fecha_ini)} - {formatearFecha(experiencia.fecha_fin)}</p>
+            <p><strong className="text-orange-500">Área:</strong> {experiencia.area.split(',')[1]}</p>
+            <p><strong className="text-orange-500">Funciones y responsabilidades en el cargo:</strong></p>
+            {experiencia.descripcion_responsabilidades && experiencia.descripcion_responsabilidades.includes(',') ? (
               <ul className="list-disc list-inside">
                 {experiencia.descripcion_responsabilidades.split(',').map((item, idx) => (
                   <li key={idx}>{item.trim()}</li>
@@ -157,8 +152,8 @@ const ExperienceTab: React.FC = () => {
             ) : (
               <p>{experiencia.descripcion_responsabilidades}</p>
             )}
-            <p><strong className='text-orange-500'>Reporta a:</strong> {experiencia.persona_referencia}</p>
-            <p><strong className='text-orange-500' >Contacto:</strong> {experiencia.contacto}</p>
+            <p><strong className="text-orange-500">Reporta a:</strong> {experiencia.persona_referencia}</p>
+            <p><strong className="text-orange-500">Contacto:</strong> {experiencia.contacto}</p>
           </div>
         ))
       ) : (

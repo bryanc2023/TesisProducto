@@ -619,10 +619,10 @@ public function registroHabilidad(Request $request)
             $idExperiencia = $request->input('id_experiencia');
             $empresa = $request->input('empresa');
             $puesto = $request->input('puesto');
-            $fechaini = $request->input('fechaini');
-            $fechafin = $request->input('fechafin');
-            $descripcion = $request->input('descripcion');
-            $referencia = $request->input('referencia');
+            $fecha_ini = $request->input('fecha_ini');
+            $fecha_fin = $request->input('fecha_fin');
+            $descripcion_responsabilidades = $request->input('descripcion_responsabilidades');
+            $persona_referencia = $request->input('persona_referencia');
             $area = $request->input('area');
             $contacto = $request->input('contacto');
     
@@ -633,10 +633,10 @@ public function registroHabilidad(Request $request)
                 ->update([
                     'empresa' => $empresa,
                     'puesto' => $puesto,
-                    'fecha_ini' => $fechaini,
-                    'fecha_fin' => $fechafin,
-                    'descripcion_responsabilidades' => $descripcion,
-                    'persona_referencia' => $referencia,
+                    'fecha_ini' => $fecha_ini,
+                    'fecha_fin' => $fecha_fin,
+                    'descripcion_responsabilidades' => $descripcion_responsabilidades,
+                    'persona_referencia' => $persona_referencia,
                     'area' => $area,
                     'contacto' => $contacto,
                 ]);
