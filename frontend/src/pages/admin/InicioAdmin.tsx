@@ -141,7 +141,7 @@ function InicioAdmin() {
                                     </svg>
                                     Cargando...
                                 </div>
-                            ) : 'Upload'}
+                            ) : 'Subir'}
                         </button>
                     </div>
                 </form>
