@@ -536,7 +536,7 @@ function EmpresaLayout() {
             <div className="flex-1 flex flex-col overflow-auto">
                 <nav className="bg-orange-700 text-white p-4 flex justify-between items-center gap-2 w-full fixed top-0 left-0 right-0 z-30">
                     <div>
-                        <span className="font-bold">ProaJob Empresa</span>
+                        <span className="font-bold">Postúlate Empresa</span>
                     </div>
 
                     <div className="relative flex gap-2 items-center" ref={dropdownRef}>

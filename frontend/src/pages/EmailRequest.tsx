@@ -1,4 +1,4 @@
-import  { useState } from 'react';
+import { useState } from 'react';
 import Navbar from '../components/layout/Navbar';
 import axios from '../services/axios';
 import Swal from 'sweetalert2';
@@ -7,17 +7,17 @@ import { isAxiosError } from 'axios';
 
 const EmailForm = () => {
     const [email, setEmail] = useState('');
-    const [message] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+
     const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setEmail(e.target.value);
     };
 
     const handleSubmit = async () => {
+        setIsLoading(true);
         try {
             const response = await axios.post('/ResetPassword3', { email });
-           
-             
             Swal.fire({
                 toast: true,
                 position: 'top-end',
@@ -26,10 +26,10 @@ const EmailForm = () => {
                 showConfirmButton: false,
                 timer: 3000,
                 timerProgressBar: true,
-            }); 
+            });
             navigate('/');
         } catch (error) {
-            if(isAxiosError(error) && error.response){
+            if (isAxiosError(error) && error.response) {
                 Swal.fire({
                     toast: true,
                     position: 'top-end',
@@ -38,9 +38,10 @@ const EmailForm = () => {
                     showConfirmButton: false,
                     timer: 3000,
                     timerProgressBar: true,
-                }); 
-                
+                });
             }
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -68,12 +69,38 @@ const EmailForm = () => {
                         />
                     </div>
                     <button
-                        className=' bg-blue-700 text-white text-center py-3 px-5 rounded-lg shadow font-bold hover:bg-blue-500 w-full'
+                        className="bg-blue-700 text-white text-center py-3 px-5 rounded-lg shadow font-bold hover:bg-blue-500 w-full"
                         onClick={handleSubmit}
+                        disabled={isLoading}
                     >
-                        Enviar
+                        {isLoading ? (
+                            <div className="flex items-center justify-center">
+                                <svg
+                                    className="animate-spin h-5 w-5 mr-3 text-white"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <circle
+                                        className="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                    ></circle>
+                                    <path
+                                        className="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8v8H4z"
+                                    ></path>
+                                </svg>
+                                Enviando...
+                            </div>
+                        ) : (
+                            'Enviar'
+                        )}
                     </button>
-                    {message && <p className="mt-4 text-center">{message}</p>}
                 </div>
             </div>
         </div>

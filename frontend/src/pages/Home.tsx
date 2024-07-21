@@ -1,13 +1,13 @@
 import '../components/css/Footer.css';
-import React, { useEffect, useState } from 'react';
+import  { useEffect} from 'react';
 import { useInView } from 'react-intersection-observer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus, faUserTie, faBriefcase, faBuilding } from '@fortawesome/free-solid-svg-icons';
 import Navbar from "../components/layout/Navbar";
-import { loginUser } from '../store/authSlice';
+
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { useAppDispatch ,RootState} from '../store';
+import {RootState} from '../store';
 
 const Home: React.FC = () => {
   const { ref: section1Ref, inView: section1InView } = useInView({ triggerOnce: true });
@@ -35,7 +35,7 @@ const Home: React.FC = () => {
 
       <header className="bg-cover bg-center text-white py-40 px-5 text-center" style={{ backgroundImage: "url('/public/images/home.jpg')" }}>
         <div className="bg-black bg-opacity-50 p-6 rounded-lg inline-block">
-          <h1 className="text-5xl mb-2">Bienvenido a ProaJob</h1>
+          <h1 className="text-5xl mb-2">Bienvenido a Postúlate</h1>
           <p className="text-xl">La nueva app de Proasetel S.A para gestionar ofertas de trabajo de manera eficiente</p>
 
         </div>
